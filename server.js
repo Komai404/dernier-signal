@@ -1,0 +1,228 @@
+#!/usr/bin/env node
+/* =====================================================================
+   DERNIER SIGNAL — serveur de jeu
+   Aucune dépendance : il suffit d'avoir Node.js 18 ou plus récent.
+   Lancer :  node server.js        (port 8080 par défaut, ou PORT=3000)
+   ===================================================================== */
+'use strict';
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const os = require('os');
+
+const PORT = parseInt(process.env.PORT, 10) || 8080;
+const HOST = process.env.HOST || '0.0.0.0';
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+const DATA_FILE = path.join(DATA_DIR, 'parties.json');
+const MAX_DOC = 256 * 1024;          // taille max d'un document
+const MAX_BODY = 600 * 1024;         // taille max d'une requête
+const MAX_DOCS = 60000;              // garde-fou mémoire
+const GAME_TTL = 3 * 24 * 3600e3;    // une partie inactive est effacée après 3 jours
+
+/* ---------- stockage ---------- */
+let store = new Map();   // chemin -> { d: objet, t: date }
+let owners = {};         // code de partie -> identifiant de l'hôte
+let pids = {};           // identifiant joueur -> empreinte de son jeton secret
+try {
+  const j = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  store = new Map(Object.entries(j.store || {})); owners = j.owners || {}; pids = j.pids || {};
+  console.log('  ' + store.size + ' documents rechargés.');
+} catch { /* premier lancement */ }
+let dirty = false;
+setInterval(() => {
+  if (!dirty) return; dirty = false;
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(DATA_FILE + '.tmp', JSON.stringify({ store: Object.fromEntries(store), owners, pids }));
+    fs.renameSync(DATA_FILE + '.tmp', DATA_FILE);
+  } catch (err) { console.error('Sauvegarde impossible :', err.message); }
+}, 3000);
+function cleanup() {
+  const t = Date.now();
+  for (const [k, v] of store) {
+    const s = k.split('/');
+    if (s.length === 2 && s[0] === 'ds' && t - v.t > GAME_TTL) {
+      for (const k2 of [...store.keys()]) if (k2 === k || k2.startsWith(k + '/')) store.delete(k2);
+      delete owners[s[1]]; dirty = true;
+    }
+  }
+}
+setInterval(cleanup, 3600e3); cleanup();
+
+/* ---------- règles d'accès ----------
+   ds/CODE            : état public de la partie (tout le monde lit, seul l'hôte écrit)
+   ds/CODE/in/JOUEUR  : boîte privée d'un joueur (lui seul lit, seul l'hôte écrit)
+   ds/CODE/pl/JOUEUR  : messages d'un joueur vers l'hôte (lui et l'hôte lisent, lui seul écrit)
+   Rien d'autre n'est accessible.                                                          */
+const SEG = /^[A-Za-z0-9_\-.~:@+]{1,200}$/;
+function validPath(p, kind) {
+  if (typeof p !== 'string' || p.length > 1000) return false;
+  const s = p.split('/');
+  if (s.length > 16 || !s.every(x => SEG.test(x) && x !== '.' && x !== '..')) return false;
+  return kind === 'doc' ? s.length % 2 === 0 : s.length % 2 === 1;
+}
+function canRead(pid, p) {
+  const s = p.split('/'); if (s[0] !== 'ds' || s.length < 2) return false;
+  const owner = owners[s[1]];
+  if (s.length === 2) return true;
+  if (s[2] === 'in') return s.length === 4 && s[3] === pid;
+  if (s[2] === 'pl') return pid === owner || (s.length === 4 && s[3] === pid);
+  return false;
+}
+function canWrite(pid, p) {
+  const s = p.split('/'); if (s[0] !== 'ds' || s.length < 2) return false;
+  const owner = owners[s[1]];
+  if (s.length === 2) return !owner || owner === pid;
+  if (s.length !== 4) return false;
+  if (s[2] === 'in') return owner === pid;
+  if (s[2] === 'pl') return s[3] === pid;
+  return false;
+}
+const hash = t => crypto.createHash('sha256').update(String(t)).digest('hex');
+function auth(pid, token) { return typeof pid === 'string' && SEG.test(pid) && pids[pid] && pids[pid] === hash(token); }
+
+/* ---------- temps réel (Server-Sent Events) ---------- */
+const conns = new Map(); // cid -> { res, pid, subs: Map }
+function emit(conn, event, data) { try { conn.res.write('event: ' + event + '\ndata: ' + JSON.stringify(data) + '\n\n'); } catch { /* fermé */ } }
+function snapDoc(pid, p) {
+  const v = canRead(pid, p) ? store.get(p) : null;
+  return { id: p.split('/').pop(), exists: !!v, data: v ? v.d : null };
+}
+function snapCol(pid, p) {
+  if (!canRead(pid, p)) return [];
+  const pre = p + '/'; const out = [];
+  for (const k of store.keys()) if (k.startsWith(pre) && k.indexOf('/', pre.length) === -1 && canRead(pid, k)) out.push(snapDoc(pid, k));
+  return out.sort((a, b) => (a.id < b.id ? -1 : 1));
+}
+function notify(p) {
+  const parent = p.split('/').slice(0, -1).join('/');
+  for (const c of conns.values()) for (const [id, s] of c.subs) {
+    if (s.kind === 'doc' && s.path === p) emit(c, 'snap', { id, payload: snapDoc(c.pid, p) });
+    else if (s.kind === 'col' && s.path === parent) emit(c, 'snap', { id, payload: snapCol(c.pid, parent) });
+  }
+}
+
+/* ---------- positions en 3D (non sauvegardées) ---------- */
+const rooms = new Map(); // code -> { all: {pid: état}, dirty }
+function roomOf(code) { let r = rooms.get(code); if (!r) { r = { all: {}, seen: {}, dirty: false }; rooms.set(code, r); } return r; }
+setInterval(() => {
+  const t = Date.now();
+  for (const [code, r] of rooms) {
+    for (const pid of Object.keys(r.all)) if (t - (r.seen[pid] || 0) > 20000) { delete r.all[pid]; delete r.seen[pid]; r.dirty = true; }
+    if (!r.dirty) continue; r.dirty = false;
+    for (const c of conns.values()) if (c.room === code) emit(c, 'pos', { all: r.all });
+    if (!Object.keys(r.all).length) rooms.delete(code);
+  }
+}, 150);
+const cleanPos = s => s && typeof s === 'object' && typeof s.pid === 'string' && SEG.test(s.pid) ? { pid: s.pid, x: +s.x || 0, z: +s.z || 0, r: +s.r || 0, w: s.w ? 1 : 0, s: Array.isArray(s.s) ? s.s.slice(0, 7).map(n => (n | 0) % 16) : null } : null;
+
+/* ---------- HTTP ---------- */
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
+function json(res, code, obj) { res.writeHead(code, { 'content-type': 'application/json', 'cache-control': 'no-store' }); res.end(JSON.stringify(obj)); }
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let size = 0; const chunks = [];
+    req.on('data', c => { size += c.length; if (size > MAX_BODY) { reject(new Error('too_big')); req.destroy(); } else chunks.push(c); });
+    req.on('end', () => { try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}')); } catch { reject(new Error('bad_json')); } });
+    req.on('error', reject);
+  });
+}
+async function api(req, res, url) {
+  if (url.pathname.endsWith('/api/ping')) return json(res, 200, { ds: true, v: 1 });
+  if (url.pathname.endsWith('/api/hello') && req.method === 'POST') {
+    const b = await readBody(req);
+    if (typeof b.pid !== 'string' || !SEG.test(b.pid) || typeof b.token !== 'string' || b.token.length < 16) return json(res, 400, { code: 'invalid_argument' });
+    const h = hash(b.token);
+    if (pids[b.pid] && pids[b.pid] !== h) return json(res, 409, { code: 'pid_taken' });
+    if (!pids[b.pid]) { pids[b.pid] = h; dirty = true; }
+    return json(res, 200, { ok: true });
+  }
+  if (url.pathname.endsWith('/api/stream')) {
+    const pid = url.searchParams.get('pid'), token = url.searchParams.get('token');
+    if (!auth(pid, token)) return json(res, 401, { code: 'not_granted' });
+    res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache, no-transform', connection: 'keep-alive', 'x-accel-buffering': 'no' });
+    res.write('retry: 2000\n\n');
+    const cid = crypto.randomBytes(9).toString('base64url');
+    const conn = { res, pid, subs: new Map() }; conns.set(cid, conn);
+    emit(conn, 'hello', { cid });
+    const ping = setInterval(() => { try { res.write(': ping\n\n'); } catch {} }, 20000);
+    req.on('close', () => { clearInterval(ping); conns.delete(cid); });
+    return;
+  }
+  if (url.pathname.endsWith('/api/op') && req.method === 'POST') {
+    const pid = req.headers['x-ds-pid'], token = req.headers['x-ds-token'];
+    if (!auth(pid, token)) return json(res, 401, { code: 'not_granted', error: 'Identité inconnue' });
+    let b; try { b = await readBody(req); } catch (err) { return json(res, 413, { code: 'invalid_argument', error: err.message }); }
+    const p = b.path;
+    switch (b.op) {
+      case 'get': if (!validPath(p, 'doc')) return json(res, 400, { code: 'invalid_argument' }); return json(res, 200, { result: snapDoc(pid, p) });
+      case 'getcol': if (!validPath(p, 'col')) return json(res, 400, { code: 'invalid_argument' }); return json(res, 200, { result: snapCol(pid, p) });
+      case 'set': {
+        if (!validPath(p, 'doc') || !b.data || typeof b.data !== 'object' || Array.isArray(b.data)) return json(res, 400, { code: 'invalid_argument' });
+        if (!canWrite(pid, p)) return json(res, 403, { code: 'invalid_argument', error: 'Écriture refusée' });
+        if (JSON.stringify(b.data).length > MAX_DOC) return json(res, 400, { code: 'invalid_argument', error: 'Document trop gros' });
+        if (!store.has(p) && store.size >= MAX_DOCS) { cleanup(); if (store.size >= MAX_DOCS) return json(res, 507, { code: 'quota_exceeded' }); }
+        const s = p.split('/');
+        if (s.length === 2 && !owners[s[1]]) owners[s[1]] = pid;
+        store.set(p, { d: b.data, t: Date.now() });
+        if (s.length > 2 && store.has(s[0] + '/' + s[1])) store.get(s[0] + '/' + s[1]).t = Date.now();
+        dirty = true; notify(p);
+        return json(res, 200, { result: null });
+      }
+      case 'delete':
+        if (!validPath(p, 'doc') || !canWrite(pid, p)) return json(res, 403, { code: 'invalid_argument' });
+        store.delete(p); dirty = true; notify(p); return json(res, 200, { result: null });
+      case 'sub': {
+        const conn = conns.get(b.cid);
+        if (!conn || conn.pid !== pid) return json(res, 409, { code: 'unavailable', error: 'Flux non connecté' });
+        if (!validPath(p, b.kind === 'col' ? 'col' : 'doc') || conn.subs.size > 64) return json(res, 400, { code: 'invalid_argument' });
+        conn.subs.set(b.subId, { path: p, kind: b.kind === 'col' ? 'col' : 'doc' });
+        emit(conn, 'snap', { id: b.subId, payload: b.kind === 'col' ? snapCol(pid, p) : snapDoc(pid, p) });
+        return json(res, 200, { result: null });
+      }
+      case 'pos': {
+        const code = typeof b.code === 'string' && SEG.test(b.code) ? b.code : null; if (!code || !store.has('ds/' + code)) return json(res, 400, { code: 'invalid_argument' });
+        const conn = conns.get(b.cid); if (conn && conn.pid === pid) { if (conn.room !== code) { conn.room = code; emit(conn, 'pos', { all: roomOf(code).all }); } }
+        const r = roomOf(code); const t = Date.now();
+        const me = cleanPos(b.s); if (me && me.pid === pid) { r.all[pid] = me; r.seen[pid] = t; r.dirty = true; }
+        if (Array.isArray(b.b) && owners[code] === pid) for (const bs of b.b.slice(0, 16)) { const c = cleanPos(bs); if (c && c.pid.startsWith('bot-')) { r.all[c.pid] = c; r.seen[c.pid] = t; r.dirty = true; } }
+        return json(res, 200, { result: null });
+      }
+      case 'unsub': { const conn = conns.get(b.cid); if (conn) conn.subs.delete(b.subId); return json(res, 200, { result: null }); }
+    }
+    return json(res, 400, { code: 'invalid_argument' });
+  }
+  return json(res, 404, { code: 'not_found' });
+}
+function serveStatic(req, res, url) {
+  let rel = decodeURIComponent(url.pathname);
+  if (rel.endsWith('/')) rel += 'index.html';
+  const file = path.normalize(path.join(PUBLIC_DIR, rel));
+  if (!file.startsWith(PUBLIC_DIR)) { res.writeHead(403); return res.end(); }
+  fs.stat(file, (err, st) => {
+    if (err || !st.isFile()) { res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' }); return res.end('Introuvable'); }
+    const ext = path.extname(file).toLowerCase();
+    const long = /\/(cards|icons)\//.test(rel) || ext === '.png' || ext === '.webp';
+    res.writeHead(200, { 'content-type': TYPES[ext] || 'application/octet-stream', 'cache-control': long ? 'public, max-age=86400' : 'no-cache', 'x-content-type-options': 'nosniff' });
+    fs.createReadStream(file).pipe(res);
+  });
+}
+const server = http.createServer(async (req, res) => {
+  try {
+    const url = new URL(req.url, 'http://x');
+    if (url.pathname.includes('/api/')) return await api(req, res, url);
+    if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); return res.end(); }
+    serveStatic(req, res, url);
+  } catch (err) { console.error(err); if (!res.headersSent) json(res, 500, { code: 'unavailable' }); }
+});
+server.listen(PORT, HOST, () => {
+  const lan = Object.values(os.networkInterfaces()).flat().filter(i => i && i.family === 'IPv4' && !i.internal).map(i => 'http://' + i.address + ':' + PORT);
+  console.log('\n  DERNIER SIGNAL est en ligne.\n');
+  console.log('  Sur cet ordinateur :   http://localhost:' + PORT);
+  for (const u of lan) console.log('  Sur le réseau local :  ' + u);
+  console.log('\n  Laisse cette fenêtre ouverte pendant la partie. Ctrl+C pour arrêter.\n');
+});
+function shutdown() { try { if (dirty) { fs.mkdirSync(DATA_DIR, { recursive: true }); fs.writeFileSync(DATA_FILE, JSON.stringify({ store: Object.fromEntries(store), owners, pids })); } } catch {} process.exit(0); }
+process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);

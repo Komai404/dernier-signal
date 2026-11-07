@@ -1,0 +1,10 @@
+{
+  "name": "dernier-signal",
+  "version": "1.0.0",
+  "description": "Dernier Signal : jeu de déduction post-apocalyptique jouable à distance.",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "license": "UNLICENSED",
+  "private": true
+}

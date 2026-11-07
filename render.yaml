@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: dernier-signal
+    runtime: node
+    plan: free
+    buildCommand: "echo aucune installation"
+    startCommand: "node server.js"
+    healthCheckPath: /api/ping
