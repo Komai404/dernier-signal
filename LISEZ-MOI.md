@@ -94,6 +94,24 @@ joystick à gauche, glisser à droite pour regarder, bouton « Agir ».
 - Le profil est enregistré dans le navigateur (pas de compte). Changer d'appareil ou vider les données
   du site repart de zéro. Sur ton site, le classement des meilleurs joueurs est partagé par tous.
 
+## Comptes joueurs
+
+Dans **PROFIL**, chacun peut **créer un compte** (pseudo + mot de passe d'au moins 6 caractères) puis
+**se connecter** sur n'importe quel appareil : pièces, objets, codes, titres, tenue et statistiques
+sont sauvegardés automatiquement. Le mot de passe n'est jamais envoyé tel quel (empreinte PBKDF2,
+protégée encore par scrypt côté serveur). Sur la version claude.ai, la sauvegarde est automatique
+sur le compte Claude.
+
+**Important sur Render gratuit** : le disque est effacé à chaque redémarrage. Le jeu se protège
+(chaque appareil connecté recrée son compte tout seul), mais pour des comptes vraiment permanents,
+branche une base gratuite **Upstash Redis** (2 minutes) :
+
+1. Crée un compte sur https://upstash.com, puis **Create Database** (Redis, offre gratuite).
+2. Dans la base, section **REST API**, copie `UPSTASH_REDIS_REST_URL` et `UPSTASH_REDIS_REST_TOKEN`.
+3. Sur Render → ton service → **Environment** → ajoute ces deux variables avec leurs valeurs → **Save**.
+
+Le serveur redémarre et les comptes sont alors stockés pour de bon.
+
 ## Chat vocal
 
 Sur le site (Render ou ton propre serveur), chaque joueur peut parler au micro :

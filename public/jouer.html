@@ -640,6 +640,9 @@ body.thfx-glitch #app { animation: glitchapp 7s steps(1) infinite; } @keyframes 
 @media (prefers-reduced-motion: reduce) { body[class*="thfx-"], .nfx-diamond, .nfx-rainbow, .nfx-glitch, .frame-golda, .frame-infinity, .frame-eternal { animation: none !important; } }
 @media (max-width: 560px) { .prof { grid-template-columns: 1fr; justify-items: center; text-align: center; } .chips { justify-content: center; } .shopgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .crow b { min-width: 100%; } }
 @media (orientation: landscape) and (max-height: 520px) { #bar-prof, #bar-code-btn { font-size: 10px; } }
+.accbox { border: 1px solid var(--line-2); padding: 12px 14px; display: grid; gap: 8px; margin: 0 0 12px; background: var(--panel-2); }
+.accbox.ok { border-color: var(--frost); } .accbox p { margin: 0; }
+.accform { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; align-items: end; } .accform .acc-msg { grid-column: 1 / -1; font-size: 14px; } .accform .btn { justify-self: start; }
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
   .ggrid { grid-template-columns: minmax(0, 1fr) 320px; }
@@ -3188,6 +3191,9 @@ document.addEventListener('click', async ev => {
       case 'claim': { for (const r of el.dataset.r.split(',')) grant(r); pfSave(); toast('Récompense reçue !'); metaRender(); break; }
       case 'mission': { const P_ = pf(); const k = 'm' + el.dataset.i; if (!P_.wm[k]) { P_.wm[k] = 1; grant('c:' + el.dataset.r); pfSave(); metaRender(); } break; }
       case 'cheat': cheatSend(el.dataset.op); break;
+      case 'acc-form': ACC.form = el.dataset.f; G.accMsg = ''; metaRender(); break;
+      case 'acc-logout': accLogout(); break;
+      case 'acc-pass': G.accPass = !G.accPass; metaRender(); break;
       case 'emote': playEmote(el.dataset.e); break;
       case 'ewheel': ewheelToggle(); break;
       case 'cheats-toggle': if (G.isHost) { H.S.settings.cheats = H.S.settings.cheats === false; hostChanged(); render(); } break;
@@ -4823,7 +4829,7 @@ function pf() {
   PF.inv['t:nouveau'] = 1;
   return PF;
 }
-function pfSave() { LS.set(PF_KEY, PF); G.profSig = ''; }
+function pfSave() { PF.upd = Date.now(); LS.set(PF_KEY, PF); G.profSig = ''; if (typeof accSaveSoon === 'function') accSaveSoon(); }
 const level = () => 1 + Math.floor((pf().xp || 0) / ECO.XP_LEVEL);
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
 const fmtCoins = n => Math.round(n).toLocaleString('fr-FR');
@@ -5119,6 +5125,7 @@ function profileHTML(pid, mine) {
     + '<div class="chips">' + (pr.vip ? '<span class="chip vip">VIP</span>' : '') + '<span class="chip">Niveau ' + (pr.lvl || 1) + '</span>' + (pr.duos && pr.duos.length ? pr.duos.map(d => '<span class="chip">Duo ' + e(d) + '</span>').join('') : '') + '</div></div></div>'
     + statGrid([['Parties jouées', games], ['Victoires', wins], ['Taux de victoire', games ? Math.round(wins / games * 100) + ' %' : '—'], ['Meilleure série', pr.best || 0], ['Série actuelle', pr.streak || 0], ['Membre depuis', pr.since ? new Date(pr.since).toLocaleDateString('fr-FR') : '—']]);
   if (mine) {
+    h += accountHTML();
     const P_ = pf(); const d = P_.daily === today(); const extra = P_.perks.dailyExtra && P_.daily2 !== today();
     h += '<div class="row">' + (!d ? '<button class="btn frost" data-a="daily">Bonus du jour : +' + ECO.DAILY + ' pièces</button>' : extra ? '<button class="btn frost" data-a="daily2">Bonus supplémentaire : +' + ECO.DAILY + '</button>' : '<span class="dim">Bonus du jour récupéré. Reviens demain.</span>')
       + '<span class="grow"></span><button class="btn ghost small" data-a="rename">Changer de pseudo' + (P_.perks.rename ? ' (gratuit)' : ' (200 pièces)') + '</button></div>';
@@ -5272,6 +5279,7 @@ document.addEventListener('submit', ev => {
   const f = ev.target;
   if (f.dataset.code) { ev.preventDefault(); const r = redeem($('#code-in').value); G.codeMsg = r.msg; toast(r.msg, !r.ok); if (r.page && pf().pages[r.page]) { G.metaTab = 'archives'; G.metaPage = r.page; } metaRender(); if (r.cheat) G.metaTab = 'codes'; return; }
   if (f.dataset.wm) { ev.preventDefault(); const st = pf().wm; const g = ($('#wm-in').value || '').toUpperCase().normalize('NFD').replace(/[^A-Z]/g, ''); if (g.length !== 5) return toast('Il faut 5 lettres.', true); st.tries.push(g); if (g === wmWord()) { st.done = 1; grant('c:100'); toast('Trouvé ! +100 pièces'); } pfSave(); metaRender(); return; }
+  if (f.dataset.acc) { ev.preventDefault(); accSubmit(f.dataset.acc); return; }
   if (f.dataset.rename) { ev.preventDefault(); const P_ = pf(); const nm = cleanText($('#rename-in').value, 16); if (!nm) return; if (!P_.perks.rename) { if (P_.coins < 200) return toast('Il faut 200 pièces.', true); P_.coins -= 200; P_.spent += 200; } else P_.perks.rename--; P_.name = nm; pfSave(); const inp = $('#in-name'); if (inp) inp.value = nm; toast('Pseudo changé : ' + nm + '. Il sera utilisé à ta prochaine partie.'); metaRender(); }
 });
 /* --- emotes en 3D : roue (touche B ou bouton) --- */
@@ -5292,6 +5300,136 @@ function playEmote(id) {
   if (!G3.third) { G3.third = true; G3.emoteCam = true; }
   clearTimeout(G3.emT); G3.emT = setTimeout(() => { G3.me.em = null; if (G3.emoteCam) { G3.third = false; G3.emoteCam = false; } }, EMOTE_DUR * 1000);
   S3.lastSig = ''; s3Tick();
+}
+
+/* --- compte joueur : sauvegarde du profil (pièces, objets, codes…) ---
+   Site : pseudo + mot de passe, sauvegarde sur le serveur. claude.ai : automatique sur le compte Claude. */
+const ACC = { st: null, busy: false, saveT: 0, lastSave: 0, err: '', persistent: null, form: 'register' };
+function accState() { if (!ACC.st) ACC.st = LS.get('ds_acc', null); return ACC.st; }
+function accSet(v) { ACC.st = v; LS.set('ds_acc', v); }
+const accMode = () => NET.server ? 'server' : (NET.uid && NET.real && window.claude) ? 'claude' : null;
+async function accReq(op, body) {
+  const r = await fetch('api/account', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(Object.assign({ op }, body || {})) });
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw { code: j.code || 'unavailable', message: j.error || 'Erreur ' + r.status }; return j.result;
+}
+async function accVerifier(name, pass) {
+  if (!window.crypto || !crypto.subtle) throw { message: 'Ton navigateur ne permet pas de créer un compte sur cette adresse (il faut https).' };
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: new TextEncoder().encode('dernier-signal:' + name.normalize('NFC').trim().toLowerCase()), iterations: 150000 }, k, 256);
+  return btoa(String.fromCharCode(...new Uint8Array(bits)));
+}
+function profHasProgress(p) { return p && ((p.stats && p.stats.games > 0) || Object.keys(p.inv || {}).length > 1 || Object.keys(p.codes || {}).length > 0 || (p.coins || 0) !== ECO.START); }
+function mergeProf(a, b) { // a = compte, b = cet appareil : on garde tout ce qui a été gagné des deux côtés
+  const out = JSON.parse(JSON.stringify(a)); const U = k => { out[k] = Object.assign({}, b[k] || {}, a[k] || {}); };
+  ['inv', 'codes', 'pages', 'shops', 'met'].forEach(U);
+  out.coins = Math.max(a.coins || 0, b.coins || 0); out.earned = Math.max(a.earned || 0, b.earned || 0); out.xp = Math.max(a.xp || 0, b.xp || 0);
+  out.coupons = (a.coupons || []).concat(b.coupons || []).slice(0, 30); out.vip = a.vip || b.vip; out.cheat = a.cheat || b.cheat;
+  for (const k of Object.keys(b.perks || {})) out.perks[k] = Math.max(+(a.perks || {})[k] || 0, +(b.perks || {})[k] || 0);
+  for (const k of ['games', 'wins', 'losses', 'best', 'survived']) out.stats[k] = Math.max(+(a.stats || {})[k] || 0, +(b.stats || {})[k] || 0);
+  out.stats.since = Math.min(a.stats.since || Date.now(), (b.stats || {}).since || Date.now());
+  out.duo = [...new Set([...(a.duo || []), ...(b.duo || [])])]; out.duos = [...new Set([...(a.duos || []), ...(b.duos || [])])];
+  out.history = (a.history || []).concat(b.history || []).sort((x, y) => y.t - x.t).slice(0, 40);
+  return out;
+}
+function accAdopt(prof, name) { // remplace le profil de cet appareil par celui du compte
+  if (prof && typeof prof === 'object') { PF = null; LS.set(PF_KEY, prof); }
+  const P_ = pf(); if (name) P_.name = name; LS.set(PF_KEY, P_);
+  if (Array.isArray(P_.skin)) LS.set('ds_skin', P_.skin);
+  const inp = $('#in-name'); if (inp && name) inp.value = name;
+  applyTheme(); G.profSig = '';
+}
+function accSaveSoon() {
+  const m = accMode(); if (!m) return; if (m === 'server' && !(accState() && accState().token)) return;
+  clearTimeout(ACC.saveT); ACC.saveT = setTimeout(accSaveNow, 2000);
+}
+async function accSaveNow() {
+  const m = accMode(); const P_ = pf(); P_.skin = mySkin();
+  try {
+    if (m === 'claude') { await NET.real.doc('data/users/' + NET.uid + '/profil').set({ prof: JSON.stringify(P_), upd: Date.now() }); }
+    else if (m === 'server') {
+      const st = accState(); if (!st || !st.token) return;
+      try { await accReq('save', { user: st.name, token: st.token, prof: P_ }); }
+      catch (e) {
+        if (e.code === 'unknown_account' && st.verifier) { const r = await accReq('restore', { user: st.name, verifier: st.verifier, prof: P_ }); accSet(Object.assign({}, st, { token: r.token })); }
+        else if (e.code === 'bad_token') { accSet(Object.assign({}, st, { token: null })); ACC.err = 'Session expirée : reconnecte-toi pour continuer à sauvegarder.'; toast(ACC.err, true); }
+        else throw e;
+      }
+    }
+    ACC.lastSave = Date.now(); ACC.err = '';
+  } catch (e) { ACC.err = 'Sauvegarde impossible pour l’instant (' + (e.message || 'réseau') + '). Réessai automatique.'; clearTimeout(ACC.saveT); ACC.saveT = setTimeout(accSaveNow, 20000); }
+  if (!$('#meta').hidden && G.metaTab === 'profil') { const el = $('#acc-status'); if (el) el.textContent = accStatusText(); }
+}
+async function accBoot() {
+  const m = accMode();
+  try {
+    if (m === 'claude') {
+      const snap = await NET.real.doc('data/users/' + NET.uid + '/profil').get();
+      if (snap.exists && snap.data().prof) { const remote = JSON.parse(snap.data().prof); const local = LS.get(PF_KEY, null); if (!local || (remote.upd || 0) >= (local.upd || 0)) accAdopt(remote); else accSaveSoon(); }
+      else accSaveSoon();
+      ACC.lastSave = Date.now();
+    } else if (m === 'server') {
+      accReq('info').then(i => { ACC.persistent = !!(i && i.persistent); }).catch(() => {});
+      const st = accState(); if (!st || !st.token) return;
+      try { const r = await accReq('load', { user: st.name, token: st.token }); const local = pf(); if (r.prof && (r.upd || 0) > (local.upd || 0)) accAdopt(r.prof, r.name); else accSaveSoon(); ACC.lastSave = Date.now(); }
+      catch (e) { if (e.code === 'unknown_account' && st.verifier) { const r = await accReq('restore', { user: st.name, verifier: st.verifier, prof: pf() }); accSet(Object.assign({}, st, { token: r.token })); ACC.lastSave = Date.now(); } else if (e.code === 'bad_token') accSet(Object.assign({}, st, { token: null })); }
+    }
+  } catch (e) { console.warn('compte', e); }
+  render();
+}
+function accStatusText() {
+  if (ACC.err) return ACC.err;
+  return ACC.lastSave ? 'Sauvegardé à ' + new Date(ACC.lastSave).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + '.' : 'Sauvegarde en cours…';
+}
+function accountHTML() {
+  const m = accMode(); const st = accState();
+  if (m === 'claude') return '<div class="accbox ok"><b>Compte</b><p>Ta progression est sauvegardée automatiquement sur ton compte Claude : tu la retrouves sur tous tes appareils.</p><p class="dim" id="acc-status">' + e(accStatusText()) + '</p></div>';
+  if (m !== 'server') return '<div class="accbox"><b>Compte</b><p class="dim">Pour créer un compte et garder ta progression sur tous tes appareils, joue sur le site du jeu (dernier-signal.onrender.com). Ici, elle est gardée dans ce navigateur.</p></div>';
+  if (st && st.token) return '<div class="accbox ok"><div class="row"><b>Connecté : ' + e(st.name) + '</b><span class="grow"></span><button class="btn ghost small" data-a="acc-pass">Changer le mot de passe</button><button class="btn ghost small" data-a="acc-logout">Se déconnecter</button></div><p class="dim" id="acc-status">' + e(accStatusText()) + '</p>'
+    + (ACC.persistent === false ? '<p class="dim" style="font-size:13px">Le serveur est en stockage temporaire : si un redémarrage efface ton compte, ton appareil le recrée tout seul à ta prochaine visite.</p>' : '') + (G.accPass ? accFormHTML('password') : '') + '</div>';
+  const f = ACC.form; const relog = st && st.name && !st.token;
+  return '<div class="accbox"><b>' + (relog ? 'Reconnecte-toi' : 'Ton compte') + '</b><p class="dim">Crée un compte pour garder tes pièces, tes objets, tes codes et tes statistiques, et les retrouver sur n’importe quel appareil.</p>'
+    + '<div class="rtabs subtabs"><button data-a="acc-form" data-f="register" aria-selected="' + (f === 'register') + '">Créer un compte</button><button data-a="acc-form" data-f="login" aria-selected="' + (f === 'login') + '">Se connecter</button></div>'
+    + accFormHTML(f, relog ? st.name : '') + '</div>';
+}
+function accFormHTML(f, name) {
+  if (f === 'password') return '<form class="accform" data-acc="password"><div class="field"><label for="acc-p1">Nouveau mot de passe</label><input class="input" id="acc-p1" type="password" autocomplete="new-password" minlength="6" required></div><div class="field"><label for="acc-p2">Confirme</label><input class="input" id="acc-p2" type="password" autocomplete="new-password" minlength="6" required></div><button class="btn frost small">Changer</button></form>';
+  return '<form class="accform" data-acc="' + f + '"><div class="field"><label for="acc-u">Pseudo</label><input class="input" id="acc-u" autocomplete="username" maxlength="16" value="' + e(name || pf().name || '') + '" required></div>'
+    + '<div class="field"><label for="acc-p1">Mot de passe</label><input class="input" id="acc-p1" type="password" autocomplete="' + (f === 'register' ? 'new-password' : 'current-password') + '" minlength="6" required></div>'
+    + (f === 'register' ? '<div class="field"><label for="acc-p2">Confirme le mot de passe</label><input class="input" id="acc-p2" type="password" autocomplete="new-password" minlength="6" required></div>' : '')
+    + '<button class="btn red small">' + (f === 'register' ? 'Créer mon compte' : 'Se connecter') + '</button><p class="dim acc-msg" role="status">' + e(G.accMsg || (f === 'register' ? 'Au moins 6 caractères. Ta progression actuelle sera gardée dans le compte.' : '')) + '</p></form>';
+}
+async function accSubmit(kind) {
+  if (ACC.busy) return; const P_ = pf(); const msg = t => { G.accMsg = t; const el = $('.acc-msg'); if (el) el.textContent = t; };
+  try {
+    ACC.busy = true;
+    if (kind === 'password') {
+      const p1 = $('#acc-p1').value, p2 = $('#acc-p2').value; if (p1.length < 6) return toast('Au moins 6 caractères.', true); if (p1 !== p2) return toast('Les deux mots de passe sont différents.', true);
+      const st = accState(); const v = await accVerifier(st.name, p1); const r = await accReq('password', { user: st.name, token: st.token, verifier: v }); accSet(Object.assign({}, st, { token: r.token, verifier: v })); G.accPass = false; toast('Mot de passe changé.'); metaRender(); return;
+    }
+    const name = cleanText($('#acc-u').value, 16); const p1 = $('#acc-p1').value;
+    if (name.length < 3) return msg('Pseudo : au moins 3 caractères.'); if (p1.length < 6) return msg('Mot de passe : au moins 6 caractères.');
+    if (kind === 'register' && p1 !== $('#acc-p2').value) return msg('Les deux mots de passe sont différents.');
+    msg('Un instant…'); const v = await accVerifier(name, p1);
+    if (kind === 'register') {
+      P_.name = name; P_.upd = Date.now(); LS.set(PF_KEY, P_);
+      const r = await accReq('register', { user: name, verifier: v, prof: P_ }); accSet({ name: r.name, token: r.token, verifier: v }); accAdopt(null, r.name);
+      toast('Compte créé ! Ta progression est sauvegardée.');
+    } else {
+      const r = await accReq('login', { user: name, verifier: v }); accSet({ name: r.name, token: r.token, verifier: v });
+      const local = LS.get(PF_KEY, null); let prof = r.prof;
+      if (prof && local && profHasProgress(local) && !local.acc) { prof = mergeProf(prof, local); toast('Connecté. La progression de cet appareil a été ajoutée à ton compte.'); } else toast('Connecté. Bon retour, ' + r.name + ' !');
+      accAdopt(prof || local, r.name); pf().acc = r.name; LS.set(PF_KEY, pf());
+    }
+    pf().acc = accState().name; G.accMsg = ''; pfSave(); ACC.lastSave = Date.now(); metaRender(); render();
+  } catch (e) { msg(e.message || 'Impossible pour le moment.'); }
+  finally { ACC.busy = false; }
+}
+async function accLogout() {
+  const st = accState(); if (!st) return;
+  try { await accSaveNow(); } catch {}
+  try { if (st.token) await accReq('logout', { user: st.name, token: st.token }); } catch {}
+  accSet(null); PF = null; LS.set(PF_KEY, null); LS.set('ds_skin', null); pf(); applyTheme(); G.profSig = '';
+  toast('Déconnecté. Ta progression reste dans ton compte.'); metaRender(); render();
 }
 
 /* =====================================================================
@@ -5504,6 +5642,7 @@ function vcInvite() {
   if (/^[A-Z0-9]{5}$/.test(h)) $('#in-code').value = h;
   render(); oscLoop();
   await initNet();
+  accBoot();
   if (NET.real) {
     if (NET.server) NET.db = NET.real;
     const s = await loadSession();

@@ -140,6 +140,57 @@ async function aiAsk(code, prompt) {
   } finally { u.busy--; }
 }
 
+
+/* ---------- comptes joueurs (pseudo + mot de passe) ----------
+   Le navigateur n'envoie jamais le mot de passe : il envoie une empreinte (PBKDF2), que le serveur
+   protège encore avec scrypt. Stockage : Upstash Redis si UPSTASH_REDIS_REST_URL et _TOKEN sont fournis
+   (permanent, gratuit), sinon un fichier data/comptes.json (effacé à chaque redémarrage sur l'offre
+   gratuite de Render : les appareils déjà connectés restaurent alors le compte automatiquement). */
+const ACC_FILE = path.join(DATA_DIR, 'comptes.json');
+const UP_URL = process.env.UPSTASH_REDIS_REST_URL || '', UP_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || '';
+let accLocal = {}; try { accLocal = JSON.parse(fs.readFileSync(ACC_FILE, 'utf8')); } catch {}
+let accDirty = false; setInterval(() => { if (!accDirty) return; accDirty = false; try { fs.mkdirSync(DATA_DIR, { recursive: true }); fs.writeFileSync(ACC_FILE + '.tmp', JSON.stringify(accLocal)); fs.renameSync(ACC_FILE + '.tmp', ACC_FILE); } catch (e) { console.error('comptes', e.message); } }, 3000);
+async function upstash(cmd) { const r = await fetch(UP_URL, { method: 'POST', headers: { authorization: 'Bearer ' + UP_TOKEN, 'content-type': 'application/json' }, body: JSON.stringify(cmd), signal: AbortSignal.timeout(8000) }); const j = await r.json(); if (!r.ok || j.error) throw new Error(j.error || 'upstash'); return j.result; }
+async function accGet(k) { if (UP_URL) { const v = await upstash(['GET', 'acc:' + k]); return v ? JSON.parse(v) : null; } return accLocal[k] || null; }
+async function accPut(k, v) { if (UP_URL) { await upstash(['SET', 'acc:' + k, JSON.stringify(v)]); return; } accLocal[k] = v; accDirty = true; }
+const accKey = u => typeof u === 'string' ? u.normalize('NFC').trim().toLowerCase() : '';
+const NAME_RX = /^[\p{L}\p{N}_\-. ]{3,16}$/u;
+const scryptHash = (v, salt) => crypto.scryptSync(String(v), salt, 32).toString('base64');
+const tries = new Map(); // limite de tentatives par adresse
+function tooMany(ip) { const t = Date.now(); const x = (tries.get(ip) || []).filter(z => t - z < 10 * 60e3); x.push(t); tries.set(ip, x); return x.length > 20; }
+async function account(req, res) {
+  let b; try { b = await readBody(req); } catch { return json(res, 400, { code: 'invalid_argument' }); }
+  const op = b.op; const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0];
+  if (op === 'info') return json(res, 200, { result: { persistent: !!UP_URL } });
+  const name = typeof b.user === 'string' ? b.user.normalize('NFC').trim() : ''; const k = accKey(name);
+  if (!NAME_RX.test(name)) return json(res, 400, { code: 'bad_name', error: 'Pseudo : 3 à 16 lettres ou chiffres.' });
+  const okProf = p => p && typeof p === 'object' && JSON.stringify(p).length < 250000;
+  const newToken = acc => { const t = crypto.randomBytes(24).toString('base64url'); acc.tokens = [hash(t), ...(acc.tokens || [])].slice(0, 8); return t; };
+  const okToken = (acc, t) => typeof t === 'string' && (acc.tokens || []).includes(hash(t));
+  try {
+    if (op === 'register' || op === 'restore') {
+      if (tooMany(ip)) return json(res, 429, { code: 'rate_limited', error: 'Trop d’essais, réessaie dans quelques minutes.' });
+      if (typeof b.verifier !== 'string' || b.verifier.length < 20) return json(res, 400, { code: 'invalid_argument' });
+      const cur = await accGet(k);
+      if (cur) { if (op === 'restore' && scryptHash(b.verifier, cur.salt) === cur.hash) { const token = newToken(cur); await accPut(k, cur); return json(res, 200, { result: { token, name: cur.name, prof: cur.prof || null, upd: cur.upd || 0 } }); } return json(res, 409, { code: 'name_taken', error: 'Ce pseudo est déjà pris.' }); }
+      const salt = crypto.randomBytes(16).toString('base64'); const acc = { name, salt, hash: scryptHash(b.verifier, salt), prof: okProf(b.prof) ? b.prof : null, upd: Date.now(), created: Date.now() };
+      const token = newToken(acc); await accPut(k, acc); return json(res, 200, { result: { token, name, prof: acc.prof, upd: acc.upd } });
+    }
+    if (op === 'login') {
+      if (tooMany(ip)) return json(res, 429, { code: 'rate_limited', error: 'Trop d’essais, réessaie dans quelques minutes.' });
+      const acc = await accGet(k); if (!acc || typeof b.verifier !== 'string' || scryptHash(b.verifier, acc.salt) !== acc.hash) return json(res, 403, { code: 'bad_login', error: 'Pseudo ou mot de passe incorrect.' });
+      const token = newToken(acc); await accPut(k, acc); return json(res, 200, { result: { token, name: acc.name, prof: acc.prof || null, upd: acc.upd || 0 } });
+    }
+    const acc = await accGet(k); if (!acc) return json(res, 404, { code: 'unknown_account' });
+    if (!okToken(acc, b.token)) return json(res, 403, { code: 'bad_token', error: 'Session expirée : reconnecte-toi.' });
+    if (op === 'load') return json(res, 200, { result: { name: acc.name, prof: acc.prof || null, upd: acc.upd || 0 } });
+    if (op === 'save') { if (!okProf(b.prof)) return json(res, 400, { code: 'invalid_argument' }); acc.prof = b.prof; acc.upd = Date.now(); await accPut(k, acc); return json(res, 200, { result: { upd: acc.upd } }); }
+    if (op === 'logout') { acc.tokens = (acc.tokens || []).filter(x => x !== hash(b.token)); await accPut(k, acc); return json(res, 200, { result: null }); }
+    if (op === 'password') { if (typeof b.verifier !== 'string' || b.verifier.length < 20) return json(res, 400, { code: 'invalid_argument' }); acc.salt = crypto.randomBytes(16).toString('base64'); acc.hash = scryptHash(b.verifier, acc.salt); const token = newToken(acc); acc.tokens = [acc.tokens[0]]; await accPut(k, acc); return json(res, 200, { result: { token } }); }
+  } catch (e) { console.error('compte', e.message); return json(res, 503, { code: 'unavailable', error: 'Sauvegarde indisponible pour le moment.' }); }
+  return json(res, 400, { code: 'invalid_argument' });
+}
+
 /* ---------- HTTP ---------- */
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
 function json(res, code, obj) { res.writeHead(code, { 'content-type': 'application/json', 'cache-control': 'no-store' }); res.end(JSON.stringify(obj)); }
@@ -173,6 +224,7 @@ async function api(req, res, url) {
     req.on('close', () => { clearInterval(ping); conns.delete(cid); if (conn.vroom) voiceBye(conn); });
     return;
   }
+  if (url.pathname.endsWith('/api/account') && req.method === 'POST') return account(req, res);
   if (url.pathname.endsWith('/api/op') && req.method === 'POST') {
     const pid = req.headers['x-ds-pid'], token = req.headers['x-ds-token'];
     if (!auth(pid, token)) return json(res, 401, { code: 'not_granted', error: 'Identité inconnue' });
