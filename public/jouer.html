@@ -3425,7 +3425,7 @@ class Geo {
 const R3 = {
   gl: null, prog: null, loc: {}, cube: null, quad: null, sky: null, texCache: new Map(), white: null, time: 0,
   init(canvas) {
-    const gl = canvas.getContext('webgl', { antialias: true, alpha: false, powerPreference: 'high-performance' }) || canvas.getContext('experimental-webgl');
+    const gl = canvas.getContext('webgl', { antialias: true, alpha: false, depth: true, powerPreference: 'high-performance' }) || canvas.getContext('experimental-webgl');
     if (!gl) return false;
     this.gl = gl;
     const VS = 'attribute vec3 aPos;attribute vec3 aNor;attribute vec3 aCol;attribute vec2 aUV;uniform mat4 uP,uV,uM;uniform vec3 uTint;uniform float uSway,uWT;varying vec3 vCol,vNor,vW;varying vec2 vUV;void main(){vec4 w=uM*vec4(aPos,1.0);if(uSway>0.5&&aUV.x>0.0){float s=aUV.x;w.x+=sin(uWT*1.7+w.x*0.23+w.z*0.17)*s*0.22;w.z+=cos(uWT*1.3+w.z*0.21+w.x*0.11)*s*0.15;}vW=w.xyz;vNor=mat3(uM)*aNor;vCol=aCol*uTint;vUV=aUV;gl_Position=uP*uV*w;}';
@@ -4305,7 +4305,7 @@ function g3RoomDecor(h, room, time) {
   if (f.coin === 'sapin') { for (let k = 0; k < 3; k++) D(2.25, 0.4 + k * 0.4, 2.25, 0.9 - k * 0.25, 0.4, 0.9 - k * 0.25, [0.1, 0.4, 0.18]); D(2.25, 1.65, 2.25, 0.15, 0.15, 0.15, [1, 0.85, 0.2], { emis: 1 }); for (let k = 0; k < 5; k++) D(2.25 + Math.cos(k * 1.3) * 0.38, 0.5 + k * 0.2, 2.25 + Math.sin(k * 1.3) * 0.38, 0.08, 0.08, 0.08, [[1, 0.2, 0.2], [0.2, 0.6, 1], [1, 0.9, 0.2]][k % 3], { emis: 0.8 + Math.sin(time * 3 + k) * 0.2 }); }
   // sol
   const rug = { tapisrouge: [0.6, 0.12, 0.12], tapisroyal: [0.35, 0.1, 0.5], peau: [0.55, 0.52, 0.48], pentacle: [0.08, 0.05, 0.1] }[f.sol];
-  if (rug) { D(0, 0.05, -0.4, 1.9, 0.02, 2.1, rug); if (f.sol === 'tapisroyal') D(0, 0.062, -0.4, 1.6, 0.01, 1.8, [0.85, 0.65, 0.2]); if (f.sol === 'pentacle') D(0, 0.064, -0.4, 1.2, 0.01, 1.2, [0.6, 0.1, 1], { emis: 0.6 + Math.sin(time * 2) * 0.3 }); }
+  if (rug) { D(0, 0.075, -0.4, 1.9, 0.02, 2.1, rug); if (f.sol === 'tapisroyal') D(0, 0.092, -0.4, 1.6, 0.01, 1.8, [0.85, 0.65, 0.2]); if (f.sol === 'pentacle') D(0, 0.094, -0.4, 1.2, 0.01, 1.2, [0.6, 0.1, 1], { emis: 0.6 + Math.sin(time * 2) * 0.3 }); }
   // table
   const tb = (x, y, z, sx, sy, sz, col, ex) => D(1.7 + x, 0.76 + y, 1.6 + z, sx, sy, sz, col, ex);
   if (f.table === 'bougies') for (const [x, z] of [[-0.3, -0.1], [-0.15, 0.1], [0.35, 0]]) { tb(x, 0.08, z, 0.06, 0.16, 0.06, [0.95, 0.92, 0.85]); tb(x, 0.19, z, 0.03, 0.05, 0.03, [1, 0.7, 0.2], { emis: 1 }); }
@@ -4421,7 +4421,7 @@ function g3Frame(t) {
     while (d < 4.4) { const nx = m.x + sx + bx * (d + 0.25), nz = m.z + sz + bz * (d + 0.25); if (!ghost) { const [cx, cz] = g3Collide(nx, nz); if (Math.hypot(cx - nx, cz - nz) > 0.02) break; } d += 0.2; }
     eye = [m.x + sx + bx * d, eyeY + 0.55 + Math.max(-0.5, Math.min(2.5, -Math.sin(m.pitch) * d)), m.z + sz + bz * d];
   }
-  const P = M4.persp(1.15, W / Math.max(1, H_), 0.08, 260);
+  const P = M4.persp(1.15, W / Math.max(1, H_), 0.12, 260);
   const V = M4.chain(M4.rx(-m.pitch), M4.ry(-m.yaw), M4.t(-eye[0], -eye[1], -eye[2]));
   const time = t / 1000;
   // lumières : la lanterne du joueur, celles des autres la nuit, puis les plus proches
@@ -4920,11 +4920,11 @@ const FUR_SHAPES = {
   // sol (tapis au centre)
   tapisbleu: ['sol', 'Tapis bleu', 'commun', [[0, 0, 0, 1.9, 0.02, 2.1, '#1c3a6a']]],
   tapisvert: ['sol', 'Tapis vert', 'commun', [[0, 0, 0, 1.9, 0.02, 2.1, '#2e5a2e']]],
-  damier: ['sol', 'Tapis damier', 'rare', [[0, 0, 0, 1.9, 0.02, 2.1, '#e8e2d0'], [-0.48, 0.012, -0.53, 0.95, 0.01, 1.05, '#1a1a1a'], [0.48, 0.012, 0.53, 0.95, 0.01, 1.05, '#1a1a1a']]],
+  damier: ['sol', 'Tapis damier', 'rare', [[0, 0, 0, 1.9, 0.02, 2.1, '#e8e2d0'], [-0.48, 0.022, -0.53, 0.95, 0.01, 1.05, '#1a1a1a'], [0.48, 0.022, 0.53, 0.95, 0.01, 1.05, '#1a1a1a']]],
   coussins: ['sol', 'Coussins de sol', 'rare', [[-0.5, 0.08, 0, 0.6, 0.16, 0.6, '#c4161c'], [0.3, 0.08, 0.4, 0.6, 0.16, 0.6, '#d8a92f'], [0.2, 0.08, -0.5, 0.6, 0.16, 0.6, '#1c4ac4']]],
   tapisarc: ['sol', 'Tapis arc-en-ciel', 'epique', [[0, 0, -0.84, 1.9, 0.02, 0.42, '#e8483a'], [0, 0, -0.42, 1.9, 0.02, 0.42, '#f2a23a'], [0, 0, 0, 1.9, 0.02, 0.42, '#f2e23a'], [0, 0, 0.42, 1.9, 0.02, 0.42, '#3ad96a'], [0, 0, 0.84, 1.9, 0.02, 0.42, '#3a8ad9']]],
-  tapislune: ['sol', 'Tapis lunaire', 'or', [[0, 0, 0, 1.9, 0.02, 2.1, '#141a33'], [0, 0.012, 0, 0.7, 0.01, 0.7, '#e6e2fa', 0.6]]],
-  tapiscoeur: ['sol', 'Tapis cœur', 'rare', [[0, 0, 0, 1.6, 0.02, 1.6, '#ff7aa8'], [0, 0.012, 0, 0.6, 0.01, 0.6, '#c4161c']]],
+  tapislune: ['sol', 'Tapis lunaire', 'or', [[0, 0, 0, 1.9, 0.02, 2.1, '#141a33'], [0, 0.022, 0, 0.7, 0.01, 0.7, '#e6e2fa', 0.6]]],
+  tapiscoeur: ['sol', 'Tapis cœur', 'rare', [[0, 0, 0, 1.6, 0.02, 1.6, '#ff7aa8'], [0, 0.022, 0, 0.6, 0.01, 0.6, '#c4161c']]],
   // table
   radioport: ['table', 'Radio portable', 'commun', [[0.3, 0.1, 0, 0.36, 0.2, 0.14, '#3a3a3a'], [0.22, 0.1, -0.071, 0.12, 0.12, 0.01, '#111'], [0.4, 0.12, -0.071, 0.08, 0.04, 0.01, '#3aff6a', 1], [0.42, 0.3, 0, 0.02, 0.22, 0.02, '#888']]],
   tasse: ['table', 'Tasse fumante', 'commun', [[0.35, 0.06, 0, 0.1, 0.12, 0.1, '#e8e2d0'], [0.35, 0.115, 0, 0.08, 0.01, 0.08, '#4a2a14']]],
@@ -4940,9 +4940,9 @@ const FUR_SHAPES = {
   sablier: ['table', 'Sablier', 'epique', [[0.3, 0.02, 0, 0.16, 0.03, 0.16, '#5a4028'], [0.3, 0.22, 0, 0.16, 0.03, 0.16, '#5a4028'], [0.3, 0.12, 0, 0.1, 0.18, 0.1, '#e8d9a8', 0.4]]],
   // lit
   couvrouge: ['lit', 'Couverture rouge', 'commun', [[0, 0.025, 0, 1.22, 0.02, 1.42, '#a3121e']]],
-  couvetoiles: ['lit', 'Couverture étoilée', 'epique', [[0, 0.025, 0, 1.22, 0.02, 1.42, '#141a3a'], [-0.3, 0.04, -0.3, 0.06, 0.01, 0.06, '#fff6c9', 1], [0.2, 0.04, 0.2, 0.06, 0.01, 0.06, '#fff6c9', 1], [0.35, 0.04, -0.4, 0.05, 0.01, 0.05, '#fff6c9', 1]]],
-  couvcamo: ['lit', 'Couverture camouflage', 'rare', [[0, 0.025, 0, 1.22, 0.02, 1.42, '#4a5a2e'], [-0.2, 0.04, -0.3, 0.4, 0.01, 0.3, '#2e3320'], [0.25, 0.04, 0.3, 0.35, 0.01, 0.4, '#6b5a3a']]],
-  couvcoeur: ['lit', 'Couverture cœurs', 'rare', [[0, 0.025, 0, 1.22, 0.02, 1.42, '#ffb3cc'], [0, 0.04, 0, 0.3, 0.01, 0.3, '#c4161c']]],
+  couvetoiles: ['lit', 'Couverture étoilée', 'epique', [[0, 0.025, 0, 1.22, 0.02, 1.42, '#141a3a'], [-0.3, 0.046, -0.3, 0.06, 0.01, 0.06, '#fff6c9', 1], [0.2, 0.046, 0.2, 0.06, 0.01, 0.06, '#fff6c9', 1], [0.35, 0.046, -0.4, 0.05, 0.01, 0.05, '#fff6c9', 1]]],
+  couvcamo: ['lit', 'Couverture camouflage', 'rare', [[0, 0.025, 0, 1.22, 0.02, 1.42, '#4a5a2e'], [-0.2, 0.046, -0.3, 0.4, 0.01, 0.3, '#2e3320'], [0.25, 0.046, 0.3, 0.35, 0.01, 0.4, '#6b5a3a']]],
+  couvcoeur: ['lit', 'Couverture cœurs', 'rare', [[0, 0.025, 0, 1.22, 0.02, 1.42, '#ffb3cc'], [0, 0.046, 0, 0.3, 0.01, 0.3, '#c4161c']]],
   couvarc: ['lit', 'Couverture arc-en-ciel', 'epique', [[0, 0.025, -0.5, 1.22, 0.02, 0.36, '#e8483a'], [0, 0.025, -0.15, 1.22, 0.02, 0.36, '#f2e23a'], [0, 0.025, 0.2, 1.22, 0.02, 0.36, '#3ad96a'], [0, 0.025, 0.55, 1.22, 0.02, 0.32, '#3a8ad9']]],
   peluche: ['lit', 'Peluche de loup', 'rare', [[0.3, 0.15, 0.6, 0.26, 0.24, 0.2, '#8a8f94'], [0.3, 0.33, 0.6, 0.2, 0.18, 0.18, '#8a8f94'], [0.24, 0.45, 0.6, 0.05, 0.08, 0.04, '#8a8f94'], [0.36, 0.45, 0.6, 0.05, 0.08, 0.04, '#8a8f94']]],
   // plafond
@@ -4956,7 +4956,7 @@ const FUR_SHAPES = {
   chauvesouris: ['plafond', 'Chauves-souris', 'epique', [[-0.4, -0.1, 0, 0.3, 0.06, 0.1, '#1a1a1a'], [0.3, -0.2, 0.4, 0.3, 0.06, 0.1, '#1a1a1a'], [0.1, -0.05, -0.5, 0.26, 0.05, 0.1, '#1a1a1a']]],
 };
 for (const [id, [slot, name, rar]] of Object.entries(FUR_SHAPES)) FURNITURE[id] = [slot, name, rar];
-const FUR_ANCHOR = { mur: [0, 0, 2.78], coin: [2.3, 0, 2.3], sol: [0, 0.05, -0.4], table: [1.7, 0.76, 1.6], lit: [-1.9, 0.62, 0.95], plafond: [0, 2.45, 0.5] };
+const FUR_ANCHOR = { mur: [0, 0, 2.78], coin: [2.3, 0, 2.3], sol: [0, 0.075, -0.4], table: [1.7, 0.76, 1.6], lit: [-1.9, 0.62, 0.95], plafond: [0, 2.45, 0.5] };
 /* codes de meubles (au moins 50) : chacun débloque la chambre et des meubles */
 const ROOM_CODES = {
   HORLOGE: ['horloge'], MIROIR: ['miroir'], CARTEZONE7: ['cartemonde'], ETAGERE: ['etagere'], GUITARE: ['guitare'], ECRANGEANT: ['ecran'], VITRAIL: ['vitrail'], FLECHETTES: ['cible'], ATTRAPEREVES: ['attrapereves'], FANIONMEUTE: ['fanion'],
@@ -5686,14 +5686,14 @@ function buildAnnex(g, em, wat, h, type, col, lights, circles, M, rand) {
   const segs = (a0, a1, gaps) => { const out = []; let a = a0; for (const [g0, g1] of gaps) { if (g0 > a) out.push([a, g0, 0]); out.push([g0, g1, 1]); a = g1; } if (a1 > a) out.push([a, a1, 0]); return out; };
   const wallX = (z, x0, x1, gaps = []) => { for (const [a, b, gap] of segs(x0, x1, gaps)) { const m = (a + b) / 2, L_ = b - a; if (gap) { B(m, (2.2 + HT) / 2, z, L_, HT - 2.2, T, wc); B(a, 1.1, z, 0.1, 2.2, T + 0.08, lo); B(b, 1.1, z, 0.1, 2.2, T + 0.08, lo); } else { B(m, HT / 2, z, L_, HT, T, wc); C(m, z, L_, T); } } };
   const wallZ = (x, z0, z1, gaps = []) => { for (const [a, b, gap] of segs(z0, z1, gaps)) { const m = (a + b) / 2, L_ = b - a; if (gap) { B(x, (2.2 + HT) / 2, m, T, HT - 2.2, L_, wc); B(x, 1.1, a, T + 0.08, 2.2, 0.1, lo); B(x, 1.1, b, T + 0.08, 2.2, 0.1, lo); } else { B(x, HT / 2, m, T, HT, L_, wc); C(x, m, T, L_); } } };
-  const floor = (x0, x1, z0, z1, c, y = 0.035) => g.face([xf(x0, y, z0), xf(x1, y, z0), xf(x1, y, z1), xf(x0, y, z1)], c, xf((x0 + x1) / 2, -1, (z0 + z1) / 2));
-  const roof = (x0, x1, z0, z1) => { B((x0 + x1) / 2, HT + 0.1, (z0 + z1) / 2, x1 - x0 + 0.5, 0.2, z1 - z0 + 0.5, pl.r); if (lv >= 6) { BE((x0 + x1) / 2, HT + 0.24, z0 - 0.22, x1 - x0 + 0.5, 0.07, 0.07, [1, 0.78, 0.3]); BE((x0 + x1) / 2, HT + 0.24, z1 + 0.22, x1 - x0 + 0.5, 0.07, 0.07, [1, 0.78, 0.3]); } };
+  const floor = (x0, x1, z0, z1, c, y = 0.06) => g.face([xf(x0, y, z0), xf(x1, y, z0), xf(x1, y, z1), xf(x0, y, z1)], c, xf((x0 + x1) / 2, -1, (z0 + z1) / 2));
+  const roof = (x0, x1, z0, z1, pd = [0.25, 0.25, 0.25, 0.25], y = HT + 0.1) => { const a0 = x0 - pd[0], a1 = x1 + pd[1], b0 = z0 - pd[2], b1 = z1 + pd[3]; B((a0 + a1) / 2, y, (b0 + b1) / 2, a1 - a0, 0.2, b1 - b0, pl.r); if (lv >= 6) { BE((x0 + x1) / 2, HT + 0.24, z0 - 0.22, x1 - x0 + 0.5, 0.07, 0.07, [1, 0.78, 0.3]); BE((x0 + x1) / 2, HT + 0.24, z1 + 0.22, x1 - x0 + 0.5, 0.07, 0.07, [1, 0.78, 0.3]); } };
   const lamp = (x, z, c = [1, 0.84, 0.6]) => { BE(x, HT - 0.06, z, 0.5, 0.05, 0.5, c); lights.push({ p: xf(x, HT - 0.6, z), c: c.map(v => v * 0.8), r: 7, home: h.i }); };
   const legs = (x, z, w, d, hgt, c = wood) => { for (const sx of [-1, 1]) for (const sz of [-1, 1]) B(x + sx * (w / 2 - 0.06), hgt / 2, z + sz * (d / 2 - 0.06), 0.07, hgt, 0.07, c); };
   // --- niveau 2 : cuisine (à droite)
   wallX(-3, 3, 8.6); wallZ(8.6, -3, 3); wallX(3, 3, 8.6, lv >= 4 ? [[5, 6.4]] : []); if (tent) wallZ(3.12, -3, 3, [[-2.5, -1.1]]);
   BE(5.8, 1.6, -3.17, 1.2, 0.8, 0.04, warm); BE(8.77, 1.6, 0.2, 0.04, 0.8, 1.2, warm);
-  floor(3, 8.6, -3, 3, pl.f); roof(3, 8.6, -3, 3); lamp(5.8, 0);
+  floor(3.15, 8.6, -3, 3, pl.f); roof(3, 8.6, -3, 3, [0, 0.25, 0.25, lv >= 4 ? 0 : 0.25]); lamp(5.8, 0);
   B(8.1, 0.46, -2.1, 0.85, 0.92, 0.85, [0.2, 0.2, 0.22]); BE(7.95, 0.93, -2.3, 0.22, 0.02, 0.22, [1, 0.35, 0.1]); BE(7.95, 0.93, -1.9, 0.22, 0.02, 0.22, [1, 0.35, 0.1]);
   B(7.66, 0.4, -2.1, 0.02, 0.45, 0.6, [0.08, 0.08, 0.09]); BE(7.65, 0.4, -2.1, 0.01, 0.3, 0.45, [1, 0.5, 0.15]); B(8.2, 2.25, -2.1, 0.7, 0.5, 0.9, [0.55, 0.55, 0.58]); C(8.1, -2.1, 0.85, 0.85);
   B(8.1, 0.45, -0.1, 0.9, 0.9, 3.0, [0.55, 0.45, 0.35]); B(8.1, 0.93, -0.1, 0.95, 0.06, 3.05, [0.85, 0.83, 0.78]); B(8.1, 0.965, 0.3, 0.6, 0.02, 0.6, [0.55, 0.65, 0.7]); B(8.4, 1.1, 0.3, 0.05, 0.25, 0.05, [0.7, 0.7, 0.72]); C(8.1, -0.1, 0.9, 3.0);
@@ -5706,19 +5706,19 @@ function buildAnnex(g, em, wat, h, type, col, lights, circles, M, rand) {
   // --- niveau 3 : salle de jeux (à gauche)
   if (lv >= 3) {
     wallX(-3, -8.6, -3); wallZ(-8.6, -3, 3); wallX(3, -8.6, -3, lv >= 4 ? [[-6.4, -5]] : []); if (tent) wallZ(-3.12, -3, 3, [[-2.5, -1.1]]);
-    BE(-5.8, 1.6, -3.17, 1.2, 0.8, 0.04, [0.75, 0.55, 1]); floor(-8.6, -3, -3, 3, cmul(pl.f, 0.7)); roof(-8.6, -3, -3, 3); lamp(-5.8, 0, [0.85, 0.65, 1]);
+    BE(-5.8, 1.6, -3.17, 1.2, 0.8, 0.04, [0.75, 0.55, 1]); floor(-8.6, -3.15, -3, 3, cmul(pl.f, 0.7)); roof(-8.6, -3, -3, 3, [0.25, 0, 0.25, lv >= 4 ? 0 : 0.25]); lamp(-5.8, 0, [0.85, 0.65, 1]);
     BE(-8.4, 0.06, 0, 0.05, 0.04, 5.6, [1, 0.2, 0.6]); BE(-4.2, 2.1, 2.83, 1.4, 0.25, 0.04, [0.2, 0.9, 1]);
     for (const [zz, sc] of [[-1.8, [0.3, 0.9, 1]], [-0.6, [0.4, 1, 0.4]]]) { B(-8.05, 0.85, zz, 0.7, 1.7, 0.8, [0.15, 0.1, 0.3]); BE(-7.69, 1.3, zz, 0.02, 0.45, 0.55, sc); B(-7.6, 0.95, zz, 0.25, 0.08, 0.65, [0.9, 0.2, 0.3]); BE(-7.75, 1.65, zz, 0.05, 0.18, 0.62, [1, 0.85, 0.3]); C(-8.05, zz, 0.7, 0.8); }
-    B(-5.4, 0.72, 1.2, 1.3, 0.1, 2.2, [0.12, 0.45, 0.22]); B(-5.4, 0.66, 1.2, 1.45, 0.12, 2.35, [0.35, 0.2, 0.12]); legs(-5.4, 1.2, 1.45, 2.35, 0.62, [0.3, 0.18, 0.1]); C(-5.4, 1.2, 1.45, 2.35);
-    for (const [dx, dz, c] of [[0.1, -0.4, [0.95, 0.95, 0.9]], [-0.2, 0.3, [0.85, 0.15, 0.1]], [0.25, 0.5, [0.95, 0.8, 0.15]], [-0.1, 0.6, [0.1, 0.2, 0.7]]]) B(-5.4 + dx, 0.81, 1.2 + dz, 0.08, 0.08, 0.08, c);
-    B(-4.0, 0.25, -2.0, 0.8, 0.5, 0.8, [0.9, 0.5, 0.1]);
+    B(-5.3, 0.72, 0.6, 2.2, 0.1, 1.3, [0.12, 0.45, 0.22]); B(-5.3, 0.66, 0.6, 2.35, 0.12, 1.45, [0.35, 0.2, 0.12]); legs(-5.3, 0.6, 2.35, 1.45, 0.62, [0.3, 0.18, 0.1]); C(-5.3, 0.6, 2.35, 1.45);
+    for (const [dx, dz, c] of [[-0.6, 0.1, [0.95, 0.95, 0.9]], [0.3, -0.2, [0.85, 0.15, 0.1]], [0.5, 0.25, [0.95, 0.8, 0.15]], [0.6, -0.1, [0.1, 0.2, 0.7]]]) B(-5.3 + dx, 0.81, 0.6 + dz, 0.08, 0.08, 0.08, c);
+    B(-7.9, 0.25, 2.2, 0.8, 0.5, 0.8, [0.9, 0.5, 0.1]); C(-7.9, 2.2, 0.8, 0.8);
   }
   // --- niveau 4 : salon (derrière)
   if (lv >= 4) {
     wallZ(-8.6, 3, 8.6); wallZ(8.6, 3, 8.6); wallX(8.6, -8.6, 8.6, lv >= 5 ? [[-0.7, 0.7]] : []); if (tent) wallX(3.15, -3.1, 3.1);
     BE(-8.77, 1.6, 5.8, 0.04, 0.8, 1.4, warm); BE(8.77, 1.6, 4.0, 0.04, 0.8, 1.0, warm);
-    floor(-8.6, 8.6, 3, 8.6, cmul(pl.f, 1.1)); roof(-8.6, 8.6, 3, 8.6); lamp(-4.5, 5.8); lamp(4.0, 5.8);
-    floor(-6, -3, 5, 7, [0.45, 0.2, 0.15], 0.05);
+    floor(-8.6, 8.6, 3.15, 8.6, cmul(pl.f, 1.1)); roof(-8.6, 8.6, 3, 8.6, [0.25, 0.25, 0, 0.25], HT + 0.13); lamp(-4.5, 5.8); lamp(4.0, 5.8);
+    floor(-6, -3, 5, 7, [0.45, 0.2, 0.15], 0.09);
     B(-4.5, 0.25, 7.8, 2.4, 0.5, 0.9, [0.5, 0.2, 0.2]); B(-4.5, 0.75, 8.25, 2.4, 0.6, 0.22, [0.45, 0.18, 0.18]); B(-5.75, 0.45, 7.8, 0.2, 0.45, 0.9, [0.45, 0.18, 0.18]); B(-3.25, 0.45, 7.8, 0.2, 0.45, 0.9, [0.45, 0.18, 0.18]); C(-4.5, 7.9, 2.6, 1.0);
     B(-4.5, 0.32, 6.1, 1.2, 0.06, 0.7, wood); legs(-4.5, 6.1, 1.2, 0.7, 0.3); C(-4.5, 6.1, 1.2, 0.7);
     B(-4.1, 1.45, 3.2, 1.5, 0.85, 0.06, [0.05, 0.05, 0.06]); BE(-4.1, 1.45, 3.24, 1.38, 0.75, 0.01, [0.3, 0.55, 1]); B(-4.1, 0.3, 3.45, 1.7, 0.6, 0.45, wood); B(-3.7, 0.64, 3.45, 0.35, 0.08, 0.25, [0.1, 0.1, 0.1]); C(-4.1, 3.45, 1.7, 0.45);
@@ -5730,12 +5730,12 @@ function buildAnnex(g, em, wat, h, type, col, lights, circles, M, rand) {
   }
   // --- niveau 5 : jardin (derrière le salon)
   if (lv >= 5) {
-    floor(-7, 7, 8.75, 14.4, [0.28, 0.45, 0.2], 0.03);
+    floor(-7, 7, 8.75, 14.4, [0.28, 0.45, 0.2], 0.06);
     const fx = (z, x0, x1, gaps = []) => { for (const [a, b, gap] of segs(x0, x1, gaps)) { if (gap) continue; const m = (a + b) / 2; B(m, 0.75, z, b - a, 0.08, 0.08, [0.85, 0.82, 0.75]); B(m, 0.4, z, b - a, 0.08, 0.08, [0.85, 0.82, 0.75]); for (let x = a; x <= b + 0.01; x += 1.2) B(x, 0.45, z, 0.1, 0.9, 0.1, [0.9, 0.88, 0.8]); C(m, z, b - a, 0.15); } };
     const fz = (x, z0, z1) => { const m = (z0 + z1) / 2; B(x, 0.75, m, 0.08, 0.08, z1 - z0, [0.85, 0.82, 0.75]); B(x, 0.4, m, 0.08, 0.08, z1 - z0, [0.85, 0.82, 0.75]); for (let z = z0; z <= z1 + 0.01; z += 1.2) B(x, 0.45, z, 0.1, 0.9, 0.1, [0.9, 0.88, 0.8]); C(x, m, 0.15, z1 - z0); };
     fx(14.4, -7, 7, [[-0.8, 0.8]]); fz(-7, 8.75, 14.4); fz(7, 8.75, 14.4);
     for (const zz of [10, 11.3, 12.6]) { B(-3.8, 0.1, zz, 3.2, 0.2, 0.7, [0.3, 0.2, 0.12]); for (let k = 0; k < 6; k++) B(-5.1 + k * 0.52, 0.32, zz, 0.22, 0.26, 0.22, [[0.3, 0.6, 0.2], [0.95, 0.5, 0.1], [0.85, 0.15, 0.12]][(k + Math.round(zz)) % 3]); }
-    { const pts = [], c0 = xf(3.8, 0.05, 11.6); for (let j = 0; j < 14; j++) { const a = j / 14 * Math.PI * 2; pts.push(xf(3.8 + Math.cos(a) * 1.6, 0.05, 11.6 + Math.sin(a) * 1.3)); } for (let j = 0; j < 14; j++) wat.face([c0, pts[j], pts[(j + 1) % 14]], [0.16, 0.3, 0.34], xf(3.8, -1, 11.6)); for (let j = 0; j < 10; j++) { const a = j / 10 * Math.PI * 2; B(3.8 + Math.cos(a) * 1.75, 0.12, 11.6 + Math.sin(a) * 1.45, 0.4, 0.24, 0.35, [0.5, 0.5, 0.48], a); } CL(3.8, 11.6, 1.5); }
+    { const pts = [], c0 = xf(3.8, 0.1, 11.6); for (let j = 0; j < 14; j++) { const a = j / 14 * Math.PI * 2; pts.push(xf(3.8 + Math.cos(a) * 1.6, 0.1, 11.6 + Math.sin(a) * 1.3)); } for (let j = 0; j < 14; j++) wat.face([c0, pts[j], pts[(j + 1) % 14]], [0.16, 0.3, 0.34], xf(3.8, -1, 11.6)); for (let j = 0; j < 10; j++) { const a = j / 10 * Math.PI * 2; B(3.8 + Math.cos(a) * 1.75, 0.12, 11.6 + Math.sin(a) * 1.45, 0.4, 0.24, 0.35, [0.5, 0.5, 0.48], a); } CL(3.8, 11.6, 1.5); }
     { const [ox, , oz] = xf(5.9, 0, 13.5); P3.oak(g, ox, oz, 5.5, rand); circles.push({ x: ox, z: oz, r: 0.5 }); }
     B(-5.8, 0.42, 13.85, 1.4, 0.08, 0.45, wood); legs(-5.8, 13.85, 1.4, 0.45, 0.4);
     for (const sx of [-1, 1]) { B(sx * 6.5, 0.6, 9.2, 0.1, 1.2, 0.1, [0.2, 0.2, 0.22]); BE(sx * 6.5, 1.25, 9.2, 0.22, 0.22, 0.22, warm); }
@@ -5764,14 +5764,14 @@ function buildZone(g, em, wat, zn, mapId, col, lights, circles, M, rand) {
   const bench = (x, z, ry = 0) => { B(x, 0.42, z, 1.5, 0.08, 0.45, wood, ry); B(x, 0.2, z, 1.3, 0.4, 0.08, cmul(wood, 0.8), ry); };
   const disc = (geo, cx, cz, r, ry2, y, c, n = 20) => { const c0 = xf(cx, y, cz), pts = []; for (let j = 0; j < n; j++) { const a = j / n * Math.PI * 2; const k = 0.9 + 0.12 * Math.sin(j * 1.7); pts.push(xf(cx + Math.cos(a) * r * k, y, cz + Math.sin(a) * ry2 * k)); } for (let j = 0; j < n; j++) geo.face([c0, pts[j], pts[(j + 1) % n]], c, xf(cx, -1, cz)); };
   if (zn.id === 'etang') {
-    disc(g, 0, 1, 6.4, 5.4, 0.02, M.ground.map(v => v * 0.6), 24); disc(wat, 0, 1, 5.3, 4.3, 0.05, [0.16, 0.3, 0.34], 24);
+    disc(g, 0, 1, 6.4, 5.4, 0.05, M.ground.map(v => v * 0.6), 24); disc(wat, 0, 1, 5.3, 4.3, 0.1, [0.16, 0.3, 0.34], 24);
     CL(0, 1.3, 3.9); CL(-2.6, 1, 2.4); CL(2.6, 1, 2.4); CL(0, 3.6, 2.6);
     B(0, 0.22, -3.7, 1.2, 0.1, 2.4, wood); for (const sx of [-0.5, 0.5]) for (const zz of [-4.8, -2.6]) B(sx, 0.1, zz, 0.12, 0.4, 0.12, cmul(wood, 0.7));
     for (let k = 0; k < 16; k++) { const a = rand() * Math.PI * 2, r = 5.4 + rand() * 0.7; const x = Math.cos(a) * r, z = 1 + Math.sin(a) * r * 0.82; if (z < -3 && Math.abs(x) < 1.5) continue; B(x, 0.5, z, 0.06, 1.0, 0.06, [0.35, 0.45, 0.2]); B(x, 1.05, z, 0.09, 0.22, 0.09, [0.42, 0.26, 0.15]); }
     for (let k = 0; k < 4; k++) B(-1.6 + k * 1.1, 0.06, 1.5 + (k % 2) * 1.2, 0.6, 0.02, 0.5, [0.25, 0.5, 0.25]);
     post(2.3, -5.8); bench(-2.6, -6.4); B(-1.2, 0.9, -6.9, 0.1, 1.8, 0.1, wood); B(-1.2, 1.55, -6.9, 1.0, 0.5, 0.06, [0.55, 0.4, 0.25]);
   } else if (zn.id === 'clairiere') {
-    disc(g, 0, 0, 7.2, 7.2, 0.025, [0.22, 0.32, 0.2], 24);
+    disc(g, 0, 0, 7.2, 7.2, 0.05, [0.22, 0.32, 0.2], 24);
     for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2 + 0.2; const x = Math.cos(a) * 6.3, z = Math.sin(a) * 6.3; B(x, 1.1, z, 0.8, 2.2, 0.55, [0.5, 0.5, 0.52], -a); CL(x, z, 0.5); }
     B(0, 0.35, 0, 1.4, 0.7, 1.0, [0.45, 0.45, 0.47]); BE(0, 0.71, 0, 1.0, 0.02, 0.6, [0.65, 0.45, 1]); CL(0, 0, 0.75); lights.push({ p: xf(0, 1.4, 0), c: [0.55, 0.4, 0.95], r: 8 });
     for (const [x, z, s] of [[-4.6, 2.2, 1], [4.3, 3.0, 1.2], [1.4, -4.6, 0.9], [-3.2, -3.6, 0.8]]) { const [wx, , wz] = xf(x, 0, z); g.cyl(wx, 0, wz, 0.22 * s, 1.5 * s, 8, [0.9, 0.88, 0.8]); g.cyl(wx, 1.5 * s, wz, 1.0 * s, 0.4 * s, 10, [0.72, 0.16, 0.12], 0.3 * s); for (let j = 0; j < 4; j++) B(x + Math.cos(j * 1.6) * 0.55 * s, 1.72 * s, z + Math.sin(j * 1.6) * 0.55 * s, 0.14, 0.05, 0.14, [0.95, 0.92, 0.85]); circles.push({ x: wx, z: wz, r: 0.3 * s }); }
@@ -5783,7 +5783,7 @@ function buildZone(g, em, wat, zn, mapId, col, lights, circles, M, rand) {
     for (let k = 0; k < cps.length; k++) { const [x0, z0] = cps[k], [x1, z1] = cps[(k + 1) % cps.length]; const mx = (x0 + x1) / 2, mz = (z0 + z1) / 2; if (k % 3 === 1) B(mx, 0.14, mz, 1.2, 0.28, 0.28, wood, Math.atan2(x1 - x0, z1 - z0) + Math.PI / 2); }
     for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; B(Math.cos(a) * 14, 1.3, Math.sin(a) * 14, 0.06, 2.6, 0.06, dark); B(Math.cos(a) * 14 + 0.3, 2.35, Math.sin(a) * 14, 0.6, 0.4, 0.02, [[0.85, 0.15, 0.12], [0.95, 0.8, 0.15], [0.2, 0.5, 0.85]][k % 3]); }
   } else if (zn.id === 'puits') {
-    disc(g, 0, 0, 5.6, 5.6, 0.025, M.plaza.map(v => v * 0.95), 20);
+    disc(g, 0, 0, 5.6, 5.6, 0.05, M.plaza.map(v => v * 0.95), 20);
     { const [wx, , wz] = xf(0, 0, 0); g.cyl(wx, 0, wz, 1.0, 0.9, 12, [0.5, 0.48, 0.45]); g.cyl(wx, 0.9, wz, 1.05, 0.1, 12, [0.42, 0.4, 0.38]); }
     disc(wat, 0, 0, 0.78, 0.78, 0.6, [0.05, 0.1, 0.12], 12); CL(0, 0, 1.15);
     for (const sx of [-0.85, 0.85]) B(sx, 1.4, 0, 0.12, 1.8, 0.12, wood); B(0, 2.3, 0, 2.3, 0.12, 1.5, [0.4, 0.2, 0.15]); B(0, 1.75, 0, 1.6, 0.08, 0.08, cmul(wood, 0.8)); B(0.3, 1.3, 0, 0.25, 0.25, 0.25, [0.42, 0.3, 0.18]);
@@ -5840,7 +5840,7 @@ function lifeTargets(out) {
     const h = w.L.homes[i]; if (!h || !near([h.cx, h.cz], 16)) return; const lv = h.lvl || 1; const own = p.pid === G.pid;
     if (own) { const room = pfPublic().room || {}; if (room.mur && FUR_ACT[room.mur]) T('fur', h.W(0, 2.1), { fur: room.mur }); }
     if (lv >= 2) { T('stove', h.W(7.0, -2.1)); T('fridge', h.W(7.0, 2.2)); }
-    if (lv >= 3) { T('arcade', h.W(-7.0, -1.8)); T('arcade2', h.W(-7.0, -0.6)); T('billard', h.W(-4.3, 1.2)); }
+    if (lv >= 3) { T('arcade', h.W(-7.0, -1.8)); T('arcade2', h.W(-7.0, -0.6)); T('billard', h.W(-5.3, -0.6)); }
     if (lv >= 4) { T('tv', h.W(-4.1, 4.7)); T('fireplace', h.W(7.1, 6.0)); T('books', h.W(4.0, 7.2)); }
     if (lv >= 5) { T('potager', h.W(-1.5, 11.3), { home: i, own }); T('pond2', h.W(1.9, 11.6)); }
     if (lv >= 6) { T('jacuzzi', h.W(6.2, -6.2)); T('piano', h.W(1.6, 6.8)); }
