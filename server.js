@@ -122,6 +122,23 @@ const cleanPos = s => s && typeof s === 'object' && typeof s.pid === 'string' &&
 function voicePeers(code, except) { const out = []; for (const c of conns.values()) if (c.vroom === code && c !== except) out.push(c); return out; }
 function voiceBye(conn) { const code = conn.vroom; conn.vroom = null; if ([...conns.values()].some(c => c.vroom === code && c.pid === conn.pid)) return; for (const c of voicePeers(code, conn)) emit(c, 'rtc', { from: conn.pid, data: { t: 'bye' } }); }
 
+/* ---------- bots intelligents (facultatif) : si une clé ANTHROPIC_API_KEY est fournie, les bots réfléchissent avec Claude ---------- */
+const AI_KEY = process.env.ANTHROPIC_API_KEY || '';
+const AI_MODEL = process.env.AI_MODEL || 'claude-haiku-5-5';
+const aiUse = new Map(); // code -> { n, since, busy }
+async function aiAsk(code, prompt) {
+  const u = aiUse.get(code) || { n: 0, since: Date.now(), busy: 0 }; aiUse.set(code, u);
+  if (Date.now() - u.since > 3600e3) { u.n = 0; u.since = Date.now(); }
+  if (u.n >= 400 || u.busy >= 2) throw Object.assign(new Error('rate'), { code: 'rate_limited' });
+  u.n++; u.busy++;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': AI_KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: AI_MODEL, max_tokens: 300, messages: [{ role: 'user', content: String(prompt).slice(0, 12000) }] }), signal: AbortSignal.timeout(20000) });
+    const j = await r.json(); if (!r.ok) throw Object.assign(new Error('ai'), { code: 'unavailable', detail: j && j.error && j.error.message });
+    return (j.content || []).map(c => c.text || '').join('');
+  } finally { u.busy--; }
+}
+
 /* ---------- HTTP ---------- */
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
 function json(res, code, obj) { res.writeHead(code, { 'content-type': 'application/json', 'cache-control': 'no-store' }); res.end(JSON.stringify(obj)); }
@@ -208,6 +225,14 @@ async function api(req, res, url) {
         if (typeof b.to !== 'string' || !SEG.test(b.to) || !b.data || typeof b.data !== 'object' || JSON.stringify(b.data).length > 20000) return json(res, 400, { code: 'invalid_argument' });
         for (const c of voicePeers(conn.vroom, conn)) if (c.pid === b.to) emit(c, 'rtc', { from: pid, data: b.data });
         return json(res, 200, { result: null });
+      }
+      case 'aiinfo': return json(res, 200, { result: { ai: !!AI_KEY } });
+      case 'ai': {
+        const code = typeof b.code === 'string' && SEG.test(b.code) ? b.code : null;
+        if (!AI_KEY) return json(res, 409, { code: 'unavailable' });
+        if (!code || owners[code] !== pid || typeof b.prompt !== 'string') return json(res, 403, { code: 'permission_denied' });
+        try { return json(res, 200, { result: { text: await aiAsk(code, b.prompt) } }); }
+        catch (e) { return json(res, e.code === 'rate_limited' ? 429 : 502, { code: e.code || 'unavailable' }); }
       }
       case 'unsub': { const conn = conns.get(b.cid); if (conn) conn.subs.delete(b.subId); return json(res, 200, { result: null }); }
     }

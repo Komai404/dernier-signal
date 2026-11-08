@@ -6,3 +6,6 @@ services:
     buildCommand: "echo aucune installation"
     startCommand: "node server.js"
     healthCheckPath: /api/ping
+    envVars:
+      - key: ANTHROPIC_API_KEY   # facultatif : bots pilotés par l'IA Claude (voir LISEZ-MOI)
+        sync: false

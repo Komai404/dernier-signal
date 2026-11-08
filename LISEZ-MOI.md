@@ -114,10 +114,26 @@ Les cartes de ces trois rôles sont provisoires : remplace `public/cards/constru
 
 ## 6. Les bots
 
-Les bots raisonnent avec les faits de la partie : qui accuse qui, qui parle peu, les annonces,
-les analyses du Scientifique. Ils répondent quand on leur parle et votent en cohérence avec ce
-qu'ils ont dit. Le revenant d'un bot donne un indice tiré de ce qu'il savait vraiment.
-Sur la version claude.ai, l'hôte peut aussi cocher « Bots pilotés par l'IA Claude ».
+Les bots comprennent ce qu'on leur écrit et répondent à la question posée :
+
+- « Brume t'es quoi ? » → il donne son rôle, le garde secret ou ment s'il est contaminé ;
+- « qui vous soupçonnez ? », « tu votes qui ? », « pourquoi ? » → ils donnent un nom et leur raison ;
+- une accusation contre un bot → il se défend, puis donne son rôle si on insiste ;
+- « je suis Scientifique, j'ai analysé X : contaminé » → ils en tiennent compte et votent en conséquence ;
+- quelqu'un qui change de rôle annoncé, ou deux joueurs qui annoncent le même rôle → ils le remarquent ;
+- « comment on joue ? », « il s'est passé quoi cette nuit ? » → ils expliquent ou résument.
+
+Ils ne parlent pas tous en même temps : deux bots lancent la discussion, les autres répondent quand on
+leur parle. Dans la tanière, un bot contaminé suit la cible proposée par un humain.
+
+**Bots encore plus intelligents (IA Claude)** :
+
+- Sur la version claude.ai, la case « Bots pilotés par l'IA Claude » est cochée par défaut dans le salon
+  (Claude demande l'autorisation au lancement).
+- Sur ton site Render, c'est possible avec une clé d'API Anthropic (payante, quelques centimes par
+  partie) : sur https://console.anthropic.com crée une clé, puis dans Render → ton service →
+  **Environment** → ajoute `ANTHROPIC_API_KEY` avec la clé. La case apparaît alors dans le salon.
+  Seul l'hôte de la partie peut l'utiliser, avec une limite de 400 messages par heure et par partie.
 
 ## 7. Confidentialité des rôles
 

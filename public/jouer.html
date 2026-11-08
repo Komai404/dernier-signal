@@ -976,10 +976,11 @@ async function initNet() {
     try {
       const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 2500);
       const r = await fetch('api/ping', { signal: ctl.signal, cache: 'no-store' }); clearTimeout(tm);
-      if (r.ok && (await r.json()).ds) { NET.real = makeServerDB(); NET.server = true; }
+      if (r.ok && (await r.json()).ds) { NET.real = makeServerDB(); NET.server = true; NET.real.aiinfo().then(i => { G.aiServer = !!(i && i.ai); if (G.aiServer) G.aiWanted = true; }).catch(() => {}); }
     } catch {}
   }
   NET.ready = true;
+  if (!NET.server && window.claude && typeof window.claude.use === 'function') G.aiWanted = true; // version claude.ai : bots IA par défaut
   renderNetNote();
 }
 async function ensureIdentity(demo) {
@@ -1065,6 +1066,7 @@ function makeServerDB() {
   connect();
   return { doc: docRef, collection: colRef, pos(code, s, b) { post({ op: 'pos', code, s, b }).catch(() => {}); }, onPos(cb) { posCbs.push(cb); },
     vjoin: code => post({ op: 'vjoin', code }), vleave: code => post({ op: 'vleave', code }).catch(() => {}), rtc: (to, data) => post({ op: 'rtc', to, data }).catch(() => {}),
+    aiinfo: () => post({ op: 'aiinfo' }), ai: (code, prompt) => post({ op: 'ai', code, prompt }),
     onRtc(cb) { rtcCbs.push(cb); }, onHello(cb) { helloCbs.push(cb); }, get pid() { return pid; } };
 }
 let installPrompt = null;
@@ -1303,7 +1305,7 @@ function hostHandle(pid, m) {
       const txt = cleanText(m.txt); if (!txt) return false;
       if (p.fakeRole === 'mordu' && p.camp === 'S') { pushChat(p.fakeLair = p.fakeLair || [], { pid, txt, t: now() }, 40); return true; }
       if (!lairMembers().includes(pid)) return false;
-      pushChat(S.lair, { pid, txt, t: now() }, 80); return true;
+      pushChat(S.lair, { pid, txt, t: now() }, 80); if (!p.bot) brainOnChat(pid, txt, 'lair'); return true;
     }
     case 'lairJoin': {
       if (!p || p.camp !== 'C' || p.role === 'mordu' || !p.alive) return false;
@@ -1464,7 +1466,7 @@ function hostCanStart() {
   return { ok: true };
 }
 function stat(kind, o) { const S = H.S; S.stats = S.stats || { conta: [], elim: [] }; S.stats[kind].push(o); }
-function setPhase(ph, secs) { const S = H.S; S.paused = false; S.pauseLeft = 0; S.phase = ph; S.endsAt = secs ? now() + secs * 1000 : 0; S.closeAt = 0; S.ev++; }
+function setPhase(ph, secs) { const S = H.S; S.phaseAt = now(); if (ph !== S.phase) S.botReplies = (S.botReplies || []).filter(r => r.ctx && r.ctx.where === 'lair'); S.paused = false; S.pauseLeft = 0; S.phase = ph; S.endsAt = secs ? now() + secs * 1000 : 0; S.closeAt = 0; S.ev++; }
 function beginNight(r) {
   const S = H.S; S.round = r; setPhase('night', S.settings.timers.night);
   S.night = { acts: {}, conta: {}, done: {}, pass: {}, campStart: Object.fromEntries(S.order.map(id => [id, P(id).camp])), botAt: {} };
@@ -1737,95 +1739,257 @@ function applyPoison(victim, fake) {
   privLog(by, 'Tu as empoisonné ' + pn(victim) + ' : il se croit ' + ROLES[fake].name + '.', 'red');
 }
 
-/* --- bots : un cerveau par bot, nourri par les faits de la partie --- */
-const ACCUSE_RX = /(mefie|suspect|louche|mordu|menteur|ment |vote contre|voter contre|elimin|accuse|contamin|cache|bizarre|pas confiance|douteux|trop calme|silencieux)/;
-const DEFEND_RX = /(confiance|innocent|c est pas lui|c est pas elle|pas lui|pas elle|je le crois|fiable|de mon cote)/;
+/* --- bots : un cerveau par bot, nourri par les faits de la partie, qui comprend ce qu'on lui dit --- */
+const ACCUSE_RX = /(mefie|suspect|louche|mordu|menteur|ment |mens |vote contre|voter contre|elimin|accuse|contamin|cache|bizarre|pas confiance|douteux|trop calme|silencieux|c est toi|c est lui|c est elle|t es le|t es contamine|tu mens|il ment|elle ment)/;
+const DEFEND_RX = /(confiance|innocent|c est pas lui|c est pas elle|c est pas toi|pas lui|pas elle|je le crois|je la crois|fiable|de mon cote|il est clean|elle est clean|survivant sur|je le couvre)/;
+const ROLE_WORDS = { scientifique: 'scientifique', gardien: 'gardien', rodeur: 'rodeur', chasseur: 'chasseur', reanimateur: 'reanimateur', constructeur: 'constructeur', survivant: 'survivant', discret: 'discret', empoisonneur: 'empoisonneur', mordu: 'mordu' };
 const CLAIM_RX = /je suis (?:le |la |l |un |une )?(scientifique|gardien|rodeur|chasseur|reanimateur|constructeur|survivant|discret|empoisonneur|mordu)/;
+const INTENTS = {
+  help: /(je comprends pas|j ai pas compris|comment on joue|c est quoi les regles|je fais quoi|on fait quoi|comment ca marche|aide moi|explique moi le jeu)/,
+  greet: /^(salut|bonjour|bonsoir|yo|coucou|hello|hey|wesh|slt|cc|re)\b/,
+  role: /(t es quoi|tu es quoi|t es qui|tu es qui|ton role|tu as quel role|t as quel role|t as quoi comme|quel est ton role|c est quoi ton role|ta carte|tu fais quoi la nuit|vous etes quoi|vos roles|chacun son role|qui est quoi|qui a un pouvoir|qui est (le )?(gardien|scientifique|rodeur|chasseur|reanimateur|constructeur))/,
+  suspect: /(qui (tu |vous )?(soupconne|suspecte|accuse)|tu soupconnes qui|tu suspectes qui|vous soupconnez qui|qui est (le )?mordu|c est qui le mordu|des idees|une idee|un avis|ton avis|t en penses quoi|vous en pensez quoi|tu en penses quoi|qui est suspect|qui est louche|t as des soupcons|des soupcons|des pistes|une piste|qui vous parait)/,
+  vote: /(tu votes? (pour |contre )?qui|pour qui tu votes|contre qui tu votes|tu vas voter|vous votez qui|on vote qui|qui on vote|on elimine qui|qui on elimine|ton vote)/,
+  why: /(pourquoi|pk|pq|comment ca|t as des preuves|quelle preuve|des preuves|sur quoi tu te bases|tu dis ca pourquoi|qu est ce qui te fait dire)/,
+  news: /(il s est passe quoi|quoi de neuf|c etait quoi cette nuit|qui est mort|qui a ete contamine|ca dit quoi|c est quoi le rapport|resume)/,
+  propose: /(votons|on vote (contre )?|tous sur|votez (contre )?|il faut voter|on l elimine|eliminons|on le sort|on la sort|tout le monde vote)/,
+  yes: /^(oui|ouais|ouai|ok|okay|d accord|dac|grave|exact|carrement|vrai|bien vu|c est clair)\b/,
+  no: /^(non|nan|nope|pas du tout|n importe quoi|faux)\b/,
+  thanks: /^(merci|thx|merci beaucoup)\b/,
+  insult: /(con|debile|idiot|nul|stupide|teubé|tebe|abruti|ferme la|ta gueule|tg)\b/,
+  respond: /(tu reponds quoi|reponds|defends toi|defend toi|explique toi|justifie|t as rien a dire|t as quelque chose a dire|on t ecoute|alors tu dis quoi)/,
+  sciResult: /(j ai analyse|analyse de|mon analyse|j ai teste|resultat)/,
+  protectInfo: /(j ai protege|je protege|j ai garde)/,
+};
+const BOT_STYLE = [ // trois façons de parler, pour que les bots ne se ressemblent pas
+  { hi: ['Salut', 'Yo', 'Hey'], ok: ['Ok.', 'Noté.', 'Ça marche.'], think: ['Franchement', 'Honnêtement', 'Perso'], calm: 'On se calme' },
+  { hi: ['Bonjour', 'Salut', 'Bonsoir'], ok: ['D’accord.', 'Je vois.', 'Entendu.'], think: ['À mon avis', 'Si je résume', 'Pour moi'], calm: 'Restons calmes' },
+  { hi: ['Wesh', 'Salut', 'Yo'], ok: ['Ouais.', 'Ok ok.', 'Vu.'], think: ['Moi je dis', 'Sérieux', 'Clairement'], calm: 'Tranquille' },
+];
 function brain(id) {
   const S = H.S; S.brain = S.brain || {};
-  if (!S.brain[id]) { const sus = {}; for (const x of S.order) if (x !== id) sus[x] = Math.random() * 0.9; S.brain[id] = { sus, reasons: {}, intent: null, replies: 0, lastSaid: 0 }; }
+  if (!S.brain[id]) { const sus = {}; for (const x of S.order) if (x !== id) sus[x] = Math.random() * 0.5; S.brain[id] = { sus, reasons: {}, intent: null, replies: 0, lastSaid: 0, lastAcc: null, claimed: null, style: hashStr(id) % BOT_STYLE.length, talkedTo: {} }; }
   return S.brain[id];
 }
-function addSus(id, t, v, reason) { if (!t || t === id) return; const b = brain(id); b.sus[t] = (b.sus[t] || 0) + v; if (reason && v > 0 && (!b.reasons[t] || v >= 1)) b.reasons[t] = reason; }
+const styleOf = id => BOT_STYLE[brain(id).style];
+function addSus(id, t, v, reason) { if (!t || t === id || !P(t)) return; const b = brain(id); b.sus[t] = (b.sus[t] || 0) + v; if (reason && v > 0 && (!b.reasons[t] || v >= (b.reasons[t].w || 0))) b.reasons[t] = Object.assign({ w: v }, reason); }
 function namesIn(txt) { const nt = ' ' + norm(txt) + ' '; return H.S.order.filter(id => { const nm = norm(pn(id)); return nm && nt.includes(' ' + nm + ' '); }); }
 const de = n => (/^[aeiouyhàâéèêëîïôûü]/i.test(n) ? 'd’' : 'de ') + n;
-function brainOnChat(from, txt) {
+const roleIn = nt => { for (const w of Object.keys(ROLE_WORDS)) if (new RegExp('\\b' + w + '\\b').test(nt)) return w; if (/\bcontamine/.test(nt)) return 'contamine'; if (/\b(innocent|clean|sain)\b/.test(nt)) return 'survivant'; return null; };
+const afterName = (nt, pid) => { const k = (' ' + nt + ' ').indexOf(' ' + norm(pn(pid)) + ' '); return k < 0 ? nt : nt.slice(k + norm(pn(pid)).length); };
+function dayMsgs() { const S = H.S; const since = S.phaseAt || 0; return S.chat.filter(m => !m.sys && m.t >= since).length; }
+function intentsOf(txt) { const nt = norm(txt); const out = {}; for (const [k, rx] of Object.entries(INTENTS)) if (rx.test(nt)) out[k] = true; if (ACCUSE_RX.test(nt)) out.accuse = true; if (DEFEND_RX.test(nt) && !out.accuse) out.defend = true; if (/\?/.test(txt)) out.q = true; const c = nt.match(CLAIM_RX); if (c) out.claim = c[1]; return out; }
+
+function brainOnChat(from, txt, where) {
   const S = H.S; if (!S || !P(from)) return;
-  const nt = norm(txt); const ment = namesIn(txt).filter(x => x !== from);
+  const nt = norm(txt); let ment = namesIn(txt).filter(x => x !== from); const I = intentsOf(txt);
+  if (P(from).bot) { const ja = brain(from).justAcc; ment = ja ? [ja].concat(ment.filter(x => x !== ja)) : ment; I.accuse = !!ja; I.defend = false; I.propose = false; I.sciResult = I.sciResult && !!ja; }
+  else if (I.accuse && /\b(personne|pas encore|aucun|rien de)\b/.test(nt) && !ment.length) I.accuse = false;
   S.msgCount = S.msgCount || {}; S.msgCount[from] = (S.msgCount[from] || 0) + 1;
-  const claim = nt.match(CLAIM_RX);
-  const accuse = ACCUSE_RX.test(nt), defend = DEFEND_RX.test(nt) && !accuse;
-  const fromBot = P(from).bot;
-  for (const id of alivePids()) {
+  const fromBot = P(from).bot; const game = !!(P(from).role);
+  const subject = ment[0] || null;
+  // 1. ce que chacun en retient
+  if (game) for (const id of alivePids()) {
     const p = P(id); if (!p.bot || id === from) continue;
     const b = brain(id); const trust = 1 / (1 + Math.max(0, b.sus[from] || 0));
     for (const t of ment) {
-      if (t === id) { if (accuse) addSus(id, from, 1.1, { k: 'accusedMe', by: from }); continue; }
-      if (accuse) addSus(id, t, 0.5 * trust * (fromBot ? 0.6 : 1), { k: 'echo', by: from });
-      if (defend) addSus(id, t, -0.5 * trust);
-      if (p.camp === 'C' && accuse && lairMembers().includes(t)) addSus(id, from, 1.4, { k: 'random', by: from });
+      if (t === id) { if (I.accuse) addSus(id, from, 0.9, { k: 'accusedMe', by: from }); continue; }
+      if (I.accuse || I.propose) addSus(id, t, 0.45 * trust * (fromBot ? 0.6 : 1), { k: 'echo', by: from });
+      if (I.defend) addSus(id, t, -0.45 * trust);
+      if (p.camp === 'C' && (I.accuse || I.propose) && lairMembers().includes(t)) addSus(id, from, 1.2, { k: 'aggro', by: from });
     }
-    // répondre : toujours à un humain qui parle au bot, rarement à un autre bot
-    const addressed = ment.length ? ment[0] === id || (ment.includes(id) && /\?/.test(txt)) || ment.includes(id) : false;
-    if (addressed && S.phase !== 'night' && !p._replyAt && b.replies < 4 && (!fromBot || Math.random() < 0.3) && now() - b.lastSaid > 6000) {
-      p._replyAt = now() + 3500 + rnd(4500); p._replyTo = { from, txt }; b.replies++;
+    // résultat d'analyse annoncé par un « Scientifique »
+    if ((I.sciResult || (S.claims || {})[from] === 'scientifique') && subject && subject !== id) {
+      const r = roleIn(afterName(nt, subject));
+      if (r === 'mordu' || r === 'contamine' || r === 'empoisonneur') addSus(id, subject, 2.2 * trust, { k: 'sci', by: from });
+      else if (r) addSus(id, subject, -1.2 * trust);
     }
   }
-  if (claim) {
-    S.claims = S.claims || {}; const role = claim[1];
+  // 2. qui annonce quel rôle
+  if (I.claim && game) {
+    S.claims = S.claims || {}; const role = I.claim;
+    const before = S.claims[from]; if (before && before !== role && !P(from).bot) { S.flips = S.flips || {}; S.flips[from] = { from: before, to: role }; for (const id of alivePids()) if (P(id).bot && id !== from) addSus(id, from, 1.6, { k: 'flip', a: before, b: role }); }
     const same = Object.keys(S.claims).filter(x => x !== from && S.claims[x] === role && role !== 'survivant' && P(x) && P(x).alive);
     S.claims[from] = role;
-    if (same.length) for (const id of alivePids()) if (P(id).bot) { addSus(id, from, 0.9, { k: 'claim', role }); same.forEach(x => addSus(id, x, 0.9, { k: 'claim', role })); }
+    if (same.length) for (const id of alivePids()) if (P(id).bot && id !== from) { addSus(id, from, 0.9, { k: 'claim', role, other: same[0] }); same.forEach(x => addSus(id, x, 0.7, { k: 'claim', role, other: from })); }
+  }
+  // 3. qui répond : ceux à qui on parle, sinon un ou deux bots si la question est pour tout le monde
+  if (S.phase === 'night' && where !== 'lair') return;
+  const bots = (where === 'lair' ? lairMembers() : alivePids().concat(S.phase === 'lobby' ? S.order : [])).filter((x, i, a) => a.indexOf(x) === i && P(x) && P(x).bot && x !== from && (S.phase === 'lobby' || P(x).alive));
+  if (!bots.length) return;
+  let who = [];
+  const named = ment.filter(x => bots.includes(x));
+  const general = /\b(vous|les gars|tout le monde|quelqu un|qqn|personne|on)\b/.test(nt) || I.q;
+  if (fromBot) { // un bot parle à un autre : réponse rare, pour garder une discussion lisible
+    if (named.length && I.accuse && Math.random() < 0.45 && !(brain(named[0]).talkedTo[from] > 0)) who = [named[0]];
+  } else if (named.length) { who = named.slice(0, 2); if ((I.accuse || I.sciResult || I.propose) && who.length < 2) { const other = bots.filter(x => !who.includes(x)); if (other.length) who.push(pick(other)); } }
+  else if (where === 'lair') who = [pick(bots)];
+  else if (I.help || I.suspect || I.vote || I.role || I.news || I.propose || (general && I.q)) who = shuffle(bots).slice(0, I.role || I.suspect ? 2 : 1);
+  else if (I.greet) who = shuffle(bots).slice(0, Math.min(2, bots.length));
+  else if (I.accuse && subject && !P(subject).bot) who = Math.random() < 0.7 ? [pick(bots)] : [];
+  else if (I.claim || I.sciResult) who = Math.random() < 0.8 ? [pick(bots)] : [];
+  else if (Math.random() < 0.25 && dayMsgs() < 40) who = [pick(bots)];
+  S.botReplies = S.botReplies || [];
+  let delay = 1800;
+  for (const id of who) {
+    const b = brain(id); if (S.botReplies.filter(r => r.pid === id).length >= 2) continue;
+    if (fromBot) b.talkedTo[from] = (b.talkedTo[from] || 0) + 1;
+    S.botReplies.push({ pid: id, at: now() + delay + rnd(1800), ctx: { from, txt, I, ment, subject, where, phase: S.phase } });
+    delay += 2600 + rnd(1600);
   }
 }
-function botTop(id) {
+function botTop(id, exclude) {
   const S = H.S, p = P(id), b = brain(id);
-  let pool = alivePids().filter(x => x !== id);
+  let pool = alivePids().filter(x => x !== id && x !== exclude);
   if (p.camp === 'C') { const lm = lairMembers(); const np = pool.filter(x => !lm.includes(x)); if (np.length) pool = np; }
   if (!pool.length) return null;
   const known = S.knows[id] || {};
-  const quiet = x => ((S.msgCount || {})[x] || 0) < 2 ? 0.35 : 0;
-  const score = x => (b.sus[x] || 0) + (known[x] ? (/contamin|mordu/.test(norm(known[x])) ? 10 : -4) : 0) + quiet(x) + Math.random() * 0.25;
+  const quiet = x => dayMsgs() > 10 && ((S.msgCount || {})[x] || 0) < 2 ? 0.3 : 0;
+  const score = x => (b.sus[x] || 0) + (known[x] ? (/contamin|mordu/.test(norm(known[x])) ? 10 : -4) : 0) + quiet(x);
   return pool.slice().sort((a, c) => score(c) - score(a))[0];
 }
+const susOf = (id, t) => { const k = (H.S.knows[id] || {})[t]; return (brain(id).sus[t] || 0) + (k ? (/contamin|mordu/.test(norm(k)) ? 10 : -4) : 0); };
 function botReason(id, t, you) {
   const S = H.S, b = brain(id), r = b.reasons[t];
-  const Ti = you ? 'tu' : 'il', T = pn(t);
-  if (r && typeof r === 'object') {
-    if (r.k === 'accusedMe') return you ? 'tu m’accuses sans la moindre preuve' : 'il m’accuse sans la moindre preuve';
-    if (r.k === 'echo' && r.by !== id && P(r.by)) return (P(r.by).bot ? '' : '') + pn(r.by) + ' a aussi des doutes sur ' + (you ? 'toi' : 'lui');
-    if (r.k === 'random') return you ? 'tu accuses tout le monde au hasard' : 'il accuse tout le monde au hasard';
-    if (r.k === 'claim') return 'deux joueurs prétendent être ' + (ROLES[r.role] ? ROLES[r.role].short : r.role) + ', et ' + (you ? 'tu' : 'il') + ' en fais' + (you ? '' : 't') + ' partie';
-  }
+  const Ti = you ? 'tu' : 'il';
   if (S.knows[id] && S.knows[id][t]) return 'mon analyse dit ' + S.knows[id][t];
+  if (r && typeof r === 'object') {
+    if (r.k === 'accusedMe') return you ? 'tu m’accuses sans rien de concret' : 'il m’accuse sans rien de concret';
+    if (r.k === 'sci' && P(r.by)) return pn(r.by) + ' dit l’avoir analysé' + (you ? '' : '') + ' et ça ne sent pas bon';
+    if (r.k === 'echo' && r.by !== id && P(r.by)) return pn(r.by) + ' a des doutes sur ' + (you ? 'toi' : 'lui') + ' et je les partage';
+    if (r.k === 'aggro') return you ? 'tu accuses tout le monde au hasard' : 'il accuse tout le monde au hasard';
+    if (r.k === 'flip') return (you ? 'tu disais' : 'il disait') + ' être ' + (ROLES[r.a] ? ROLES[r.a].short : r.a) + ', et maintenant ' + (ROLES[r.b] ? ROLES[r.b].short : r.b);
+    if (r.k === 'claim') return (r.other && P(r.other) ? pn(r.other) + ' et ' + (you ? 'toi' : 'lui') : 'deux joueurs') + ' prétend' + (r.other ? 'ent' : 'ent') + ' être ' + (ROLES[r.role] ? ROLES[r.role].short : r.role) + ', l’un des deux ment';
+  }
   const c = (S.msgCount || {})[t] || 0;
-  if (c === 0) return Ti + ' n’a' + (you ? 's' : '') + ' pas dit un mot';
-  if (c < 3) return Ti + ' ne parle' + (you ? 's' : '') + ' presque pas';
-  return you ? 'tu détournes la conversation' : 'il détourne la conversation';
+  if (dayMsgs() > 10 && c === 0) return Ti + ' n’a' + (you ? 's' : '') + ' pas dit un mot';
+  if (dayMsgs() > 10 && c < 2) return Ti + ' ne parle' + (you ? 's' : '') + ' presque pas';
+  return S.round <= 1 ? 'rien de solide, juste une impression' : pick(['c’est une impression, rien de sûr', 'quelque chose ne colle pas dans ' + (you ? 'ton' : 'son') + ' attitude']);
+}
+/* que répond un bot quand on lui demande son rôle */
+function botRoleAnswer(id, pressed) {
+  const S = H.S, p = P(id), role = shownRole(p), b = brain(id), r = round => S.round;
+  const evil = p.camp === 'C';
+  if (b.claimed) return 'Je l’ai déjà dit : ' + ROLES[b.claimed].short + '.';
+  if (evil) { // un contaminé ment
+    const used = Object.values(S.claims || {});
+    const fake = pressed && !used.includes('gardien') && Math.random() < 0.4 ? 'gardien' : 'survivant';
+    b.claimed = fake; (S.claims = S.claims || {})[id] = fake;
+    return fake === 'survivant' ? pick(['Simple survivant, pas de pouvoir. Désolé.', 'Survivant de base, rien à cacher.']) : 'Gardien. Je protège quelqu’un chaque nuit, je ne dirai pas qui.';
+  }
+  if (role === 'discret' && S.cover) { b.claimed = S.cover.role; (S.claims = S.claims || {})[id] = S.cover.role; return 'Je suis ' + ROLES[S.cover.role].short + ', celui qui a été annoncé au début.'; }
+  if (role === 'survivant') { b.claimed = 'survivant'; (S.claims = S.claims || {})[id] = 'survivant'; return pick(['Survivant, sans pouvoir. Je compte sur vous.', 'Juste survivant. Rien de spécial la nuit.']); }
+  const hasInfo = Object.keys(S.knows[id] || {}).length;
+  if (role === 'scientifique' && (hasInfo || pressed || S.round >= 2)) { b.claimed = role; (S.claims = S.claims || {})[id] = role; const ks = Object.entries(S.knows[id] || {}); return 'Scientifique.' + (ks.length ? ' J’ai analysé ' + ks.map(([x, l]) => pn(x) + ' (' + l + ')').join(', ') + '.' : ' Pas encore de résultat utile.'); }
+  if (pressed || S.round >= 3) { b.claimed = role; (S.claims = S.claims || {})[id] = role; return 'Bon, je le dis : ' + ROLES[role].short + '.' + (role === 'constructeur' && p.house2Used ? ' Et j’ai un indice que je n’ai pas le droit de partager.' : ''); }
+  return pick(['Je préfère garder mon rôle pour moi pour l’instant, sinon le Mordu va me viser.', 'J’ai un rôle utile, je le dirai si on m’accuse vraiment.', 'Pas tout de suite : un rôle annoncé trop tôt, c’est une cible pour la nuit.']);
+}
+function botNews() {
+  const S = H.S; const a = S.announce; const lines = a && a.lines ? a.lines.filter(l => !/^Chacun|canal public/.test(l)) : [];
+  return lines.length ? lines.slice(0, 2).join(' ') : 'Rien de particulier depuis la dernière aube.';
+}
+function botReply(id, c) {
+  const S = H.S, p = P(id), st = styleOf(id), b = brain(id);
+  const from = c.from, F = pn(from), I = c.I || intentsOf(c.txt), subj = c.subject;
+  const lobby = !p.role || S.phase === 'lobby';
+  if (I.insult) return st.calm + ', ' + F + '. On joue ensemble, garde tes forces pour le Mordu.';
+  if (I.help) return 'Un Mordu se cache parmi nous et contamine quelqu’un chaque nuit (dès la 2e). Le jour on discute, puis on vote pour l’éliminer. Le bouton GUIDE explique tout.';
+  if (lobby) {
+    if (I.greet) return pick(st.hi) + ' ' + F + ' ! Prêt à survivre ?';
+    if (I.q) return pick(['On attend que l’hôte lance la partie.', 'Moi je suis prêt, on lance quand tu veux.', 'Aucune idée, la partie n’a pas commencé !']);
+    return pick(['Ça va être tendu cette partie.', 'Hâte de voir qui sera le Mordu.', pick(st.ok)]);
+  }
+  if (c.where === 'lair') { // dans la tanière, avec un humain contaminé
+    const lm = lairMembers(); const named = (c.ment || []).find(x => !lm.includes(x) && P(x).alive);
+    if (named) { b.intent = named; addSus(id, named, 3); return pick(['Ok, on vise ' + pn(named) + ' cette nuit.', pn(named) + ', bonne idée. Il est dangereux pour nous.']); }
+    const t = botTop(id); return t ? 'Je propose ' + pn(t) + ' : ' + botReason(id, t) + '. Tu en dis quoi ?' : 'Je n’ai pas d’idée, choisis.';
+  }
+  // on m'accuse
+  if (subj === id && (I.accuse || I.propose || I.respond || (I.why && (brain(id).reasons[from] || {}).k === 'accusedMe'))) {
+    b.replies++;
+    const top = botTop(id, from);
+    const back = susOf(id, from) > 0.9 ? ' Et franchement, ' + F + ', c’est toi qui m’inquiètes : ' + botReason(id, from, true) + '.' : '';
+    const claim = b.replies >= 2 || S.round >= 2 ? ' ' + botRoleAnswer(id, true) : '';
+    return (b.replies >= 2 ? pick(['Je te l’ai dit, ce n’est pas moi.', 'Je répète : je n’ai rien à me reprocher.', 'Toujours non, ' + F + '.']) : pick(['Moi ? Non, tu te trompes de cible.', 'Pourquoi moi ? Je n’ai rien fait de suspect.', 'C’est faux, ' + F + '.'])) + (claim || back || (top ? ' Regarde plutôt du côté ' + de(pn(top)) + '.' : ''));
+  }
+  if (I.role && (subj === id || !subj)) return botRoleAnswer(id, false);
+  if (I.why) {
+    const t = b.lastAcc && P(b.lastAcc) && P(b.lastAcc).alive ? b.lastAcc : null;
+    if (!t) return 'Je n’accuse personne pour l’instant, ' + F + '. Je préfère écouter.';
+    return 'Pour ' + pn(t) + ' ? Parce que ' + botReason(id, t, t === from) + '. Si quelqu’un a mieux, je change d’avis.';
+  }
+  if (I.vote) {
+    if (S.round === 1 && !CONFIG.FIRST_DAY_VOTE) return 'Pas de vote aujourd’hui, c’est le premier jour. On en reparle demain.';
+    const t = botTop(id);
+    if (!t) return 'Je ne sais pas encore, peut-être blanc.';
+    if (susOf(id, t) < 0.6) return 'Pas encore décidé. Peut-être ' + pn(t) + ', mais c’est léger. Sinon je vote blanc.';
+    b.intent = t; b.lastAcc = t;
+    return (t === from ? 'Contre toi, ' + F + ', désolé : ' : 'Contre ' + pn(t) + ' : ') + botReason(id, t, t === from) + '.';
+  }
+  if (I.suspect) {
+    const t = botTop(id);
+    if (!t || susOf(id, t) < 0.55) return pick([pick(st.think) + ', pas encore d’avis clair. Et toi, ' + F + ', tu as remarqué quelque chose ?', 'Rien de solide pour l’instant. On a besoin d’indices : qui a un pouvoir d’enquête ?', 'Personne en particulier. J’attends que les rôles à pouvoir parlent.', pick(st.think) + ', trop tôt pour accuser. Je regarde qui évite les questions.']);
+    b.lastAcc = t;
+    return (t === from ? pick(st.think) + ' ? Toi, ' + F + '. ' + botReason(id, t, true) : pick(st.think) + ', je surveille ' + pn(t) + ' : ' + botReason(id, t)) + '.';
+  }
+  if (I.news) return botNews();
+  const fl = (S.flips || {})[from]; if (I.claim && fl && fl.to === I.claim && !b.flipSaid) { b.flipSaid = true; addSus(id, from, 0.3); return 'Attends, ' + F + ' : tu disais être ' + (ROLES[fl.from] ? ROLES[fl.from].short : fl.from) + ' avant. Tu mens ?'; }
+  if (I.sciResult && subj && subj !== id) {
+    const r = roleIn(afterName(norm(c.txt), subj));
+    if (r === 'mordu' || r === 'contamine' || r === 'empoisonneur') { b.lastAcc = susOf(id, subj) > 0.5 ? subj : null; return b.lastAcc ? 'Si c’est vrai, on doit voter contre ' + pn(subj) + '. ' + pn(subj) + ', tu as quelque chose à dire ?' : 'Une analyse, c’est fort. Mais je me méfie aussi de toi, ' + F + '. ' + pn(subj) + ', tu réponds ?'; }
+    return 'Ok, donc ' + pn(subj) + ' serait ' + (r || 'clean') + '. Ça réduit la liste.';
+  }
+  if (I.claim && from !== id) {
+    const role = I.claim; const other = Object.keys(S.claims || {}).find(x => x !== from && S.claims[x] === role && role !== 'survivant' && P(x) && P(x).alive);
+    if (other) return 'Attends, ' + pn(other) + ' a aussi dit être ' + (ROLES[role] ? ROLES[role].short : role) + '. L’un de vous deux ment.';
+    if (role === 'mordu') return 'Euh… tu plaisantes, ' + F + ' ?';
+    return pick(['Ok ' + F + ', noté : ' + (ROLES[role] ? ROLES[role].short : role) + '.', 'Merci ' + F + '. Si c’est vrai, tu vas être une cible, fais attention.']) + (role === 'scientifique' ? ' Tu as analysé quelqu’un ?' : '');
+  }
+  if (I.sciResult && subj && subj !== id) {
+    const r = roleIn(afterName(norm(c.txt), subj));
+    if (r === 'mordu' || r === 'contamine' || r === 'empoisonneur') return 'Si c’est vrai, on doit voter contre ' + pn(subj) + '. ' + pn(subj) + ', tu as quelque chose à dire ?';
+    return 'Ok, donc ' + pn(subj) + ' serait ' + (r || 'clean') + '. Ça réduit la liste.';
+  }
+  if (I.propose && subj) {
+    if (subj === id) return 'Contre moi ? Vous faites une erreur.';
+    const s = susOf(id, subj);
+    if (s > 0.8) { b.intent = subj; b.lastAcc = subj; if ((b.reasons[subj] || {}).by === from && (b.reasons[subj] || {}).k === 'sci') return 'D’accord avec toi, ' + F + ' : ton analyse, c’est le meilleur indice qu’on ait.';
+    return pick(['D’accord avec toi, ' + F + ' : ' + botReason(id, subj) + '.', 'Je suis, ' + pn(subj) + ' me paraît louche aussi.']); }
+    const t = botTop(id, subj); return 'Je ne suis pas convaincu pour ' + pn(subj) + '.' + (t && susOf(id, t) > 0.6 ? ' Moi je regarderais plutôt ' + pn(t) + '.' : ' Tu as une preuve ?');
+  }
+  if (I.accuse && subj && subj !== id) {
+    const s = susOf(id, subj);
+    if (P(id).camp === 'C' && lairMembers().includes(subj)) return pick(['Je ne crois pas, ' + pn(subj) + ' a l’air réglo.', 'Tu vas un peu vite, ' + F + '. Pourquoi ' + pn(subj) + ' ?']);
+    if (s > 0.9) { b.lastAcc = subj; return pick(['Je suis d’accord, ' + pn(subj) + ' ne me plaît pas non plus.', 'Moi aussi : ' + botReason(id, subj) + '.']); }
+    if (s < 0.2) return 'Je ne pense pas que ce soit ' + pn(subj) + '. Tu te bases sur quoi, ' + F + ' ?';
+    return pick(['Possible. ' + pn(subj) + ', tu réponds quoi ?', 'Pourquoi ' + pn(subj) + ' ? Explique un peu, ' + F + '.']);
+  }
+  if (I.defend && subj && subj !== id) { const s = susOf(id, subj); return s > 0.9 ? 'Pas si vite. Moi je doute ' + de(pn(subj)) + ' : ' + botReason(id, subj) + '.' : 'Ok, je te fais confiance sur ' + pn(subj) + ', ' + F + '.'; }
+  if (I.protectInfo) return 'Bien joué si c’est vrai. Garde ça discret, le Mordu écoute.';
+  if (I.greet) return pick(st.hi) + ' ' + F + '.';
+  if (I.thanks) return 'De rien.';
+  if (I.yes || I.no) return pick(st.ok);
+  if (I.q) return 'Pas sûr de comprendre, ' + F + '. Tu veux savoir qui je soupçonne ?';
+  return pick([pick(st.ok) + ' Et toi, ' + F + ', tu soupçonnes qui ?', 'Je t’écoute, ' + F + '. Tu as un nom ?', pick(st.ok)]);
 }
 function botLine(id, kind, ctx) {
-  const S = H.S, p = P(id), role = shownRole(p);
-  const top = botTop(id); const T = top ? pn(top) : 'quelqu’un';
-  brain(id).lastSaid = now();
-  if (kind === 'reply') {
-    const fromN = pn(ctx.from); const accused = ACCUSE_RX.test(norm(ctx.txt));
-    if (accused) {
-      if (top === ctx.from) return pick(['Moi ? C’est plutôt toi qui m’inquiètes, ' + fromN + ' : ' + botReason(id, top, true) + '.', 'Pas du tout, ' + fromN + '. Et vu comment tu m’accuses, je me méfie ' + de(fromN) + '.']);
-      return pick(['Moi ? Pas du tout. Regarde plutôt ' + T + ' : ' + botReason(id, top) + '.', 'Tu te trompes de cible, ' + fromN + '. Moi je pense à ' + T + ', ' + botReason(id, top) + '.']);
-    }
-    if (/\?/.test(ctx.txt)) return top && top !== ctx.from ? pick(['Franchement rien de sûr. ' + T + ' me paraît louche : ' + botReason(id, top) + '.', 'Je n’ai rien vu de clair, ' + fromN + '. Je surveille ' + T + '.']) : 'Je n’ai rien vu de clair, ' + fromN + '.';
-    return pick(['Ok ' + fromN + ', je note.', 'Je suis assez d’accord avec toi, ' + fromN + '.', 'On verra au vote.']);
-  }
+  const S = H.S, p = P(id), role = shownRole(p), b = brain(id);
+  b.lastSaid = now(); const prevAcc = b.lastAcc; b.lastAcc = null; const out = botLine2(id, kind, ctx); b.justAcc = b.lastAcc; if (!b.lastAcc) b.lastAcc = prevAcc; return out;
+}
+function botLine2(id, kind, ctx) {
+  const S = H.S, p = P(id), role = shownRole(p), b = brain(id);
+  if (kind === 'reply') return botReply(id, ctx);
+  const top = botTop(id); const T = top ? pn(top) : null;
   if (kind === 'open') {
     const ks = Object.entries(S.knows[id] || {}).filter(([x]) => P(x) && P(x).alive);
-    if (p.camp === 'S' && role === 'scientifique' && ks.length && rnd(3)) { const [x, l] = ks[ks.length - 1]; return 'Je suis Scientifique : j’ai analysé ' + pn(x) + ', c’est ' + l + '.'; }
-    if (role === 'discret' && S.cover && rnd(2)) return 'Pour info je suis ' + ROLES[S.cover.role].short + ', vous pouvez compter sur moi.';
-    if (role === 'constructeur' && p.house2Used) return 'J’ai ma petite idée sur le Mordu, mais je ne peux rien dire de plus.';
+    if (p.camp === 'S' && role === 'scientifique' && ks.length && (/contamin|mordu/.test(norm(ks[ks.length - 1][1])) || rnd(2))) { b.claimed = 'scientifique'; (S.claims = S.claims || {})[id] = 'scientifique'; const [x, l] = ks[ks.length - 1]; b.lastAcc = /contamin|mordu/.test(norm(l)) ? x : b.lastAcc; return 'Je suis Scientifique : j’ai analysé ' + pn(x) + ', c’est ' + l + '.'; }
+    if (S.round === 1) return pick(['Bon, première journée. Personne n’a d’indice, alors présentez-vous un peu.', 'Pas de vote aujourd’hui. Profitons-en pour voir qui a des infos.', 'Quelqu’un a utilisé son pouvoir cette nuit et veut partager ?']);
     const head = norm(S.announce && S.announce.lines ? S.announce.lines.join(' ') : '');
-    const pre = /a ete contamine|ont ete contaminees/.test(head) ? pick(['Encore une contamination… faut se bouger.', 'Quelqu’un a été contaminé cette nuit, réfléchissons bien.']) + ' ' : /sans vie|abattu/.test(head) ? 'On a perdu quelqu’un cette nuit. ' : '';
-    return pre + (top ? pick(['Je me méfie ' + de(T) + ' : ' + botReason(id, top) + '.', T + ', explique-toi : ' + botReason(id, top, true) + '.', 'Pour l’instant mon soupçon, c’est ' + T + ' : ' + botReason(id, top) + '.']) : 'Je n’ai rien remarqué de spécial.');
+    const pre = /a ete contamine|ont ete contaminees/.test(head) ? 'Encore une contamination. ' : /sans vie|abattu/.test(head) ? 'On a perdu quelqu’un. ' : '';
+    if (!top || susOf(id, top) < 0.6) return pre + 'Je n’ai pas de piste claire. Ceux qui ont un pouvoir, vous avez appris quoi ?';
+    b.lastAcc = top; return pre + pick(['Je me méfie ' + de(T) + ' : ' + botReason(id, top) + '.', T + ', tu peux t’expliquer ? ' + botReason(id, top, true).replace(/^./, m => m.toUpperCase()) + '.']);
   }
-  if (kind === 'vote') { const b = brain(id); b.intent = top; return top ? 'Je vais voter contre ' + T + ' : ' + botReason(id, top) + '.' : 'Je ne sais pas encore pour qui voter.'; }
+  if (kind === 'vote') { b.intent = top && susOf(id, top) > 0.5 ? top : null; b.lastAcc = b.intent; return b.intent ? 'Je vais voter contre ' + T + ' : ' + botReason(id, top) + '.' : 'Pas de certitude, je risque de voter blanc.'; }
   if (kind === 'lair') { return top ? 'On vise ' + T + ' cette nuit ? ' + pick(['Il devient dangereux.', 'Il commence à trop parler.', 'Il nous soupçonne.']) : 'Qui on vise cette nuit ?'; }
   return '';
 }
@@ -1846,7 +2010,12 @@ function ghostClue(id) {
 const AI = { on: false, fn: null, busy: false, q: [] };
 async function aiEnable(on) {
   if (!on) { AI.on = false; H.S.settings.ai = false; hostChanged(); return; }
-  try { AI.fn = window.claude && typeof window.claude.use === 'function' ? await window.claude.use('sample') : null; } catch { AI.fn = null; }
+  try {
+    if (NET.server && !NET.demo) { // site : l'IA passe par le serveur, si son propriétaire a fourni une clé
+      const info = await NET.real.aiinfo().catch(() => null);
+      AI.fn = info && info.ai ? { json: async prompt => { const r = await NET.real.ai(G.code, prompt); const t = String(r && r.text || ''); const m = t.match(/\{[\s\S]*\}/); return m ? JSON.parse(m[0]) : null; } } : null;
+    } else AI.fn = window.claude && typeof window.claude.use === 'function' ? await window.claude.use('sample') : null;
+  } catch { AI.fn = null; }
   if (!AI.fn) { toast('L’IA Claude n’est pas disponible ici : les bots utilisent leur propre logique.', true); return; }
   toast('Connexion à l’IA… autorise-la si une fenêtre te le demande.');
   try { const r = await AI.fn.json('Réponds uniquement par ce JSON : {"ok": true}', { modelTier: 'quick' }); AI.on = !!(r && r.ok); }
@@ -1861,12 +2030,14 @@ function aiPrompt(id, kind, ctx) {
   if (evil) { secrets.push('Le Mordu original est ' + (role === 'mordu' ? 'toi' : pn(roleHolder('mordu'))) + '.'); const lm = (p.fakeRole ? [] : lairMembers()).filter(x => x !== id).map(pn); if (lm.length) secrets.push('Tes alliés : ' + lm.join(', ') + '.'); }
   for (const l of (S.priv[id] || []).slice(-6)) secrets.push(l.txt);
   const chat = S.chat.slice(-18).map(m => m.sys ? '[annonce] ' + m.txt : (m.mj ? 'Maître du jeu' : pn(m.pid)) + ' : ' + m.txt).join('\n');
-  const sit = kind === 'reply' ? pn(ctx.from) + ' vient de te parler : « ' + ctx.txt + ' ». Réponds-lui directement.' : kind === 'vote' ? 'Le débat touche à sa fin : annonce pour qui tu vas voter et pourquoi.' : 'Le débat de la journée commence : donne ton avis sur la situation.';
+  const sit = kind === 'reply' ? pn(ctx.from) + ' vient d’écrire : « ' + ctx.txt + ' ». ' + (namesIn(ctx.txt).includes(id) ? 'Il s’adresse à toi.' : 'Le message s’adresse au groupe.') + ' Réponds précisément à ce qu’il dit ou demande (question sur ton rôle, tes soupçons, ton vote, une accusation contre toi…), sans changer de sujet.' : kind === 'vote' ? 'Le débat touche à sa fin : annonce pour qui tu vas voter et pourquoi.' : 'Le débat de la journée commence : donne ton avis sur la situation.';
   return 'Tu joues dans le chat d’une partie de « Dernier Signal », un jeu de déduction proche du loup-garou dans un monde post-apocalyptique.\n'
     + 'Règles : un Mordu original caché contamine chaque nuit un survivant avec ses contaminés. Les survivants votent le jour pour l’éliminer. Personne ne voit les votes individuels ni les cartes des autres.\n'
     + 'Ton nom : ' + pn(id) + '. Ta carte secrète : ' + R.name + ' (' + R.power + '). Ton camp : ' + (evil ? 'les contaminés. Tu dois cacher ton camp et faire éliminer des survivants.' : 'les survivants. Tu cherches le Mordu original.') + '\n'
     + (S.cover ? 'Rôle dévoilé à tous au début de la partie : ' + ROLES[S.cover.role].short + ' (c’est la couverture du Discret).\n' : '')
     + 'Ce que toi seul sais :\n- ' + (secrets.join('\n- ') || 'rien de particulier') + '\n'
+    + (brain(id).claimed ? 'Tu as déjà annoncé publiquement être ' + ROLES[brain(id).claimed].short + ' : reste cohérent.\n' : 'Tu n’as pas encore annoncé ton rôle. Tu peux le garder secret ou mentir si ton camp l’exige.\n')
+    + 'Ton tempérament : ' + ['direct et un peu sec', 'posé et réfléchi', 'familier et nerveux'][brain(id).style] + '.\n'
     + 'Joueurs en vie : ' + alivePids().map(pn).join(', ') + '. Éliminés : ' + (deadPids().map(pn).join(', ') || 'aucun') + '. Jour ' + S.round + '.\n'
     + 'Fil de discussion (du plus ancien au plus récent) :\n' + (chat || '(vide)') + '\n\n'
     + 'Situation : ' + sit + '\n'
@@ -1879,7 +2050,7 @@ function aiPrompt(id, kind, ctx) {
 function botSay(id, kind, ctx) {
   const S = H.S;
   const deliver = raw => {
-    if (!H.S || H.S !== S || !P(id) || !P(id).alive) return;
+    if (!H.S || H.S !== S || !P(id) || (!P(id).alive && S.phase !== 'lobby')) return;
     const lair = kind === 'lair';
     if (!lair && !canChat(id).ok) return;
     if (lair && !lairMembers().includes(id)) return;
@@ -1888,8 +2059,8 @@ function botSay(id, kind, ctx) {
     else { pushChat(S.chat, { pid: id, txt, t: now() }, 100); brainOnChat(id, txt); }
     hostChanged();
   };
-  if (AI.on && AI.fn && kind !== 'lair') { AI.q.push({ id, kind, ctx, deliver, phase: S.phase }); aiPump(); }
-  else deliver(botLine(id, kind, ctx));
+  if (AI.on && AI.fn && kind !== 'lair' && P(id).role && !(ctx && ctx.where === 'lair')) { AI.q.push({ id, kind, ctx, deliver, phase: S.phase }); aiPump(); }
+  else { let txt = '', k = 0; const recent = S.chat.slice(-12).map(m => m.txt); do { txt = botLine(id, kind, ctx); } while (recent.includes(txt) && ++k < 5); if (!recent.includes(txt)) deliver(txt); }
 }
 async function aiPump() {
   if (AI.busy) return; const job = AI.q.shift(); if (!job) return; AI.busy = true;
@@ -1907,13 +2078,18 @@ async function aiPump() {
   AI.busy = false; if (AI.q.length) setTimeout(aiPump, 250);
 }
 function scheduleBotDay() {
-  const S = H.S; S.botDay = {}; S.botChat = [];
+  const S = H.S; S.botDay = {}; S.botChat = []; S.botReplies = [];
+  const talkers = [];
   for (const id of S.order) {
     const p = P(id); p.ready = false; p._replyAt = 0;
     if (!p.bot || !p.alive) continue;
-    if (CONFIG.BOTS_TALK && canChat(id).ok) { S.botChat.push({ pid: id, at: now() + 4000 + rnd(22000), kind: 'open' }); S.botChat.push({ pid: id, at: now() + 38000 + rnd(30000), kind: 'vote' }); }
+    if (CONFIG.BOTS_TALK && canChat(id).ok) talkers.push(id);
     if (isVoter(id)) S.botDay[id] = now() + 45000 + rnd(40000);
   }
+  // deux bots lancent la discussion, deux annoncent leur vote : les autres répondent quand on leur parle
+  const sh = shuffle(talkers);
+  sh.slice(0, 2).forEach((id, k) => S.botChat.push({ pid: id, at: now() + 5000 + k * 9000 + rnd(5000), kind: 'open' }));
+  if (!(S.round === 1 && !CONFIG.FIRST_DAY_VOTE)) shuffle(talkers).slice(0, 2).forEach((id, k) => S.botChat.push({ pid: id, at: now() + 45000 + k * 12000 + rnd(15000), kind: 'vote' }));
 }
 function botAct(id) {
   const S = H.S; const p = P(id); if (!p || !p.alive) return;
@@ -1948,6 +2124,7 @@ function botAct(id) {
 }
 function botVote(id) {
   const b = brain(id); const ok = alivePids().filter(x => x !== id);
+  const tp = botTop(id); if (P(id).camp === 'S' && (!tp || susOf(id, tp) < 0.35) && !(b.intent && susOf(id, b.intent) > 0.5)) return 'blank';
   if (b.intent && ok.includes(b.intent) && !(P(id).camp === 'C' && lairMembers().includes(b.intent))) return b.intent;
   return botTop(id) || pick(ok);
 }
@@ -1985,7 +2162,14 @@ function hostTick() {
     if (!S.closeAt && voters.length && voters.every(id => S.votes[id])) S.closeAt = t + 3000;
     if (S.closeAt && t >= S.closeAt) { advance(); return; }
   }
-  if (S.phase === 'day' || S.phase === 'vote' || S.phase === 'result') for (const id of alivePids()) { const p = P(id); if (p.bot && p._replyAt && t >= p._replyAt) { p._replyAt = 0; const ctx = p._replyTo; p._replyTo = null; if (ctx) { botSay(id, 'reply', ctx); changed = true; } } }
+  if (S.botReplies && S.botReplies.length) {
+    const due = S.botReplies.filter(r => t >= r.at); S.botReplies = S.botReplies.filter(r => t < r.at);
+    for (const r of due) {
+      if (r.ctx.where === 'lair') { if (lairMembers().includes(r.pid)) { const txt = cleanText(botLine(r.pid, 'reply', r.ctx), 220); if (txt) { pushChat(S.lair, { pid: r.pid, txt, t }, 80); changed = true; } } continue; }
+      if (S.phase === 'night' || S.phase === 'poison') continue;
+      botSay(r.pid, 'reply', r.ctx); changed = true;
+    }
+  }
   if (S.endsAt && t >= S.endsAt && S.phase !== 'lobby' && S.phase !== 'end') { advance(); return; }
   if (changed) hostChanged();
 }
@@ -2813,7 +2997,7 @@ document.addEventListener('click', async ev => {
       case 'bot': hostAddBot(); hostChanged(); break;
       case 'kick': hostRemove(el.dataset.pid); break;
       case 'toggle-role': if (G.isHost && H.S.phase === 'lobby') { const r = el.dataset.role; H.S.settings.roles[r] = !H.S.settings.roles[r]; hostChanged(); } break;
-      case 'start': hostStartGame(); break;
+      case 'start': if (G.aiWanted && !AI.on && H.S.order.some(id => P(id).bot)) { G.aiWanted = false; await aiEnable(true); } hostStartGame(); break;
       case 'replay': hostReplay(); break;
       case 'card': openCard(false); break;
       case 'close-card': closeCard(); break;
@@ -2844,7 +3028,7 @@ document.addEventListener('click', async ev => {
       case 'home-mode': LS.set('ds_mode', el.dataset.m); renderHome(); break;
       case 'set-mode': if (G.isHost && H.S.phase === 'lobby') { const m = el.dataset.m; if (H.S.settings.mode !== m) { H.S.settings.mode = m; if (m === '3d') { H.S.settings.timers.night = Math.max(H.S.settings.timers.night, 120); H.S.settings.timers.day = Math.max(H.S.settings.timers.day, 300); } } hostChanged(); } break;
       case 'set-map': if (G.isHost && H.S.phase === 'lobby') { H.S.settings.map = el.dataset.m; hostChanged(); } break;
-      case 'ai-toggle': if (G.isHost) { await aiEnable(!H.S.settings.ai); } break;
+      case 'ai-toggle': if (G.isHost) { G.aiWanted = false; await aiEnable(!H.S.settings.ai); } break;
       case 'skin': { const s = mySkin().slice(); s[+el.dataset.k] = +el.dataset.v; LS.set('ds_skin', s); $('#lobby-skin')._h = null; renderLobby(); break; }
       case 'skin-rand': { LS.set('ds_skin', skinDefault(rid(8))); $('#lobby-skin')._h = null; renderLobby(); break; }
       case 't3': g3Tablet(!G3.tablet); break;
@@ -3972,7 +4156,7 @@ function modePanelHTML(host) {
     + '<button data-a="set-mode" data-m="classic" aria-pressed="' + (mode === 'classic') + '" ' + (host ? '' : 'disabled') + '><b>Classique</b><span>Cartes et tablette, comme à table</span></button>'
     + '<button data-a="set-mode" data-m="3d" aria-pressed="' + (mode === '3d') + '" ' + (host ? '' : 'disabled') + '><b>3D</b><span>Monde à explorer à la première personne</span></button></div>';
   if (mode === '3d') h += '<div class="maps">' + Object.entries(MAPS3D).map(([id, M]) => '<button class="mapcard map-' + id + '" data-a="set-map" data-m="' + id + '" aria-pressed="' + (map === id) + '" ' + (host ? '' : 'disabled') + '><b>' + e(M.name) + '</b><span>' + e(M.desc) + '</span><i>' + e(M.home.charAt(0).toUpperCase() + M.home.slice(1)) + ' pour chaque joueur</i></button>').join('') + '</div>';
-  if (host && window.claude && typeof window.claude.use === 'function' && !NET.server) h += '<label class="check"><input type="checkbox" id="in-ai" data-a="ai-toggle" ' + (st.ai ? 'checked' : '') + '> Bots pilotés par l’IA Claude : ils lisent la discussion et raisonnent sur les faits de la partie (utilise ton compte Claude).</label>';
+  if (host && ((window.claude && typeof window.claude.use === 'function' && !NET.server) || (NET.server && G.aiServer))) h += '<label class="check"><input type="checkbox" id="in-ai" data-a="ai-toggle" ' + (st.ai ? 'checked' : '') + '> Bots pilotés par l’IA Claude : ils comprennent ce qu’on leur dit et raisonnent comme de vrais joueurs' + (NET.server ? '.' : ' (utilise ton compte Claude).') + '</label>';
   return h;
 }
 
