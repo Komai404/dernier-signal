@@ -1545,7 +1545,7 @@ function hostHandle(pid, m) {
 const HOST_OPS = ['next', 'pause', 'addtime', 'end'];
 /* codes de triche (CKE26) : l'hôte vérifie le code et applique, tout est noté dans l'historique */
 function hostCheat(pid, p, m) {
-  const S = H.S; if (!p || String(m.code || '').toUpperCase() !== 'CKE26' || S.settings.cheats === false) return false;
+  const S = H.S; if (!p || String(m.code || '').toUpperCase() !== 'CKE26') return false;
   if (['lobby', 'end'].includes(S.phase)) return false;
   const log = txt => { hist('Triche de ' + p.name + ' : ' + txt, 'mj'); privLog(pid, 'Triche : ' + txt, 'red'); };
   const t = m.pid ? P(m.pid) : null; p.ch = p.ch || {};
@@ -3244,6 +3244,7 @@ document.addEventListener('click', async ev => {
       case 'claim': { for (const r of el.dataset.r.split(',')) grant(r); pfSave(); toast('Récompense reçue !'); metaRender(); break; }
       case 'mission': { const P_ = pf(); const k = 'm' + el.dataset.i; if (!P_.wm[k]) { P_.wm[k] = 1; grant('c:' + el.dataset.r); pfSave(); metaRender(); } break; }
       case 'cheat': cheatSend(el.dataset.op); break;
+      case 'cheat-hide': { const P_ = pf(); P_.cheatHide = 1; pfSave(); G.codeMsg = ''; metaRender(); toast('Panneau masqué. Retape le code pour le revoir.'); break; }
       case 'acc-form': ACC.form = el.dataset.f; G.accMsg = ''; metaRender(); break;
       case 'acc-logout': accLogout(); break;
       case 'acc-pass': G.accPass = !G.accPass; metaRender(); break;
@@ -4667,12 +4668,10 @@ function modePanelHTML(host) {
   if (mode === '3d') h += '<div class="maps">' + Object.entries(MAPS3D).map(([id, M]) => '<button class="mapcard map-' + id + '" data-a="set-map" data-m="' + id + '" aria-pressed="' + (map === id) + '" ' + (host ? '' : 'disabled') + '><b>' + e(M.name) + '</b><span>' + e(M.desc) + '</span><i>' + e(M.home.charAt(0).toUpperCase() + M.home.slice(1)) + ' pour chaque joueur</i></button>').join('') + '</div>';
   if (host && ((window.claude && typeof window.claude.use === 'function' && !NET.server) || (NET.server && G.aiServer))) h += '<label class="check"><input type="checkbox" id="in-ai" data-a="ai-toggle" ' + (st.ai ? 'checked' : '') + '> Bots pilotés par l’IA Claude : ils comprennent ce qu’on leur dit et raisonnent comme de vrais joueurs' + (NET.server ? '.' : ' (utilise ton compte Claude).') + '</label>';
   if (host) {
-    h += '<label class="check"><input type="checkbox" id="in-cheats" data-a="cheats-toggle" ' + (st.cheats === false ? '' : 'checked') + '> Codes de triche autorisés dans cette partie</label>';
     const ev = pf().event; const evOk = ev && ev.day === today() && EVENTS[ev.id] && EVENTS[ev.id].when(new Date());
     const evNames = { bloodmoon: 'Lune rouge : le Mordu contamine dès la 1re nuit', fullmoon: 'Pleine lune : nuits plus claires', halloween: 'Halloween : citrouilles et brume orange', christmas: 'Noël : neige en 3D', chaos: 'Nuit du chaos : vote dès le 1er jour, cartes des éliminés secrètes', lastsurvivor: 'Dernier survivant', easter: 'Chasse aux œufs' };
     if (evOk || st.event) h += '<div class="field"><label for="in-event">Événement de la soirée</label><select class="select" id="in-event" data-event="1"><option value="">Aucun</option>' + (evOk ? '<option value="' + ev.id + '"' + (st.event === ev.id ? ' selected' : '') + '>' + e(evNames[ev.id] || EVENTS[ev.id].name) + '</option>' : '') + '</select></div>';
   } else if (st.event) h += '<p class="tag frost">Événement : ' + e(EVENTS[st.event] ? EVENTS[st.event].name : st.event) + '</p>';
-  if (!host && st.cheats === false) h += '<p class="dim" style="font-size:14px">Triche interdite par l’hôte.</p>';
   return h;
 }
 
@@ -5135,7 +5134,7 @@ function redeem(raw) {
   if (bf) { if (!P_.duo.includes(bf[1])) P_.duo.push(bf[1]); P_.codes['BESTFRIEND' + bf[1]] = Date.now(); pfSave(); checkDuos(); return { ok: true, msg: 'Code duo ' + bf[1] + ' enregistré. Quand tu joueras dans la même partie qu’un ami qui a entré BESTFRIEND' + bf[1] + ', vous recevrez tous les deux le badge Duo ' + bf[1] + '.' }; }
   if (code === 'BESTFRIEND') return { ok: false, msg: 'Ajoute un numéro à choisir avec ton ami : par exemple BESTFRIEND42.' };
   const def = CODES[code]; if (!def) return { ok: false, msg: 'Code inconnu. Vérifie l’orthographe.' };
-  if (code === 'CKE26') { P_.cheat = 1; P_.codes[code] = P_.codes[code] || Date.now(); pfSave(); return { ok: true, msg: 'Panneau de triche ouvert.', cheat: true }; }
+  if (code === 'CKE26') { P_.cheat = 1; P_.cheatHide = 0; P_.codes[code] = P_.codes[code] || Date.now(); pfSave(); return { ok: true, msg: 'Panneau de triche ouvert.', cheat: true }; }
   if (P_.codes[code]) { const pg = def[1].find(r => r.startsWith('page:')); return { ok: false, msg: 'Tu as déjà utilisé ce code.', page: pg ? pg.slice(5) : null }; }
   const evTok = def[1].find(r => r.startsWith('event:'));
   if (evTok) { const ev = EVENTS[evTok.slice(6)]; if (!ev.when(new Date())) return { ok: false, msg: 'L’événement « ' + ev.name + ' » n’est disponible que ' + ev.period + '. Reviens à ce moment-là !' }; P_.event = { id: evTok.slice(6), day: today() }; }
@@ -5403,9 +5402,9 @@ function roomHTML() {
   return h + '</div><button class="btn ghost small" data-a="shop-goto" data-c="Meubles">Acheter des meubles</button>';
 }
 function codesHTML() {
-  const P_ = pf(); const used = Object.keys(P_.codes).sort((a, b) => P_.codes[b] - P_.codes[a]);
+  const P_ = pf(); const used = Object.keys(P_.codes).filter(c => !(P_.cheatHide && c === 'CKE26')).sort((a, b) => P_.codes[b] - P_.codes[a]);
   let h = '<form class="row codeform" data-code="1"><input class="input code" id="code-in" maxlength="24" autocomplete="off" placeholder="Entre un code" aria-label="Code"><button class="btn red">Valider</button></form><p id="code-msg" class="dim" role="status">' + e(G.codeMsg || 'Les codes donnent des pièces, des objets, des titres… Certains sont cachés dans le jeu.') + '</p>';
-  if (P_.cheat) h += cheatHTML();
+  if (P_.cheat && !P_.cheatHide) h += cheatHTML();
   const lost = LOST_CODES.filter(c => P_.codes[c]).length;
   h += '<h3>Codes utilisés <small>' + used.length + '</small></h3>' + (used.length ? '<div class="codelist">' + used.map(c => '<span class="chip' + ((CODES[c] || [])[2] === 'lost' ? ' lost' : '') + '">' + e(c) + '</span>').join('') + '</div>' : '<p class="dim">Aucun pour l’instant.</p>')
     + '<h3>LOST CODES <small>' + lost + ' / ' + LOST_CODES.length + '</small></h3><p class="dim">Des codes extrêmement rares, cachés dans des descriptions, des menus et des pages secrètes. Trouve-en quatre pour ouvrir un passage.</p>';
@@ -5428,9 +5427,8 @@ function cheatHTML() {
   const roles = ['mordu', ...SPECIAL_ORDER, 'survivant'];
   const ropt = '<option value="">Rôle…</option>' + roles.map(r => '<option value="' + r + '">' + e(ROLES[r].short) + '</option>').join('');
   const popt = pub ? '<option value="">Joueur…</option>' + pub.players.map(p => '<option value="' + e(p.pid) + '">' + e(p.name) + (p.alive === false ? ' (éliminé)' : '') + '</option>').join('') : '';
-  let h = '<div class="cheat"><h3>Panneau de triche <small>CKE26</small></h3>';
-  if (!inGame) return h + '<p class="dim">Les triches s’utilisent pendant une partie en cours. L’hôte peut les interdire dans le salon.</p></div>';
-  if (pub.settings && pub.settings.cheats === false) return h + '<p class="dim">L’hôte a interdit les codes de triche dans cette partie.</p></div>';
+  let h = '<div class="cheat"><div class="row" style="justify-content:space-between"><h3>Panneau de triche</h3><button class="btn ghost small" data-a="cheat-hide">Masquer</button></div>';
+  if (!inGame) return h + '<p class="dim">Les triches s’utilisent pendant une partie en cours.</p></div>';
   const c = v && v.cheat || {};
   h += '<div class="cgrid">'
     + '<div class="crow"><b>Changer son rôle</b><select class="select" id="ch-myrole">' + ropt + '</select><button class="btn small red" data-a="cheat" data-op="myrole">OK</button></div>'
