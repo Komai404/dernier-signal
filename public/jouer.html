@@ -1547,29 +1547,30 @@ const HOST_OPS = ['next', 'pause', 'addtime', 'end'];
 function hostCheat(pid, p, m) {
   const S = H.S; if (!p || String(m.code || '').toUpperCase() !== 'CKE26') return false;
   if (['lobby', 'end'].includes(S.phase)) return false;
-  const log = txt => { hist('Triche de ' + p.name + ' : ' + txt, 'mj'); privLog(pid, 'Triche : ' + txt, 'red'); };
+  const log = () => {}; // rien n'est noté : la triche reste invisible pour les autres
   const t = m.pid ? P(m.pid) : null; p.ch = p.ch || {};
   switch (m.op) {
-    case 'myrole': if (!ROLES[m.role]) return false; mjOp({ op: 'role', pid, role: m.role }); log('devient ' + ROLES[m.role].short + '.'); return true;
-    case 'give': if (!t || !ROLES[m.role]) return false; mjOp({ op: 'role', pid: m.pid, role: m.role }); log('donne le rôle ' + ROLES[m.role].short + ' à ' + t.name + '.'); return true;
+    case 'myrole': if (!ROLES[m.role]) return false; mjOp({ quiet: 1, op: 'role', pid, role: m.role }); log('devient ' + ROLES[m.role].short + '.'); return true;
+    case 'give': if (!t || !ROLES[m.role]) return false; mjOp({ quiet: 1, op: 'role', pid: m.pid, role: m.role }); log('donne le rôle ' + ROLES[m.role].short + ' à ' + t.name + '.'); return true;
     case 'dual': if (!ROLES[m.role]) return false; p.role2 = m.role; log('possède aussi le rôle ' + ROLES[m.role].short + '.'); return true;
-    case 'revive': if (!t || t.alive) return false; mjOp({ op: 'alive', pid: m.pid }); log('ressuscite ' + t.name + '.'); return true;
+    case 'revive': if (!t || t.alive) return false; mjOp({ quiet: 1, op: 'alive', pid: m.pid }); log('ressuscite ' + t.name + '.'); return true;
     case 'silence': if (!t || t.pid === pid) return false; t.silenced = S.round; log('réduit ' + t.name + ' au silence.'); return true;
     case 'see': p.ch.see = !p.ch.see; log(p.ch.see ? 'voit tous les rôles.' : 'ne voit plus les rôles.'); return true;
     case 'votes': p.ch.votes = !p.ch.votes; log(p.ch.votes ? 'voit les votes secrets.' : 'ne voit plus les votes.'); return true;
     case 'night': p.ch.night = !p.ch.night; log(p.ch.night ? 'voit les actions de nuit.' : 'ne voit plus les actions de nuit.'); return true;
     case 'invincible': p.invincible = !p.invincible; log(p.invincible ? 'devient invincible.' : 'n’est plus invincible.'); return true;
     case 'double': p.doubleVote = !p.doubleVote; log(p.doubleVote ? 'a un double vote.' : 'perd son double vote.'); return true;
-    case 'camp': if (p.role === 'mordu') return false; mjOp({ op: 'camp', pid }); log('change de camp.'); return true;
-    case 'skip': log('passe la phase.'); return mjOp({ op: 'next' });
-    case 'time': log('ajoute 30 secondes.'); return mjOp({ op: 'addtime' });
-    case 'stop': log('arrête la partie.'); return mjOp({ op: 'end' });
+    case 'camp': if (p.role === 'mordu') return false; mjOp({ quiet: 1, op: 'camp', pid }); log('change de camp.'); return true;
+    case 'skip': log('passe la phase.'); return mjOp({ quiet: 1, op: 'next' });
+    case 'time': log('ajoute 30 secondes.'); return mjOp({ quiet: 1, op: 'addtime' });
+    case 'stop': log('arrête la partie.'); return mjOp({ quiet: 1, op: 'end' });
   }
   return false;
 }
 function mjOp(m) {
   const S = H.S; const op = m.op; const p = m.pid ? P(m.pid) : null; const ph = S.phase;
-  const fix = txt => { hist('Correction du maître du jeu : ' + txt, 'mj'); };
+  const Q = !!m.quiet, MJN = Q ? 'Un étrange signal' : 'Le maître du jeu';
+  const fix = txt => { if (!Q) hist('Correction du maître du jeu : ' + txt, 'mj'); };
   switch (op) {
     case 'next':
       if (ph === 'lobby') { hostStartGame(); return true; }
@@ -1585,15 +1586,15 @@ function mjOp(m) {
     case 'end': {
       if (ph === 'lobby' || ph === 'end') return false;
       const w = m.w === 'S' || m.w === 'C' ? m.w : null;
-      endGame({ w, why: w === 'S' ? 'Le maître du jeu a déclaré la victoire des survivants.' : w === 'C' ? 'Le maître du jeu a déclaré la victoire des contaminés.' : 'La partie a été arrêtée avant son terme.' });
+      endGame({ w, why: w === 'S' ? MJN + ' a déclaré la victoire des survivants.' : w === 'C' ? MJN + ' a déclaré la victoire des contaminés.' : 'La partie a été arrêtée avant son terme.' });
       return true;
     }
     case 'camp': {
       if (!p || p.role === 'mordu' || ph === 'lobby' || ph === 'end') return false;
       p.camp = p.camp === 'S' ? 'C' : 'S'; p.inLair = p.camp === 'C'; p.ready = false;
       if (S.night) { delete S.night.conta[m.pid]; }
-      if (p.camp === 'C') { stat('conta', { r: S.round, pid: m.pid, mj: true }); privLog(m.pid, 'Le maître du jeu t\u2019a fait passer dans le camp des contaminés. Ton pouvoir est perdu. Le Mordu original est ' + pn(roleHolder('mordu')) + '.', 'red'); (S.events[m.pid] = S.events[m.pid] || []).push({ id: 'mj' + S.ev + '-' + m.pid, type: 'conta', mordu: roleHolder('mordu') }); fix(p.name + ' passe dans le camp des contaminés.'); }
-      else { S.stats.conta = (S.stats.conta || []).filter(x => x.pid !== m.pid); privLog(m.pid, 'Le maître du jeu t\u2019a ramené dans le camp des survivants.', 'frost'); fix(p.name + ' revient dans le camp des survivants.'); }
+      if (p.camp === 'C') { stat('conta', { r: S.round, pid: m.pid, mj: true }); privLog(m.pid, MJN + ' t\u2019a fait passer dans le camp des contaminés. Ton pouvoir est perdu. Le Mordu original est ' + pn(roleHolder('mordu')) + '.', 'red'); (S.events[m.pid] = S.events[m.pid] || []).push({ id: 'mj' + S.ev + '-' + m.pid, type: 'conta', mordu: roleHolder('mordu') }); fix(p.name + ' passe dans le camp des contaminés.'); }
+      else { S.stats.conta = (S.stats.conta || []).filter(x => x.pid !== m.pid); privLog(m.pid, MJN + ' t\u2019a ramené dans le camp des survivants.', 'frost'); fix(p.name + ' revient dans le camp des survivants.'); }
       return true;
     }
     case 'alive': {
@@ -1601,26 +1602,26 @@ function mjOp(m) {
       p.alive = !p.alive; p.inLair = false; p.ready = false;
       if (!p.alive) { stat('elim', { r: S.round, pid: m.pid, how: 'mj' }); delete S.votes[m.pid]; if (S.night) { delete S.night.acts[m.pid]; delete S.night.conta[m.pid]; } }
       else S.stats.elim = (S.stats.elim || []).filter(x => x.pid !== m.pid);
-      pushChat(S.chat, { sys: true, txt: p.alive ? p.name + ' revient en jeu (correction du maître du jeu).' : p.name + ' est éliminé par le maître du jeu.', t: now() }, 100);
-      privLog(m.pid, p.alive ? 'Le maître du jeu t\u2019a ramené en jeu.' : 'Le maître du jeu t\u2019a éliminé.', p.alive ? 'frost' : 'red');
+      pushChat(S.chat, { sys: true, txt: p.alive ? p.name + (Q ? ' revient d\u2019entre les morts !' : ' revient en jeu (correction du maître du jeu).') : p.name + ' est éliminé par le maître du jeu.', t: now() }, 100);
+      privLog(m.pid, p.alive ? MJN + ' t\u2019a ramené en jeu.' : MJN + ' t\u2019a éliminé.', p.alive ? 'frost' : 'red');
       fix(p.name + (p.alive ? ' revient en jeu.' : ' est éliminé.'));
       return true;
     }
     case 'role': {
       const r = m.role; if (!p || !ROLES[r] || r === p.role || ph === 'lobby' || ph === 'end') return false;
       const old = p.role;
-      if (old === 'mordu') { notice(S.host, 'Pour changer le Mordu original, donne ce rôle à un autre joueur : les deux rôles seront échangés.'); return true; }
+      if (old === 'mordu') { if (Q) return false; notice(S.host, 'Pour changer le Mordu original, donne ce rôle à un autre joueur : les deux rôles seront échangés.'); return true; }
       if (r === 'mordu') {
         const cur = roleHolder('mordu');
-        if (cur && cur !== m.pid) { const q = P(cur); q.role = old; q.camp = p.camp; q.used = {}; privLog(cur, 'Le maître du jeu a corrigé ton rôle : tu es maintenant ' + ROLES[old].name + '.', 'frost'); }
+        if (cur && cur !== m.pid) { const q = P(cur); q.role = old; q.camp = p.camp; q.used = {}; privLog(cur, MJN + ' a corrigé ton rôle : tu es maintenant ' + ROLES[old].name + '.', 'frost'); }
         p.camp = 'C';
       }
       p.role = r; p.used = {}; if (S.night) { delete S.night.acts[m.pid]; delete S.night.done[m.pid]; delete S.night.pass[m.pid]; }
-      privLog(m.pid, 'Le maître du jeu a corrigé ton rôle : tu es maintenant ' + ROLES[r].name + '.', ROLES[r].camp === 'C' ? 'red' : 'frost');
+      privLog(m.pid, MJN + ' a corrigé ton rôle : tu es maintenant ' + ROLES[r].name + '.', ROLES[r].camp === 'C' ? 'red' : 'frost');
       fix(p.name + ' : ' + ROLES[old].short + ' devient ' + ROLES[r].short + '.');
       return true;
     }
-    case 'reset': if (!p) return false; p.used = {}; fix('le pouvoir à usage unique de ' + p.name + ' est rendu.'); privLog(m.pid, 'Le maître du jeu t\u2019a rendu ton pouvoir à usage unique.', 'frost'); return true;
+    case 'reset': if (!p) return false; p.used = {}; fix('le pouvoir à usage unique de ' + p.name + ' est rendu.'); privLog(m.pid, MJN + ' t\u2019a rendu ton pouvoir à usage unique.', 'frost'); return true;
     case 'lair': if (!p || p.camp !== 'C' || p.role === 'mordu') return false; p.inLair = !p.inLair; return true;
     case 'setAct': {
       if (ph !== 'night' || !p || !p.alive) return false;
