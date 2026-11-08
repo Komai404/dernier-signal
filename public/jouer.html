@@ -1508,18 +1508,24 @@ function contaTarget(n) {
 }
 function tally(map) { const t = {}; for (const v of Object.values(map)) t[v] = (t[v] || 0) + 1; return t; }
 function topOf(t) { const max = Math.max(0, ...Object.values(t)); const top = Object.keys(t).filter(k => t[k] === max); return { max, top }; }
+/* Pouvoirs des empoisonnés : ils échouent toujours, mais avec les mêmes mots que les vrais résultats
+   du jeu, et sans jamais répéter deux fois de suite la même excuse au même joueur. */
+const PRETEXTS = {
+  protect: [t => 'Tu as veillé sur ' + t + ' cette nuit.'],
+  probe: [t => 'L’échantillon de ' + t + ' était trop abîmé : analyse impossible cette nuit.', t => t + ' n’était pas chez lui quand tu es passé : pas d’échantillon.', t => 'Une coupure de courant a interrompu l’analyse de ' + t + '. À refaire.', t => 'Le réactif a tourné : le test sur ' + t + ' ne donne rien de lisible.', t => 'Tu as entendu du bruit près de chez ' + t + ' et tu as préféré rentrer avant la fin de l’analyse.'],
+  track: [t => 'Tu as perdu la trace de ' + t + ' dans le brouillard.', t => 'Une patrouille t’a obligé à te cacher : tu n’as pas pu surveiller ' + t + '.', t => 'Il faisait trop noir autour de chez ' + t + ' : impossible de savoir s’il est sorti.', t => 'Tu t’es endormi en guettant ' + t + '. Rien vu.'],
+  hunt: [t => 'Ta flèche a manqué ' + t + '.', t => 'Ta flèche a manqué ' + t + '.', t => t + ' a bougé au dernier moment : ta flèche s’est plantée dans le mur.'],
+  revive: [t => 'Le corps de ' + t + ' était trop froid : il n’a pas pu revenir.', t => 'Le défibrillateur n’avait plus assez de charge pour ramener ' + t + '.', t => 'Des cris au loin t’ont fait fuir le cimetière avant de ramener ' + t + '.'],
+  build: [() => 'Il manquait des planches : ta seconde maison n’est pas terminée.', () => 'La pluie a emporté tes fondations : il faudra recommencer.', () => 'Un rôdeur traînait près du chantier : tu as dû abandonner les travaux cette nuit.'],
+  conta: [t => t + ' était protégé : ta contamination a échoué.', t => t + ' n’était pas chez lui : ta tentative a échoué.', t => 'Ta tentative sur ' + t + ' n’a rien donné.', t => t + ' s’est réveillé à ton arrivée : tu as dû fuir.'],
+};
 function pretext(a, pid) {
-  const t = a.target ? pn(a.target) : '';
-  switch (a.kind) {
-    case 'protect': return 'Une tempête de cendres t’a bloqué chez toi : tu n’as pu veiller sur personne cette nuit.';
-    case 'probe': return 'Ton analyseur a grillé en pleine analyse de ' + t + ' : aucun résultat cette nuit.';
-    case 'track': return 'Tu as perdu la trace de ' + t + ' dans le brouillard.';
-    case 'hunt': return 'La corde de ton arc a cassé au moment de tirer sur ' + t + '.';
-    case 'revive': return 'Le défibrillateur n’avait plus de batterie : ' + t + ' n’a pas pu revenir.';
-    case 'build': return 'Il manquait des planches : ta seconde maison n’a pas pu être terminée.';
-    case 'conta': return t + ' avait barricadé sa porte : impossible d’entrer cette nuit.';
-    default: return 'Un bruit dehors t’a fait renoncer : tu n’as rien pu faire cette nuit.';
-  }
+  const t = a.target ? pn(a.target) : '', p = P(pid);
+  const pool = PRETEXTS[a.kind]; if (!pool) return 'Un bruit dehors t’a fait renoncer : tu n’as rien pu faire cette nuit.';
+  p.fakeSaid = p.fakeSaid || {}; const used = p.fakeSaid[a.kind] || [];
+  let free = pool.map((_, i) => i).filter(i => !used.includes(i)); if (!free.length) { free = pool.map((_, i) => i).filter(i => i !== used[used.length - 1]); used.length = 0; if (!free.length) free = [0]; }
+  const k = pick(free); used.push(k); p.fakeSaid[a.kind] = used;
+  return pool[k](t);
 }
 function contaminate(t, r) {
   const S = H.S, tp = P(t), mordu = roleHolder('mordu');
@@ -1536,7 +1542,7 @@ function resolveNight() {
   const campAt = id => n.campStart[id];
   const roleAt = id => P(id).role;
   // 0. pouvoirs des empoisonnés : toujours un prétexte
-  for (const [pid, a] of Object.entries(n.fake || {})) { privLog(pid, pretext(a, pid), ''); hist(pn(pid) + ' (empoisonné) tente d’agir : échec.'); }
+  for (const [pid, a] of Object.entries(n.fake || {})) { privLog(pid, pretext(a, pid), a.kind === 'protect' ? 'frost' : a.kind === 'conta' ? 'red' : ''); hist(pn(pid) + ' (empoisonné) tente d’agir : échec.'); }
   // 1. constructions
   for (const [pid, a] of byKind('build')) { const p = P(pid); p.house2 = true; p.house2Used = false; privLog(pid, a.mimic ? 'Tu as imité le Constructeur : ta seconde maison est prête.' : 'Ta seconde maison est construite. Si la tanière vient pour toi, tu dormiras ailleurs (une seule fois).', 'frost'); hist(pn(pid) + (a.mimic ? ' (Discret, en Constructeur)' : ' (Constructeur)') + ' construit une seconde maison.', 'frost'); }
   // 2. protections
@@ -1699,7 +1705,7 @@ function hostStartGame() {
   const deck = ['mordu', ...specials]; while (deck.length < n) deck.push('survivant');
   const dealt = shuffle(deck);
   S.order = shuffle(S.order);
-  S.order.forEach((id, i) => { const p = P(id); Object.assign(p, { role: dealt[i], camp: ROLES[dealt[i]].camp, alive: true, used: {}, lastProtect: null, inLair: dealt[i] === 'empoisonneur', leftLair: false, ack: !!p.bot, ready: false, fakeRole: null, fakeUsed: {}, fakeLast: null, fakeLair: [], house2: false, house2Used: false, _replyAt: 0 }); });
+  S.order.forEach((id, i) => { const p = P(id); Object.assign(p, { role: dealt[i], camp: ROLES[dealt[i]].camp, alive: true, used: {}, lastProtect: null, inLair: dealt[i] === 'empoisonneur', leftLair: false, ack: !!p.bot, ready: false, fakeRole: null, fakeUsed: {}, fakeLast: null, fakeLair: [], fakeSaid: {}, house2: false, house2Used: false, _replyAt: 0 }); });
   Object.assign(S, { round: 0, votes: {}, lair: [], priv: {}, knows: {}, events: {}, notice: {}, revive: null, history: [], winner: null, winReason: '', night: null, stats: { conta: [], elim: [] }, paused: false, pauseLeft: 0, cover: null, poison: null, brain: {}, msgCount: {}, claims: {}, botChat: [] });
   S.order.forEach(id => privLog(id, 'Tu as reçu ta carte : ' + ROLES[P(id).role].name + '.', ROLES[P(id).role].camp === 'C' ? 'red' : 'frost'));
   hist('Distribution des rôles : ' + S.order.map(id => pn(id) + ' (' + ROLES[P(id).role].short + ')').join(', ') + '.');
