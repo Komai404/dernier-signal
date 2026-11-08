@@ -361,6 +361,10 @@ body.conta3d #hud3d::after { content: ""; position: absolute; inset: 0; pointer-
 .skin-row { display: grid; gap: 4px; }
 .swatch { width: 28px; height: 28px; border: 2px solid var(--line-2); }
 .swatch[aria-pressed="true"] { border-color: var(--bone); box-shadow: 0 0 0 2px var(--signal); }
+.assign { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); gap: 8px; }
+.assign-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid var(--line); min-width: 0; }
+.assign-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; } .assign-row small { color: var(--mute); font-weight: 400; }
+.assign-row select { width: 140px; flex: none; }
 .rchip.small { padding: 4px 10px; font-size: 13px; }
 @media (pointer: coarse) {
   #hud-btns { flex-direction: column-reverse; flex-wrap: nowrap; align-items: flex-end; gap: 6px; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); max-width: 46%; }
@@ -705,6 +709,7 @@ body.shake #app { animation: shake .6s ease; }
           <div class="panel" id="lobby-mode"></div>
           <div class="panel" id="lobby-skin" hidden></div>
           <div class="panel" id="lobby-settings"></div>
+          <div class="panel" id="lobby-assign" hidden></div>
           <div class="comms" style="position:static;height:340px;min-height:0" id="lobby-chat">
             <div class="tabs"><button class="tab" aria-selected="true">Canal du salon</button></div>
             <div class="msgs" id="lobby-msgs"></div>
@@ -1456,9 +1461,30 @@ function mjOp(m) {
 }
 
 /* --- déroulé --- */
+/* rôles imposés par le maître du jeu (H.S.assign, jamais envoyé aux joueurs) */
+function assignPlan(deck) {
+  const S = H.S; const fixed = {}; const rest = deck.slice();
+  const a = S.mj ? (S.assign || {}) : {};
+  for (const id of S.order) { const r = a[id]; if (r && ROLES[r]) fixed[id] = r; }
+  const count = {}; for (const r of Object.values(fixed)) count[r] = (count[r] || 0) + 1;
+  for (const [r, c] of Object.entries(count)) if (r !== 'survivant' && c > 1) return { ok: false, why: 'Le rôle ' + ROLES[r].short + ' est imposé à ' + c + ' joueurs : il ne peut y en avoir qu’un.' };
+  const fixedN = Object.keys(fixed).length;
+  if (fixedN === S.order.length && !count.mordu) return { ok: false, why: 'Tous les rôles sont imposés, mais personne n’est Mordu original.' };
+  for (const r of Object.values(fixed)) {
+    let k = rest.indexOf(r);
+    if (k < 0) k = rest.lastIndexOf('survivant');
+    if (k < 0) { for (let j = rest.length - 1; j >= 0; j--) if (rest[j] !== 'mordu' && !Object.values(fixed).includes(rest[j])) { k = j; break; } }
+    if (k < 0) return { ok: false, why: 'Trop de rôles imposés pour le nombre de joueurs.' };
+    rest.splice(k, 1);
+  }
+  if (count.mordu && rest.includes('mordu')) { const k = rest.indexOf('mordu'); rest[k] = 'survivant'; }
+  if (!count.mordu && !rest.includes('mordu')) return { ok: false, why: 'Il faut laisser une place pour le Mordu original.' };
+  return { ok: true, fixed, rest };
+}
 function hostCanStart() {
   const S = H.S; const n = S.order.length;
   if (n < CONFIG.MIN_PLAYERS) return { ok: false, why: 'Il faut au moins ' + CONFIG.MIN_PLAYERS + ' joueurs (bots compris).' };
+  if (S.mj && S.assign && Object.keys(S.assign).length) { const specials = SPECIAL_ORDER.filter(r => S.settings.roles[r]).slice(0, Math.max(1, n - 2)); const deck = ['mordu', ...specials]; while (deck.length < n) deck.push('survivant'); const pl = assignPlan(deck); if (!pl.ok) return { ok: false, why: pl.why }; }
   const off = S.order.filter(id => !P(id).bot && !P(id).host && now() - (H.seenLocal[id] || 0) > 65000);
   if (off.length) return { ok: false, why: off.map(pn).join(', ') + (off.length > 1 ? ' semblent déconnectés.' : ' semble déconnecté.') };
   const missing = S.order.filter(id => !P(id).bot && !P(id).host && !P(id).pub && !P(id).plain);
@@ -1703,8 +1729,11 @@ function hostStartGame() {
   const n = S.order.length;
   const specials = SPECIAL_ORDER.filter(r => S.settings.roles[r]).slice(0, Math.max(1, n - 2));
   const deck = ['mordu', ...specials]; while (deck.length < n) deck.push('survivant');
-  const dealt = shuffle(deck);
+  // le maître du jeu peut imposer des rôles : les autres cartes sont tirées au hasard
+  const plan = assignPlan(deck); if (!plan.ok) { pushChat(S.chat, { sys: true, txt: plan.why, t: now() }, 100); hostChanged(true); return; }
   S.order = shuffle(S.order);
+  const rest = shuffle(plan.rest); const dealt = S.order.map(id => plan.fixed[id] || rest.pop());
+  if (Object.keys(plan.fixed).length) hist('Rôles imposés par le maître du jeu : ' + Object.entries(plan.fixed).map(([id, r]) => pn(id) + ' (' + ROLES[r].short + ')').join(', ') + '.');
   S.order.forEach((id, i) => { const p = P(id); Object.assign(p, { role: dealt[i], camp: ROLES[dealt[i]].camp, alive: true, used: {}, lastProtect: null, inLair: dealt[i] === 'empoisonneur', leftLair: false, ack: !!p.bot, ready: false, fakeRole: null, fakeUsed: {}, fakeLast: null, fakeLair: [], fakeSaid: {}, house2: false, house2Used: false, _replyAt: 0 }); });
   Object.assign(S, { round: 0, votes: {}, lair: [], priv: {}, knows: {}, events: {}, notice: {}, revive: null, history: [], winner: null, winReason: '', night: null, stats: { conta: [], elim: [] }, paused: false, pauseLeft: 0, cover: null, poison: null, brain: {}, msgCount: {}, claims: {}, botChat: [] });
   S.order.forEach(id => privLog(id, 'Tu as reçu ta carte : ' + ROLES[P(id).role].name + '.', ROLES[P(id).role].camp === 'C' ? 'red' : 'frost'));
@@ -2406,10 +2435,25 @@ function renderLobby() {
     + '<p class="dim" style="margin:0;font-size:14px">' + (nP >= CONFIG.MIN_PLAYERS ? 'Avec ' + nP + ' joueurs : 1 Mordu original, ' + (kept.length ? kept.map(r => ROLES[r].short).join(', ') : 'aucun rôle spécial') + ', ' + Math.max(0, nP - 1 - kept.length) + ' Survivant' + (nP - 1 - kept.length > 1 ? 's' : '') + '.' + (enabled.length > kept.length ? ' Pas assez de joueurs pour : ' + enabled.slice(slots).map(r => ROLES[r].short).join(', ') + '.' : '') : 'Il faut au moins ' + CONFIG.MIN_PLAYERS + ' joueurs.') + ' * pouvoir provisoire.</p>'
     + '<div class="sel-row">' + [['night', 'Nuit', [45, 60, 75, 90, 120, 150, 180]], ['day', 'Discussion', [90, 120, 180, 240, 300, 420, 600]], ['vote', 'Vote', [30, 45, 60, 75, 90, 120]]].map(([k, l, opts]) =>
       '<div class="field"><label for="tm-' + k + '">' + l + '</label><select class="select" id="tm-' + k + '" data-timer="' + k + '" ' + (lock ? 'disabled' : '') + '>' + opts.map(o => '<option value="' + o + '"' + (st.timers[k] === o ? ' selected' : '') + '>' + fmt(o) + '</option>').join('') + '</select></div>').join('') + '</div>');
+  renderAssign(host);
   renderMsgs($('#lobby-msgs'), pub.chat, false);
   setHTML($('#lobby-mode'), modePanelHTML(host));
   const is3d = pub.settings.mode === '3d'; $('#lobby-skin').hidden = !is3d;
   if (is3d) { if (setHTML($('#lobby-skin'), skinPanelHTML()) || !G.skinDrawn) { G.skinDrawn = true; drawSkinPreview($('#skin-prev'), mySkin()); } }
+}
+function renderAssign(host) {
+  const box = $('#lobby-assign'); if (!box) return;
+  if (!host) { box.hidden = true; return; }
+  box.hidden = false;
+  if (!H.S.mj) { setHTML(box, '<h3>Distribution des cartes <small>au hasard</small></h3><p class="dim" style="margin:0;font-size:14px">Pour choisir toi-même les rôles de certains joueurs, crée la partie en cochant « Je suis maître du jeu » (tu ne joues pas, tu animes).</p>'); return; }
+  const S = H.S; S.assign = S.assign || {};
+  for (const id of Object.keys(S.assign)) if (!S.order.includes(id)) delete S.assign[id];
+  const roles = ['mordu', ...SPECIAL_ORDER, 'survivant'];
+  const nFixed = Object.values(S.assign).filter(Boolean).length;
+  let h = '<h3>Distribution des cartes <small>visible par toi seul</small></h3><p class="dim" style="margin:0 0 8px;font-size:14px">Laisse « Au hasard » ou impose un rôle à un joueur. Les cartes non imposées sont tirées au hasard parmi les rôles en jeu.</p><div class="assign">';
+  for (const id of S.order) h += '<label class="assign-row" for="as-' + e(id) + '"><span>' + e(pn(id)) + (P(id).bot ? ' <small>bot</small>' : '') + '</span><select class="select" id="as-' + e(id) + '" data-assign="' + e(id) + '"><option value="">Au hasard</option>' + roles.map(r => '<option value="' + r + '"' + (S.assign[id] === r ? ' selected' : '') + '>' + e(ROLES[r].short) + (S.settings.roles[r] === false ? ' (désactivé)' : '') + '</option>').join('') + '</select></label>';
+  h += '</div><div class="row" style="margin-top:8px"><span class="dim" style="font-size:14px">' + (nFixed ? nFixed + ' rôle' + (nFixed > 1 ? 's' : '') + ' imposé' + (nFixed > 1 ? 's' : '') + ', ' + (S.order.length - nFixed) + ' au hasard.' : 'Tout est au hasard.') + '</span><span class="grow"></span>' + (nFixed ? '<button class="btn ghost small" data-a="assign-clear">Tout au hasard</button>' : '') + '</div>';
+  setHTML(box, h);
 }
 function knowledgeTags(pid) {
   const v = G.view, pub = G.pub; let t = '';
@@ -3002,6 +3046,7 @@ document.addEventListener('click', async ev => {
         el.dataset.sure = ''; await leaveGame(); break;
       case 'bot': hostAddBot(); hostChanged(); break;
       case 'kick': hostRemove(el.dataset.pid); break;
+      case 'assign-clear': if (G.isHost) { H.S.assign = {}; render(); } break;
       case 'toggle-role': if (G.isHost && H.S.phase === 'lobby') { const r = el.dataset.role; H.S.settings.roles[r] = !H.S.settings.roles[r]; hostChanged(); } break;
       case 'start': if (G.aiWanted && !AI.on && H.S.order.some(id => P(id).bot)) { G.aiWanted = false; await aiEnable(true); } hostStartGame(); break;
       case 'replay': hostReplay(); break;
@@ -3061,6 +3106,7 @@ document.addEventListener('submit', async ev => {
 document.addEventListener('change', ev => {
   const mj = ev.target.closest('[data-mj]');
   if (mj) { send({ t: 'mj', op: mj.dataset.mj, pid: mj.dataset.pid || null, kind: mj.dataset.kind || null, target: mj.value, role: mj.value }); mj.blur(); setTimeout(render, 0); return; }
+  const as = ev.target.closest('[data-assign]'); if (as && G.isHost && H.S.phase === 'lobby') { H.S.assign = H.S.assign || {}; if (as.value) H.S.assign[as.dataset.assign] = as.value; else delete H.S.assign[as.dataset.assign]; hostChanged(); render(); return; }
   const s = ev.target.closest('[data-timer]'); if (!s || !G.isHost || H.S.phase !== 'lobby') return;
   H.S.settings.timers[s.dataset.timer] = parseInt(s.value, 10); hostChanged();
 });

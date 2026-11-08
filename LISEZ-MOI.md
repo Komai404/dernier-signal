@@ -151,6 +151,9 @@ leur parle. Dans la tanière, un bot contaminé suit la cible proposée par un h
 En cochant « Je suis maître du jeu » à la création, l'hôte obtient un panneau réservé
 (les joueurs n'y ont jamais accès) pour :
 
+- **choisir les rôles** dans le salon (panneau « Distribution des cartes ») : pour chaque joueur,
+  « Au hasard » ou un rôle imposé. Tu peux en imposer un seul, plusieurs ou tous ; les autres cartes
+  sont tirées au hasard. Ce choix reste invisible pour les joueurs ;
 - lancer la partie, passer à la phase suivante (nuit → aube → vote → nuit) ;
 - mettre le chrono en pause, ajouter 30 secondes ;
 - voir tous les rôles, les camps, les contaminations et les éliminations ;
