@@ -23,11 +23,12 @@ const GAME_TTL = 3 * 24 * 3600e3;    // une partie inactive est effacée après 
 
 /* ---------- stockage ---------- */
 let store = new Map();   // chemin -> { d: objet, t: date }
-let owners = {};         // code de partie -> identifiant de l'hôte
+let owners = {};
+let board = {};          // classement : identifiant -> { nom, victoires, parties… }         // code de partie -> identifiant de l'hôte
 let pids = {};           // identifiant joueur -> empreinte de son jeton secret
 try {
   const j = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-  store = new Map(Object.entries(j.store || {})); owners = j.owners || {}; pids = j.pids || {};
+  store = new Map(Object.entries(j.store || {})); owners = j.owners || {}; pids = j.pids || {}; board = j.board || {};
   console.log('  ' + store.size + ' documents rechargés.');
 } catch { /* premier lancement */ }
 let dirty = false;
@@ -35,7 +36,7 @@ setInterval(() => {
   if (!dirty) return; dirty = false;
   try {
     fs.mkdirSync(DATA_DIR, { recursive: true });
-    fs.writeFileSync(DATA_FILE + '.tmp', JSON.stringify({ store: Object.fromEntries(store), owners, pids }));
+    fs.writeFileSync(DATA_FILE + '.tmp', JSON.stringify({ store: Object.fromEntries(store), owners, pids, board }));
     fs.renameSync(DATA_FILE + '.tmp', DATA_FILE);
   } catch (err) { console.error('Sauvegarde impossible :', err.message); }
 }, 3000);
@@ -116,7 +117,7 @@ setInterval(() => {
     if (!Object.keys(r.all).length) rooms.delete(code);
   }
 }, 150);
-const cleanPos = s => s && typeof s === 'object' && typeof s.pid === 'string' && SEG.test(s.pid) ? { pid: s.pid, x: +s.x || 0, z: +s.z || 0, r: +s.r || 0, w: s.w ? 1 : 0, s: Array.isArray(s.s) ? s.s.slice(0, 7).map(n => (n | 0) % 16) : null } : null;
+const cleanPos = s => s && typeof s === 'object' && typeof s.pid === 'string' && SEG.test(s.pid) ? { pid: s.pid, x: +s.x || 0, z: +s.z || 0, r: +s.r || 0, w: s.w ? 1 : 0, s: Array.isArray(s.s) ? s.s.slice(0, 9).map(n => Math.max(0, Math.min(255, n | 0))) : null, em: typeof s.em === 'string' && /^[a-z0-9]{1,16}$/.test(s.em) ? s.em : undefined, et: +s.et || 0 } : null;
 
 /* ---------- chat vocal : relais de signalisation WebRTC (le son passe directement entre joueurs) ---------- */
 function voicePeers(code, except) { const out = []; for (const c of conns.values()) if (c.vroom === code && c !== except) out.push(c); return out; }
@@ -226,6 +227,14 @@ async function api(req, res, url) {
         for (const c of voicePeers(conn.vroom, conn)) if (c.pid === b.to) emit(c, 'rtc', { from: pid, data: b.data });
         return json(res, 200, { result: null });
       }
+      case 'lbset': {
+        const d = b.d || {}; const nm = typeof d.name === 'string' ? d.name.replace(/[\u0000-\u001f]/g, '').slice(0, 16) : ''; if (!nm) return json(res, 400, { code: 'invalid_argument' });
+        const n = v => Math.max(0, Math.min(1e6, v | 0)); const w = s2 => typeof s2 === 'string' && /^[a-z0-9]{0,20}$/.test(s2) ? s2 : '';
+        board[pid] = { name: nm, games: n(d.games), wins: n(d.wins), best: n(d.best), lvl: n(d.lvl), title: w(d.title), badge: w(d.badge), t: Date.now() }; dirty = true;
+        const keys = Object.keys(board); if (keys.length > 500) { keys.sort((a, c) => board[a].wins - board[c].wins).slice(0, keys.length - 500).forEach(k => delete board[k]); }
+        return json(res, 200, { result: null });
+      }
+      case 'lbget': return json(res, 200, { result: Object.values(board).sort((a, c) => c.wins - a.wins || c.games - a.games).slice(0, 50) });
       case 'aiinfo': return json(res, 200, { result: { ai: !!AI_KEY } });
       case 'ai': {
         const code = typeof b.code === 'string' && SEG.test(b.code) ? b.code : null;
@@ -268,5 +277,5 @@ server.listen(PORT, HOST, () => {
   for (const u of lan) console.log('  Sur le réseau local :  ' + u);
   console.log('\n  Laisse cette fenêtre ouverte pendant la partie. Ctrl+C pour arrêter.\n');
 });
-function shutdown() { try { if (dirty) { fs.mkdirSync(DATA_DIR, { recursive: true }); fs.writeFileSync(DATA_FILE, JSON.stringify({ store: Object.fromEntries(store), owners, pids })); } } catch {} process.exit(0); }
+function shutdown() { try { if (dirty) { fs.mkdirSync(DATA_DIR, { recursive: true }); fs.writeFileSync(DATA_FILE, JSON.stringify({ store: Object.fromEntries(store), owners, pids, board })); } } catch {} process.exit(0); }
 process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);

@@ -71,6 +71,29 @@ joystick à gauche, glisser à droite pour regarder, bouton « Agir ».
 - La nuit, chacun porte une lanterne : on voit les autres passer de loin. Sur un appareil lent, la
   résolution baisse automatiquement pour rester fluide.
 
+## Profil, pièces, boutique et codes
+
+- **PROFIL** (en haut, ou sur l'accueil) : ton profil, tes statistiques, la **boutique**, ton **casier**
+  (titre, badges, cadre, effet de pseudo, thème de l'interface, tenue), tes **emotes**, ta **chambre**,
+  les **codes** et les **archives** (pages secrètes).
+- Chaque partie terminée rapporte des pièces : 50 pour avoir joué, +100 en cas de victoire, +25 si tu
+  as survécu jusqu'au bout. Bonus du jour : +150. Les réglages sont dans `const ECO`.
+- Clique sur le nom d'un joueur pour voir son profil (badge à gauche du pseudo, titre à droite
+  entre crochets, VIP, niveau, parties jouées et gagnées).
+- **CODE** : entre un code pour recevoir pièces, objets, titres, thèmes, emotes, pages secrètes…
+  Les codes sont dans `const CODES` (ajoute ou modifie-les facilement). `BESTFRIEND` suivi d'un numéro :
+  deux amis qui entrent le même numéro et jouent ensemble reçoivent le badge Duo. Les **LOST CODES**
+  sont cachés dans le jeu ; en trouver 4 ouvre PROJECT : UNDERGROUND. Les codes d'événement ne marchent
+  que pendant leur période (`const EVENTS`).
+- **Emotes en 3D** : touche **B** (ou bouton Emotes sur téléphone) pour la roue de 6 emotes.
+- **Chambre** : avec la Clé de chambre (boutique) ou un code, décore ton logement 3D (6 emplacements).
+- **Triche (CKE26)** : changer de rôle, donner un rôle, voir les rôles et les votes, double vote,
+  invincible, ressusciter, etc. L'hôte peut l'interdire dans le salon (« Codes de triche autorisés »),
+  et chaque triche est notée dans l'historique du maître du jeu. Attention : n'importe qui qui connaît
+  le code peut tricher dans une partie où c'est autorisé.
+- Le profil est enregistré dans le navigateur (pas de compte). Changer d'appareil ou vider les données
+  du site repart de zéro. Sur ton site, le classement des meilleurs joueurs est partagé par tous.
+
 ## Chat vocal
 
 Sur le site (Render ou ton propre serveur), chaque joueur peut parler au micro :
