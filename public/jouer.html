@@ -362,6 +362,14 @@ body.conta3d #hud3d::after { content: ""; position: absolute; inset: 0; pointer-
 .swatch { width: 28px; height: 28px; border: 2px solid var(--line-2); }
 .swatch[aria-pressed="true"] { border-color: var(--bone); box-shadow: 0 0 0 2px var(--signal); }
 .rchip.small { padding: 4px 10px; font-size: 13px; }
+@media (pointer: coarse) {
+  #hud-btns { flex-direction: column-reverse; flex-wrap: nowrap; align-items: flex-end; gap: 6px; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); max-width: 46%; }
+  #hud-btns .btn { min-height: 38px; font-size: 13px; padding: 0 12px; }
+  #hud-btns .hb-act { width: 82px; height: 82px; min-height: 82px; border-radius: 50%; clip-path: none; justify-content: center; padding: 0; font-size: 17px; box-shadow: 0 0 0 3px rgba(255,255,255,.15); }
+  #hud-btns .hb-phase { min-height: 44px; font-size: 14px; border: 1px solid var(--frost); }
+  .hud-feed { bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important; width: calc(100% - 150px); }
+  .hud-feed div:nth-last-child(n+4) { display: none; }
+}
 body.in3d .bar { position: fixed; top: 0; left: 0; right: 0; padding-top: env(safe-area-inset-top, 0px); }
 @media (max-width: 700px) {
   #hud-guide .steps { display: none; } #hud-guide .guide { padding: 8px 10px; gap: 4px; } #hud-guide .guide-txt b { font-size: 15px; } #hud-guide .guide-txt p { font-size: 12.5px; }
@@ -419,7 +427,9 @@ body.in3d .bar { position: fixed; top: 0; left: 0; right: 0; padding-top: env(sa
 .end-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 26px; margin-top: 28px; align-items: start; }
 
 /* ---------- carte de rôle (modale) ---------- */
-.modal { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 20px max(16px, env(safe-area-inset-right, 0px)) 20px max(16px, env(safe-area-inset-left, 0px)); background: rgba(3,4,5,.86); backdrop-filter: blur(4px); overflow-y: auto; }
+.modal-x { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: calc(10px + env(safe-area-inset-right, 0px)); z-index: 2; width: 48px; height: 48px; border: 1px solid var(--line); background: rgba(12,14,16,.92); color: var(--bone); font-size: 30px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.modal-x:hover { border-color: var(--bone); }
+.modal { position: fixed; inset: 0; z-index: 70; touch-action: pan-y; display: grid; place-items: center; padding: 20px max(16px, env(safe-area-inset-right, 0px)) 20px max(16px, env(safe-area-inset-left, 0px)); background: rgba(3,4,5,.86); backdrop-filter: blur(4px); overflow-y: auto; }
 .modal[hidden] { display: none !important; }
 .cardbox { width: min(880px, 100%); display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 30px; align-items: center; }
 .flip { perspective: 1400px; width: 100%; max-width: 340px; aspect-ratio: 1; justify-self: center; }
@@ -488,6 +498,16 @@ body.shake #app { animation: shake .6s ease; }
 .drawer-in h2 { margin: 0; font-family: var(--f-display); font-weight: 900; font-size: 40px; text-transform: uppercase; }
 .drawer-in h3 { margin: 6px 0 0; font-family: var(--f-display); font-weight: 800; font-size: 22px; text-transform: uppercase; letter-spacing: .04em; }
 .drawer-in p, .drawer-in li { color: var(--dim); font-size: 16px; }
+.rtabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.rtabs button { font: 600 13px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; padding: 11px 12px; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; }
+.rtabs button[aria-selected="true"] { background: var(--bone); color: #0b0d10; border-color: var(--bone); }
+.drawer-in .tip { border-left: 3px solid var(--frost); padding: 10px 14px; background: rgba(139,208,212,.07); color: var(--bone); margin: 0; }
+.drawer-in kbd { font: 600 12px/1 var(--f-mono); padding: 3px 6px; border: 1px solid var(--line); border-bottom-width: 2px; color: var(--bone); }
+.drawer-in .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.drawer-in .keys > div { min-width: 0; display: grid; gap: 8px; align-content: start; }
+@media (max-width: 560px) { .drawer-in .keys { grid-template-columns: 1fr; } }
+.rule-role small { font: 600 10px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; margin-left: 6px; }
+.rule-role small.rc { color: var(--signal-hi); } .rule-role small.rs { color: var(--frost); }
 .drawer-in ol, .drawer-in ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
 .rule-role { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 14px; align-items: start; }
 .rule-role img { width: 72px; height: 72px; object-fit: cover; }
@@ -547,11 +567,11 @@ body.shake #app { animation: shake .6s ease; }
         <span class="phase-name" id="bar-phase"></span>
         <span class="timer" id="bar-timer"></span>
         <span class="meter" id="bar-meter" title="Liaison avec l'hôte"><i></i><i></i><i></i><i></i></span>
-        <button class="menu-btn" id="bar-3d" data-a="v3d" hidden>VUE 3D</button><span id="bar-role"></span>
+        <button class="menu-btn" id="bar-3d" data-a="v3d" hidden>VUE 3D</button><button class="menu-btn" data-a="rules" aria-label="Guide">GUIDE</button><span id="bar-role"></span>
         <div class="rel">
           <button class="menu-btn" id="menu-btn" aria-haspopup="true" aria-expanded="false">MENU</button>
           <div class="menu" id="menu" hidden>
-            <button data-a="rules">Règles et rôles</button>
+            <button data-a="rules">Guide et règles</button>
             <button data-a="copy-code">Copier le code</button>
             <button data-a="leave" class="red" id="menu-leave">Quitter la partie</button>
           </div>
@@ -566,7 +586,7 @@ body.shake #app { animation: shake .6s ease; }
     <div class="wrap">
       <div class="home-top">
         <div class="transmit"><span class="rec"></span><span class="eyebrow">Transmission d'urgence · Zone 7</span></div>
-        <div class="row"><button class="btn ghost small" id="btn-install" data-a="install" hidden>Installer l'appli</button><button class="link" data-a="rules">Règles et rôles</button></div>
+        <div class="row"><button class="btn ghost small" id="btn-install" data-a="install" hidden>Installer l'appli</button><button class="btn ghost small" data-a="rules">Guide : comment jouer</button></div>
       </div>
       <div class="home">
         <div>
@@ -707,6 +727,7 @@ const CONFIG = {
   MIN_PLAYERS: 4,
   MAX_PLAYERS: 16,
   TIMERS: { reveal: 60, night: 60, day: 240, vote: 75, result: 10, poison: 45 },   // durées en secondes (modifiables dans le salon)
+  FIRST_DAY_VOTE: false,                // false : pas de vote le jour 1 (le Mordu n'a encore contaminé personne)
   NIGHT_ENDS_EARLY: false,              // false : la nuit dure toujours tout son temps
   MIN_NIGHT_SECONDS: 20,                // une nuit dure au moins ce temps, même si tout le monde a agi
   BOTS_TALK: true,                      // les bots écrivent quelques messages le jour (partie d'essai)
@@ -891,7 +912,7 @@ async function pump(path, w) {
   }
   w.busy = false;
 }
-const nameOf = (pub, pid) => (pub?.players || []).find(p => p.pid === pid)?.name || (pid === pub?.host && pub?.mj ? 'Maître du jeu' : '???');
+const nameOf = (pub, pid) => pid === 'blank' ? 'vote blanc' : (pub?.players || []).find(p => p.pid === pid)?.name || (pid === pub?.host && pub?.mj ? 'Maître du jeu' : '???');
 
 async function initNet() {
   const c = window.claude;
@@ -1038,7 +1059,7 @@ function hist(txt, kind = '') { const S = H.S; S.history.push({ r: S.round, ph: 
 function privLog(pid, txt, kind = '') { const S = H.S; (S.priv[pid] = S.priv[pid] || []).push({ r: S.round, ph: S.phase, txt, kind }); if (S.priv[pid].length > 60) S.priv[pid].shift(); }
 function notice(pid, txt) { H.S.notice[pid] = { id: H.S.ev++, txt }; }
 function pushChat(list, item, max) { list.push(item); while (list.length > max) list.shift(); }
-const pn = pid => P(pid)?.name || '???';
+const pn = pid => pid === 'blank' ? 'vote blanc' : (P(pid)?.name || '???');
 
 const shownRole = p => p.fakeRole || p.role;
 const MIMIC_BASE = ['gardien', 'scientifique', 'rodeur', 'chasseur', 'reanimateur', 'constructeur'];
@@ -1269,7 +1290,7 @@ function hostHandle(pid, m) {
     case 'ready': if (S.phase === 'day' && isVoter(pid) && p) { p.ready = true; return true; } return false;
     case 'vote': {
       if (S.phase !== 'vote' || !isVoter(pid) || S.votes[pid]) return false;
-      if (!alivePids().includes(m.target) || m.target === pid) return false;
+      if (m.target !== 'blank' && (!alivePids().includes(m.target) || m.target === pid)) return false;
       S.votes[pid] = m.target; return true;
     }
     case 'speak': {
@@ -1411,6 +1432,11 @@ function advance() {
 }
 function toVote() {
   const S = H.S; if (S.phase !== 'day') return;
+  if (S.round === 1 && !CONFIG.FIRST_DAY_VOTE) { // premier jour : pas de vote, le Mordu n'a encore contaminé personne
+    pushChat(S.chat, { sys: true, txt: 'Pas de vote le premier jour : le Mordu n’a encore contaminé personne. La deuxième nuit tombe.', t: now() }, 100);
+    hist('Fin du premier jour (pas de vote).');
+    beginNight(2); hostChanged(true); return;
+  }
   setPhase('vote', S.settings.timers.vote); S.votes = {}; S.botAt = {};
   for (const id of alivePids()) if (P(id).bot && isVoter(id)) S.botAt[id] = now() + 4000 + rnd(14000);
   pushChat(S.chat, { sys: true, txt: 'Le vote est ouvert. Chaque survivant vote en secret.', t: now() }, 100);
@@ -1567,13 +1593,16 @@ function resolveNight() {
   hist('Le jour ' + r + ' se lève. ' + head);
 }
 function resolveVote() {
-  const S = H.S; const t = tally(S.votes); const { max, top } = topOf(t);
+  const S = H.S; const real = Object.fromEntries(Object.entries(S.votes).filter(([, b]) => b !== 'blank')); const blanks = Object.keys(S.votes).length - Object.keys(real).length;
+  const t = tally(real); const { max, top } = topOf(t);
   const lines = []; let elim = null;
   const detail = Object.entries(t).sort((a, b) => b[1] - a[1]).map(([id, c]) => ({ pid: id, n: c }));
   hist('Votes : ' + (Object.entries(S.votes).map(([a, b]) => pn(a) + ' → ' + pn(b)).join(', ') || 'aucun') + '.');
-  if (max === 0) lines.push('Personne n’a voté. Aucun joueur n’est éliminé.');
+  if (max === 0) lines.push(blanks ? 'Tout le monde a voté blanc. Aucun joueur n’est éliminé.' : 'Personne n’a voté. Aucun joueur n’est éliminé.');
+  else if (blanks >= max) lines.push('Le vote blanc l’emporte (' + blanks + ' voix). Personne n’est éliminé.');
   else if (top.length > 1) lines.push('Égalité entre ' + top.map(pn).join(' et ') + '. Personne n’est éliminé.');
   else {
+    if (blanks) lines.push(blanks + ' vote' + (blanks > 1 ? 's' : '') + ' blanc' + (blanks > 1 ? 's' : '') + '.');
     elim = top[0]; const p = P(elim); p.alive = false; p.inLair = false; stat('elim', { r: S.round, pid: elim, how: 'vote' });
     privLog(elim, 'Le vote t\u2019a éliminé (' + max + ' voix). Tu peux suivre la partie jusqu\u2019au bout.', 'red');
     lines.push(pn(elim) + ' est éliminé par le vote (' + max + ' voix).');
@@ -2214,7 +2243,7 @@ function stageHTML() {
 }
 function controlsHTML(mj) {
   const pub = G.pub, ph = pub.phase;
-  const nextLbl = { reveal: 'Lancer la nuit 1', night: 'Passer à l’aube', day: 'Ouvrir le vote', vote: 'Clore le vote', result: 'Lancer la nuit ' + (pub.round + 1) }[ph];
+  const nextLbl = { reveal: 'Lancer la nuit 1', night: 'Passer à l’aube', day: pub.round === 1 && !CONFIG.FIRST_DAY_VOTE ? 'Lancer la nuit 2' : 'Ouvrir le vote', vote: 'Clore le vote', result: 'Lancer la nuit ' + (pub.round + 1) }[ph];
   let h = '<div class="mj-bar">' + (nextLbl ? '<button class="btn red small" data-a="mj" data-op="next">' + nextLbl + '</button>' : '')
     + (pub.endsAt || pub.paused ? '<button class="btn ghost small" data-a="mj" data-op="pause">' + (pub.paused ? 'Reprendre le chrono' : 'Pause') + '</button><button class="btn ghost small" data-a="mj" data-op="addtime">+30 s</button>' : '')
     + '<span class="grow"></span>'
@@ -2262,18 +2291,18 @@ function stageInner() {
     h += knowledgeHTML();
     if (pub.ghost && pub.ghost.r === pub.round - 0 && pub.ghost.txt) h += '<div class="ghost-msg"><b>MESSAGE D’OUTRE-TOMBE · ' + e(nameOf(pub, pub.ghost.pid)) + '</b>« ' + e(pub.ghost.txt) + ' »</div>';
     if (v.speak) h += '<div class="act"><h4>Ton dernier message</h4><p>Le Réanimateur t’a ramené. Laisse une phrase-indice, sans écrire le nom du Mordu original. Ensuite, tu retournes parmi les éliminés.</p><form class="row" data-form="speak"><input class="input grow" id="speak-in" maxlength="200" autocomplete="off" placeholder="Ton indice…"><button class="btn frost" type="submit">Transmettre</button></form></div>';
-    if (v.canVote) h += '<div class="act"><h4>Prêt à voter ?</h4><p>Le vote s’ouvre à la fin du temps ou dès que tous les votants sont prêts.</p><div class="row">' + (v.ready ? '<span class="dim">Tu es prêt.</span>' : '<button class="btn frost" data-a="ready">Je suis prêt à voter</button>') + '</div></div>';
+    if (v.canVote) h += (pub.round === 1 && !CONFIG.FIRST_DAY_VOTE) ? '<div class="act"><h4>Premier jour : pas de vote</h4><p>Le Mordu n’a encore contaminé personne, il n’y a donc pas de vote aujourd’hui. Faites connaissance, observez, puis la deuxième nuit tombe.</p><div class="row">' + (v.ready ? '<span class="dim">Tu es prêt.</span>' : '<button class="btn frost" data-a="ready">Passer à la nuit</button>') + '</div></div>' : '<div class="act"><h4>Prêt à voter ?</h4><p>Le vote s’ouvre à la fin du temps ou dès que tous les votants sont prêts.</p><div class="row">' + (v.ready ? '<span class="dim">Tu es prêt.</span>' : '<button class="btn frost" data-a="ready">Je suis prêt à voter</button>') + '</div></div>';
     else h += '<div class="act' + (v.camp === 'C' ? ' red' : '') + '"><h4>' + (v.alive ? 'Tu observes' : 'Tu es éliminé') + '</h4><p>' + (v.alive ? 'Contaminé, tu ne participes plus aux discussions ni aux votes des survivants.' : 'Tu suis la partie sans pouvoir parler ni voter.') + '</p></div>';
     return h;
   }
   if (ph === 'vote') {
     h += head('Vote', 'Chaque survivant choisit en secret qui éliminer.');
     if (v.canVote) {
-      if (v.vote) h += '<div class="act done"><h4>Vote enregistré</h4><p>Tu as voté contre <b style="color:var(--bone)">' + e(nameOf(pub, v.vote)) + '</b>. Résultat à la clôture.</p></div>';
+      if (v.vote) h += '<div class="act done"><h4>Vote enregistré</h4><p>' + (v.vote === 'blank' ? 'Tu as voté <b style="color:var(--bone)">blanc</b>' : 'Tu as voté contre <b style="color:var(--bone)">' + e(nameOf(pub, v.vote)) + '</b>') + '. Résultat à la clôture.</p></div>';
       else {
         const a = { kind: 'vote', targets: pub.players.filter(p => p.alive && p.pid !== G.pid).map(p => p.pid), forbid: {} };
         const sel = G.sel.vote;
-        h += '<div class="act"><h4>Qui éliminer ?</h4><p>En cas d’égalité, personne n’est éliminé.</p>' + targetsHTML(a) + '<div class="row"><button class="btn red" data-a="vote" ' + (sel && a.targets.includes(sel) ? '' : 'disabled') + '>Voter' + (sel && a.targets.includes(sel) ? ' contre ' + e(nameOf(pub, sel)) : '') + '</button></div></div>';
+        h += '<div class="act"><h4>Qui éliminer ?</h4><p>En cas d’égalité, personne n’est éliminé. Si tu n’as aucun soupçon, vote blanc : si les votes blancs sont aussi nombreux que le joueur le plus désigné, personne n’est éliminé.</p>' + targetsHTML(a) + '<div class="row"><button class="btn red" data-a="vote" ' + (sel && a.targets.includes(sel) ? '' : 'disabled') + '>Voter' + (sel && a.targets.includes(sel) ? ' contre ' + e(nameOf(pub, sel)) : '') + '</button><button class="btn ghost" data-a="vote-blank">Voter blanc</button></div></div>';
       }
     } else h += sleepHTML('Tu ne votes pas', v.alive ? 'Contaminé, tu observes le vote des survivants.' : 'Éliminé, tu observes le vote.');
     return h;
@@ -2475,10 +2504,12 @@ function openReport(force) {
   $('#report-in').innerHTML = '<span class="eyebrow">Aube du jour ' + pub.round + '</span><h2>Rapport de l’aube</h2>'
     + '<div class="report-pub">' + a.lines.map(l => '<p>' + e(l) + '</p>').join('') + '</div>'
     + (v.alive || reportItems().length ? '<div class="report-secret"><span class="eyebrow">Ton rapport secret · toi seul le vois</span>' + reportListHTML() + '</div>' : '')
-    + '<p class="dim" style="margin:0">' + (v.canVote ? 'Maintenant : discutez dans le canal public, puis appuyez sur « Je suis prêt à voter ».' : v.alive ? 'Contaminé, tu observes le débat. Tu peux parler dans la tanière.' : 'Tu es éliminé : tu observes la suite.') + '</p>'
+    + '<p class="dim" style="margin:0">' + (v.canVote ? (pub.round === 1 && !CONFIG.FIRST_DAY_VOTE ? 'Premier jour : pas de vote. Discutez, puis appuyez sur « Passer à la nuit ».' : 'Maintenant : discutez dans le canal public, puis appuyez sur « Je suis prêt à voter ».') : v.alive ? 'Contaminé, tu observes le débat. Tu peux parler dans la tanière.' : 'Tu es éliminé : tu observes la suite.') + '</p>'
     + '<div class="row"><button class="btn red" data-a="close-report">Compris</button></div>';
+  $('#report-in').insertAdjacentHTML('afterbegin', '<button class="modal-x" data-a="close-report" aria-label="Fermer le rapport">×</button>');
+  if (document.pointerLockElement) document.exitPointerLock();
   $('#report').hidden = false;
-  setTimeout(() => { const b = $('#report [data-a="close-report"]'); if (b) b.focus(); }, 50);
+  setTimeout(() => { const b = $('#report .btn[data-a="close-report"]'); if (b) b.focus(); }, 50);
 }
 function guideHTML() {
   const pub = G.pub, v = G.view, ph = pub.phase;
@@ -2494,18 +2525,18 @@ function guideHTML() {
   }
   else if (ph === 'day') {
     if (v.speak) { go = true; title = 'Ton dernier message'; txt = 'Écris un indice, sans le nom du Mordu original.'; }
-    else if (v.canVote && !v.ready) { go = true; title = 'Débat'; txt = 'Lis le rapport de l’aube, discute dans le canal public, puis appuie sur « Je suis prêt à voter ».'; }
+    else if (v.canVote && !v.ready) { go = true; title = pub.round === 1 && !CONFIG.FIRST_DAY_VOTE ? 'Premier jour' : 'Débat'; txt = pub.round === 1 && !CONFIG.FIRST_DAY_VOTE ? 'Pas de vote aujourd’hui : le Mordu n’a encore contaminé personne. Discutez, puis appuie sur « Passer à la nuit ».' : 'Lis le rapport de l’aube, discute dans le canal public, puis appuie sur « Je suis prêt à voter ».'; }
     else if (v.canVote) { title = 'En attente des autres'; txt = 'Le vote s’ouvre quand tout le monde est prêt, ou à la fin du temps.'; }
     else { title = 'Tu observes'; txt = v.alive ? 'Contaminé, tu ne parles plus aux survivants et tu ne votes plus. Utilise la tanière.' : 'Tu es éliminé : tu suis la partie sans parler ni voter.'; }
   }
-  else if (ph === 'vote') { if (v.canVote && !v.vote) { go = true; title = 'Vote secret'; txt = 'Touche la personne que tu soupçonnes, puis appuie sur « Voter ». En cas d’égalité, personne n’est éliminé.'; } else { title = 'Dépouillement'; txt = 'Le résultat s’affiche quand tous les votants ont voté.'; } }
+  else if (ph === 'vote') { if (v.canVote && !v.vote) { go = true; title = 'Vote secret'; txt = 'Touche la personne que tu soupçonnes, puis appuie sur « Voter ». Pas de soupçon ? Appuie sur « Voter blanc ».'; } else { title = 'Dépouillement'; txt = 'Le résultat s’affiche quand tous les votants ont voté.'; } }
   else if (ph === 'result') { title = 'Verdict'; txt = 'La nuit suivante tombe dans quelques secondes.'; }
   if (typeof G3 !== 'undefined' && G3.on && !G3.tablet) { // consignes adaptées au monde 3D
     const act = g3Coarse() ? 'Agir' : 'E';
     if (ph === 'night' && v.alive && pending.length) { const k = pending[0].kind; txt = k === 'build' ? 'Va à ton lit et appuie sur ' + act + ' pour construire ta seconde maison (ou garde-la pour plus tard).' : k === 'revive' ? 'Va au cimetière, devant la tombe à réanimer, et appuie sur ' + act + '.' : k === 'conta' ? 'Va à la porte de la cible et appuie sur ' + act + ', ou choisis avec la tanière sur la tablette.' : 'Sors, va à la porte de ta cible et appuie sur ' + act + '. Attention : on peut te voir passer. La tablette marche aussi.'; }
     else if (ph === 'poison') txt = 'Ouvre la tablette pour choisir le faux rôle et la victime.';
-    else if (ph === 'vote' && v.canVote && !v.vote) txt = 'Va au poteau du joueur que tu soupçonnes et appuie sur ' + act + '. Vote secret.';
-    else if (ph === 'day' && v.canVote && !v.ready && !v.speak) txt = 'Retrouve les autres au feu, parle avec ' + (g3Coarse() ? '« Parler »' : 'T') + ', puis appuie sur « Prêt à voter ».';
+    else if (ph === 'vote' && v.canVote && !v.vote) txt = 'Va au poteau du joueur que tu soupçonnes et appuie sur ' + act + '. Pas de soupçon ? Bouton « Voter blanc ».';
+    else if (ph === 'day' && v.canVote && !v.ready && !v.speak) txt = 'Retrouve les autres au feu, parle avec ' + (g3Coarse() ? '« Parler »' : 'T') + ', puis appuie sur « ' + (pub.round === 1 && !CONFIG.FIRST_DAY_VOTE ? 'Passer à la nuit' : 'Prêt à voter') + ' ».';
     else if (ph === 'reveal' && !v.ack) txt = 'Ta carte est posée sur ta table. Lis-la, puis appuie sur « J’ai compris ».';
   }
   const steps = [['night', 'Nuit'], ['day', 'Débat'], ['vote', 'Vote'], ['result', 'Verdict']];
@@ -2529,6 +2560,8 @@ function openCard(reveal) {
     + '<ul>' + r.limits.map(l => '<li>' + e(l) + '</li>').join('') + '</ul>'
     + '<div class="row">' + (G.pub && G.pub.phase === 'reveal' && !v.ack ? '<button class="btn red" data-a="ack">J’ai compris</button>' : '') + '<button class="btn ghost" data-a="close-card">Fermer</button></div>';
   const txt = $('#card-text'); txt.classList.remove('show');
+  if (document.pointerLockElement) document.exitPointerLock();
+  if (!$('#card-modal .modal-x')) $('#card-modal').insertAdjacentHTML('afterbegin', '<button class="modal-x" data-a="close-card" aria-label="Fermer la carte">×</button>');
   $('#card-modal').hidden = false;
   if (reveal) {
     setTimeout(() => { staticBurst(260); flip.classList.add('open'); }, 500);
@@ -2638,16 +2671,38 @@ function drawSleep(c) {
 }
 
 /* ===================================================================== règles */
-function renderRules() {
-  $('#rules-in').innerHTML = '<div class="row" style="justify-content:space-between"><span class="eyebrow">Manuel de survie</span><button class="btn ghost small" data-a="close-rules">Fermer</button></div>'
-    + '<h2>Règles</h2>'
+function renderRules(tab) {
+  const T = tab || G.rulesTab || (G.pub && G.pub.settings && G.pub.settings.mode === '3d' && G.pub.phase !== 'lobby' ? '3d' : 'start'); G.rulesTab = T;
+  const tabs = [['start', 'Débuter'], ['rules', 'Règles'], ['roles', 'Rôles'], ['classic', 'Mode classique'], ['3d', 'Mode 3D']];
+  const fdv = CONFIG.FIRST_DAY_VOTE;
+  let b = '';
+  if (T === 'start') b = '<h2>Comment jouer</h2>'
+    + '<p>Dernier Signal est un jeu de déduction, comme le Loup-garou. Un joueur a été mordu : il contamine les autres, la nuit, en secret. Les survivants doivent le trouver et l’éliminer par un vote.</p>'
+    + '<h3>Lancer une partie</h3><ol><li>Entre ton nom, puis <b>Créer une partie</b>. Tu reçois un code de 5 lettres.</li><li>Envoie ce code aux autres. Ils ouvrent le site, entrent leur nom et le code, puis <b>Rejoindre</b>.</li><li>Dans le salon, l’hôte choisit <b>Classique</b> ou <b>3D</b>, ajoute des bots s’il manque du monde (4 joueurs minimum), puis lance.</li><li>Seul ? <b>Partie d’essai</b> : tu joues contre des bots.</li></ol>'
+    + '<h3>Ta première partie en bref</h3><ol><li><b>Ta carte.</b> Elle s’affiche au début. Lis ton rôle, puis appuie sur « J’ai compris ». Ne la montre à personne.</li><li><b>Nuit 1.</b> Si ton rôle a un pouvoir, choisis une cible. Sinon, attends.</li><li><b>Jour 1.</b> ' + (fdv ? 'On discute, mais on ne vote pas : personne n’a encore été contaminé.' : 'On discute, puis on vote.') + '</li><li><b>Nuit 2 et suivantes.</b> Le Mordu contamine quelqu’un chaque nuit.</li><li><b>Jours suivants.</b> Lisez le rapport de l’aube, débattez, puis votez. Pas de soupçon ? Vote blanc.</li></ol>'
+    + '<p class="tip">En haut de l’écran, un bandeau te dit toujours quoi faire maintenant. Le menu <b>Guide</b> est disponible à tout moment, même en pleine partie.</p>';
+  if (T === 'rules') b = '<h2>Règles</h2>'
     + '<p>Un joueur reçoit en secret le rôle du <b>Mordu original</b>. Son but : contaminer tous les autres sans être découvert. Les autres sont des survivants : ils doivent le démasquer et l’éliminer par un vote.</p>'
-    + '<h3>Une manche</h3><ol><li><b>Nuit.</b> Les rôles à pouvoir agissent en secret. À partir de la deuxième nuit, le Mordu original et les contaminés choisissent une cible. Le Gardien peut l’en protéger.</li><li><b>Aube.</b> Le jeu annonce si quelqu’un a été contaminé, sans dire qui.</li><li><b>Jour.</b> Les survivants discutent et partagent leurs soupçons.</li><li><b>Vote.</b> Chaque survivant vote en secret. La personne qui reçoit le plus de voix est éliminée. En cas d’égalité, personne ne l’est.</li></ol>'
+    + '<h3>Une manche</h3><ol><li><b>Nuit.</b> Les rôles à pouvoir agissent en secret. À partir de la deuxième nuit, le Mordu original et les contaminés choisissent une cible. Le Gardien peut l’en protéger. La nuit dure tout son chrono, pour que personne ne devine qui a agi.</li><li><b>Aube.</b> Le jeu annonce ce qui s’est passé, sans dire qui a été contaminé. Chacun reçoit ses résultats en privé.</li><li><b>Jour.</b> Les survivants discutent et partagent leurs soupçons. Quand tout le monde est prêt, ou à la fin du chrono, le vote s’ouvre.</li><li><b>Vote.</b> Chaque survivant vote en secret pour un joueur, ou vote blanc. Le joueur le plus désigné est éliminé et sa carte révélée. En cas d’égalité, ou si les votes blancs sont aussi nombreux, personne ne l’est.</li></ol>'
+    + (fdv ? '' : '') + '<h3>Le premier jour</h3><p>' + (fdv ? 'Il n’y a <b>pas de vote le premier jour</b> : le Mordu ne contamine qu’à partir de la deuxième nuit, il n’y a donc encore aucun indice. On discute, puis la deuxième nuit tombe.' : 'Le premier jour se joue comme les autres, avec un vote.') + '</p>'
     + '<h3>Contamination</h3><ul><li>Un joueur contaminé reste dans la partie mais change de camp.</li><li>Il perd son pouvoir, ne vote plus et ne parle plus aux survivants.</li><li>Il connaît le Mordu original et peut rejoindre la tanière des contaminés, ou observer à l’écart.</li><li>Les contaminés ne connaissent pas les rôles des autres joueurs.</li></ul>'
     + '<h3>Victoire</h3><ul><li><b>Survivants :</b> le Mordu original est éliminé par un vote.</li><li><b>Contaminés :</b> il ne reste plus aucun survivant sain.</li></ul>'
-    + '<h3>Rôles</h3>' + ['mordu', ...SPECIAL_ORDER, 'survivant'].map(r => '<div class="rule-role"><img src="' + ROLES[r].img + '" alt=""><div><b>' + e(ROLES[r].name) + (ROLES[r].provisional ? ' · provisoire' : '') + '</b><span>' + e(ROLES[r].power) + ' ' + e(ROLES[r].limits.join(' ')) + '</span></div></div>').join('')
-    + '<h3>Jouer à distance</h3><p>L’hôte crée la partie et partage le code. Chaque joueur ouvre cette page de son côté. Les rôles et les actions sont chiffrés : chaque appareil ne déchiffre que ce qui le concerne. L’hôte doit garder la page ouverte pendant toute la partie. En cas de coupure, il suffit de rouvrir la page : la partie reprend.</p>';
+    + '<h3>Les éliminés</h3><p>Un joueur éliminé suit la partie sans parler ni voter. Le Réanimateur peut le ramener une fois pour qu’il laisse un indice.</p>';
+  if (T === 'roles') b = '<h2>Rôles</h2><p>Les rôles spéciaux entrent en jeu selon le nombre de joueurs. Tous les autres sont Survivants.</p>'
+    + ['mordu', ...SPECIAL_ORDER, 'survivant'].map(r => '<div class="rule-role"><img src="' + ROLES[r].img + '" alt=""><div><b>' + e(ROLES[r].name) + ' <small class="' + (ROLES[r].camp === 'C' ? 'rc' : 'rs') + '">' + (ROLES[r].camp === 'C' ? 'contaminés' : 'survivants') + '</small>' + (ROLES[r].provisional ? ' · provisoire' : '') + '</b><span>' + e(ROLES[r].power) + ' ' + e(ROLES[r].limits.join(' ')) + '</span></div></div>').join('');
+  if (T === 'classic') b = '<h2>Mode classique</h2><p>Tout se joue sur un seul écran, comme à table.</p>'
+    + '<h3>À l’écran</h3><ul><li><b>Le bandeau du haut</b> : la phase, le chrono, et le bouton <b>MENU</b> (guide, code, quitter).</li><li><b>Le bandeau « À toi de jouer »</b> : ce que tu dois faire maintenant.</li><li><b>Ta carte</b> : le bouton de ton rôle, en haut, la rouvre à tout moment.</li><li><b>Le canal public</b> : pour discuter le jour. La nuit, il est coupé.</li><li><b>La tanière</b> : le canal secret des contaminés.</li></ul>'
+    + '<h3>Agir la nuit</h3><ol><li>Touche le nom d’un joueur pour le choisir.</li><li>Appuie sur le bouton d’action (Protéger, Analyser…).</li><li>Ton choix est enregistré ; le résultat arrive à l’aube.</li></ol>'
+    + '<h3>Voter</h3><ol><li>Touche le joueur que tu soupçonnes.</li><li>Appuie sur « Voter contre… », ou sur « Voter blanc ».</li></ol>';
+  if (T === '3d') b = '<h2>Mode 3D</h2><p>Le même jeu, dans un monde à explorer à la première personne. Chaque joueur a son logement, avec sa carte posée sur la table.</p>'
+    + '<h3>Commandes</h3><div class="keys"><div><b>Ordinateur</b><ul><li><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou flèches : marcher, <kbd>Maj</kbd> : courir</li><li>Souris : regarder (clique d’abord sur le jeu, <kbd>Échap</kbd> pour libérer la souris)</li><li><kbd>E</kbd> : agir sur ce que tu regardes</li><li><kbd>T</kbd> : parler · <kbd>R</kbd> : prêt</li><li><kbd>Tab</kbd> : tablette · <kbd>V</kbd> : vue extérieure · <kbd>G</kbd> : guide</li></ul></div><div><b>Téléphone</b><ul><li>Pouce gauche : joystick pour marcher</li><li>Glisser à droite : regarder</li><li><b>Agir</b> : utiliser ce que tu regardes</li><li><b>Parler</b>, <b>Tablette</b>, <b>Guide</b> : boutons en bas</li></ul></div></div>'
+    + '<h3>Où faire quoi</h3><ul><li><b>Ta carte</b> : sur la table de ton logement. Regarde-la et appuie sur Agir. <kbd>Échap</kbd> ou la croix pour la fermer.</li><li><b>La nuit</b>, tu commences chez toi. Pour utiliser ton pouvoir, sors et va à <b>la porte</b> du joueur visé, puis Agir. Les autres peuvent voir ta lanterne passer.</li><li><b>Le Réanimateur</b> agit au <b>cimetière</b>, devant une tombe. <b>Le Constructeur</b> agit depuis son <b>lit</b>.</li><li><b>Le jour</b>, tout le monde se retrouve autour du feu.</li><li><b>Pour voter</b>, va au <b>poteau</b> du joueur (son nom est dessus) et Agir. Ou bouton « Voter blanc ».</li><li>Éliminé, tu deviens un <b>fantôme</b> invisible.</li></ul>'
+    + '<p class="tip">Perdu ? Ouvre la <b>tablette</b> : tout le jeu y est en version classique, avec les mêmes boutons. « Vue classique » repasse en 2D à tout moment.</p>';
+  $('#rules-in').innerHTML = '<div class="row" style="justify-content:space-between"><span class="eyebrow">Guide du survivant</span><button class="btn ghost small" data-a="close-rules">Fermer</button></div>'
+    + '<div class="rtabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" data-a="rules-tab" data-t="' + k + '" aria-selected="' + (k === T) + '">' + l + '</button>').join('') + '</div>' + b;
+  $('#rules-in').scrollTop = 0;
 }
+function openRules(tab) { if (typeof G3 !== 'undefined' && document.pointerLockElement) document.exitPointerLock(); renderRules(tab); $('#rules').hidden = false; $('#menu').hidden = true; }
 
 /* ===================================================================== interactions */
 let toastT;
@@ -2671,7 +2726,8 @@ document.addEventListener('click', async ev => {
       case 'join': { const n = getName(); if (!n) return; el.disabled = true; await ensureIdentity(false); await joinGame($('#in-code').value, n); el.disabled = false; break; }
       case 'resume': { const s = G.resume; if (!s) return; await ensureIdentity(false); if (s.host) { const S = await loadHostState(s.code); if (S) await hostStart(S, true); else { toast('Partie introuvable sur cet appareil.', true); saveSession(null); renderResume(null); } } else await joinGame(s.code, s.name); break; }
       case 'forget': saveSession(null); G.resume = null; renderResume(null); break;
-      case 'rules': renderRules(); $('#rules').hidden = false; $('#menu').hidden = true; break;
+      case 'rules': openRules(); break;
+      case 'rules-tab': renderRules(el.dataset.t); break;
       case 'close-rules': $('#rules').hidden = true; break;
       case 'copy-code': copyCode(); $('#menu').hidden = true; break;
       case 'leave':
@@ -2695,6 +2751,7 @@ document.addEventListener('click', async ev => {
       case 'mimic-role': G.sel.mimicRole = el.dataset.role; delete G.sel.mimic; render(); break;
       case 'fake-role': G.sel.fake = el.dataset.role; render(); break;
       case 'pass': await send({ t: 'pass', kind: el.dataset.kind }); toast('Tu gardes ton pouvoir pour une autre nuit.'); break;
+      case 'vote-blank': { el.disabled = true; await send({ t: 'vote', target: 'blank' }); toast('Vote blanc enregistré.'); delete G.sel.vote; break; }
       case 'vote': { const t = G.sel.vote; if (!t) return; el.disabled = true; await send({ t: 'vote', target: t }); toast('Vote enregistré contre ' + nameOf(G.pub, t) + '.'); delete G.sel.vote; break; }
       case 'ready': el.disabled = true; await send({ t: 'ready' }); break;
       case 'skip': await send({ t: 'skip' }); break;
@@ -3348,13 +3405,16 @@ function g3Bind() {
     const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement && document.activeElement.tagName);
     if (ev.code === 'Tab' && !typing) { ev.preventDefault(); g3Tablet(!G3.tablet); return; }
     if (typing) { if (ev.code === 'Escape' && G3.chatOpen) g3Chat(false); return; }
-    if (!$('#card-modal').hidden || !$('#report').hidden) return;
+    if (!$('#rules').hidden) return;
+    if (!$('#card-modal').hidden) { if (['Escape', 'KeyE', 'Space', 'Enter'].includes(ev.code) && !(G.pub.phase === 'reveal' && G.view && !G.view.ack && ev.code !== 'Escape')) { ev.preventDefault(); closeCard(); } return; }
+    if (!$('#report').hidden) { if (['Escape', 'KeyE', 'Space', 'Enter'].includes(ev.code)) { ev.preventDefault(); $('#report').hidden = true; } return; }
     if (G3.menu) { const n = parseInt(ev.key, 10); if (n >= 1 && n <= G3.menu.length) { ev.preventDefault(); g3Do(G3.menu[n - 1]); } if (ev.code === 'Escape') { G3.menu = null; g3Menu(); } if (ev.code === 'KeyE' && G3.menu.length === 1) g3Do(G3.menu[0]); return; }
     if (G3.tablet) { if (ev.code === 'Escape') g3Tablet(false); return; }
     G3.keys[ev.code] = true;
     if (ev.code === 'KeyE') { ev.preventDefault(); g3Interact(); }
     if (ev.code === 'KeyT' || ev.code === 'Enter') { ev.preventDefault(); g3Chat(true); }
     if (ev.code === 'KeyV') G3.third = !G3.third;
+    if (ev.code === 'KeyG') { ev.preventDefault(); openRules('3d'); }
     if (ev.code === 'KeyR') { const v = G.view; if (G.pub.phase === 'day' && v.canVote && !v.ready) { send({ t: 'ready' }); toast('Tu es prêt à voter.'); } }
   });
   addEventListener('keyup', ev => { G3.keys[ev.code] = false; });
@@ -3452,12 +3512,17 @@ function g3Hud() {
   if (!G3.on) return; const pub = G.pub, v = G.view;
   const night = pub.phase === 'night';
   setHTML($('#hud-guide'), v && !v.mj ? guideHTML() : '<div class="guide"><div class="guide-txt"><b>Maître du jeu</b><p>Ouvre la tablette (Tab) pour le panneau de contrôle.</p></div></div>');
-  const btns = [];
-  if (v && pub.phase === 'day' && v.canVote && !v.ready) btns.push('<button class="btn frost small" data-a="ready">Prêt à voter <span class="mono">R</span></button>');
-  btns.push('<button class="btn ghost small" data-a="t3">Tablette <span class="mono">Tab</span></button>');
-  btns.push('<button class="btn ghost small" data-a="c3">Parler <span class="mono">T</span></button>');
-  if (g3Coarse()) btns.push('<button class="btn red small" data-a="e3">Agir</button>');
-  btns.push('<button class="btn ghost small" data-a="v2d">Vue classique</button>');
+  const btns = [], coarse = g3Coarse();
+  const phaseBtn = v && pub.phase === 'day' && v.canVote && !v.ready ? '<button class="btn frost small hb-phase" data-a="ready">' + (pub.round === 1 && !CONFIG.FIRST_DAY_VOTE ? 'Passer à la nuit' : 'Prêt à voter') + ' <span class="mono">R</span></button>'
+    : v && pub.phase === 'vote' && v.canVote && !v.vote ? '<button class="btn frost small hb-phase" data-a="vote-blank">Voter blanc</button>' : '';
+  if (coarse) { // téléphone : gros bouton Agir en bas à droite, petits boutons au-dessus
+    btns.push('<button class="btn red hb-act" data-a="e3">Agir</button>');
+    if (phaseBtn) btns.push(phaseBtn);
+    btns.push('<button class="btn ghost small" data-a="c3">Parler</button>', '<button class="btn ghost small" data-a="t3">Tablette</button>', '<button class="btn ghost small" data-a="rules">Guide</button>', '<button class="btn ghost small" data-a="v2d">2D</button>');
+  } else {
+    if (phaseBtn) btns.push(phaseBtn);
+    btns.push('<button class="btn ghost small" data-a="t3">Tablette <span class="mono">Tab</span></button>', '<button class="btn ghost small" data-a="c3">Parler <span class="mono">T</span></button>', '<button class="btn ghost small" data-a="rules">Guide <span class="mono">G</span></button>', '<button class="btn ghost small" data-a="v2d">Vue classique</button>');
+  }
   setHTML($('#hud-btns'), btns.join(''));
   $('#hud-lock').hidden = G3.locked || g3Coarse() || G3.tablet || !!G3.menu || G3.chatOpen;
   document.body.classList.toggle('ghost3d', !!(v && v.alive === false && !v.mj));
@@ -3588,7 +3653,7 @@ function g3Frame(t) {
   // performance : si l'appareil peine, on baisse la résolution
   G3.fpsAcc = (G3.fpsAcc || 0) * 0.95 + rdt * 0.05; if (!G3.lowRes && G3.fpsAcc > 0.045 && t > 8000) { G3.lowRes = true; }
   // déplacements
-  const m = G3.me; const busy = G3.tablet || G3.menu || G3.chatOpen || !$('#card-modal').hidden || !$('#report').hidden;
+  const m = G3.me; const busy = G3.tablet || G3.menu || G3.chatOpen || !$('#card-modal').hidden || !$('#report').hidden || !$('#rules').hidden;
   let fx = 0, fz = 0;
   if (!busy) {
     const k = G3.keys;

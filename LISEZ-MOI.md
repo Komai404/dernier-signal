@@ -62,7 +62,9 @@ joystick à gauche, glisser à droite pour regarder, bouton « Agir ».
 - La nuit, tu commences dans ton logement. Tu peux rester ou sortir : pour utiliser ton pouvoir,
   va à la porte du joueur visé et appuie sur E. Attention, les autres peuvent te voir passer.
 - Le Réanimateur agit au cimetière, sur la tombe d'un éliminé. Le Constructeur bâtit depuis son lit.
-- Le jour, tout le monde se retrouve autour du feu. Pour voter, va au poteau du joueur et appuie sur E.
+- Le jour, tout le monde se retrouve autour du feu. Pour voter, va au poteau du joueur et appuie sur E. Le bouton « Voter blanc » permet de ne désigner personne.
+- Le bouton « Guide » (touche G) explique les règles et les commandes à tout moment.
+- Ta carte se ferme avec la croix en haut à droite, Échap ou E.
 - Un joueur éliminé devient un fantôme : il se promène sans être vu.
 - Le bouton « Vue classique » repasse en 2D à tout moment (utile sur un appareil peu puissant).
   Un joueur en vue classique reste visible dans le monde des autres (chez lui la nuit, au feu le jour).
@@ -137,6 +139,8 @@ Tout le jeu est dans `public/jouer.html` (la page d'accueil du site est `public/
 
 Exemples de réglages dans `CONFIG` :
 
+- `FIRST_DAY_VOTE: false` → pas de vote le premier jour (le Mordu ne contamine qu'à partir de la
+  deuxième nuit). Passe à `true` pour voter dès le jour 1.
 - `CONTAMINATED_CAN_TALK_BY_DAY: false` → passe à `true` pour que les contaminés puissent
   parler (et bluffer) le jour.
 - `NIGHT_ENDS_EARLY: false` → la nuit dure tout son chrono. Passe à `true` pour qu'elle se termine
