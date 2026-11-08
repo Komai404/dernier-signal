@@ -71,6 +71,32 @@ joystick à gauche, glisser à droite pour regarder, bouton « Agir ».
 - La nuit, chacun porte une lanterne : on voit les autres passer de loin. Sur un appareil lent, la
   résolution baisse automatiquement pour rester fluide.
 
+## Chat vocal
+
+Sur le site (Render ou ton propre serveur), chaque joueur peut parler au micro :
+
+- En arrivant dans une partie, un bandeau propose « Autoriser le micro ». Le navigateur demande
+  alors la permission. On peut aussi l'activer plus tard avec le bouton **VOCAL** en haut.
+- **Mode classique** : tout le monde s'entend. **Mode 3D** : chat de proximité, la voix baisse avec
+  la distance (réglable dans `const VOICE`, valeurs `NEAR` et `FAR`) et vient du bon côté.
+- Les règles du canal écrit s'appliquent : la nuit, seule la tanière peut se parler ; les éliminés
+  et les contaminés n'ont plus la parole devant les survivants.
+- Dans le panneau VOCAL : couper son micro (touche M en 3D), rendre muet un joueur, régler le volume
+  de chaque joueur, de son micro et le volume général.
+- Le son passe directement d'un joueur à l'autre (WebRTC) ; le serveur ne fait que les présenter.
+  Sur certains réseaux très fermés (entreprise, école), la connexion directe peut échouer.
+- Pas de chat vocal dans la version claude.ai ni dans la partie d'essai.
+
+## Téléphone
+
+Le jeu se joue en vertical ou en horizontal. À l'horizontale, l'interface se resserre : en classique,
+l'action à gauche et la discussion à droite ; en 3D, gros bouton Agir à droite. MENU → « Plein écran
+à l'horizontale » cache la barre du navigateur (Android). Sur iPhone, ajoute le site à l'écran
+d'accueil pour jouer en plein écran.
+
+L'aide à l'écran (le bandeau « À toi de jouer ») se masque avec sa croix et se remet dans
+MENU → Aide à l'écran.
+
 ## 5. Nouveaux rôles
 
 - **Le Constructeur** (survivants) : une fois par partie, il construit une seconde maison. Si la

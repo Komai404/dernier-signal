@@ -523,6 +523,24 @@ body.shake #app { animation: shake .6s ease; }
 .wait { flex: 1; display: grid; place-items: center; padding: 40px 16px; }
 .wait .in { display: grid; gap: 14px; justify-items: center; text-align: center; max-width: 46ch; }
 
+
+/* chat vocal */
+.vbtn.on { color: #0b0d10; background: var(--frost); border-color: var(--frost); }
+.vbtn.off { color: var(--signal-hi); border-color: var(--signal); }
+.vbtn.talking, .vbtn3.talking { box-shadow: 0 0 0 2px var(--frost), 0 0 14px rgba(139,208,212,.6); }
+[data-vpid].talking { box-shadow: inset 0 0 0 2px var(--frost), 0 0 12px rgba(139,208,212,.45); }
+.vrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border: 1px solid var(--line); }
+.vrow b { flex: 1; min-width: 0; color: var(--bone); } .vrow small { color: var(--mute); font-family: var(--f-mono); font-size: 11px; }
+.vrow .vdot { width: 10px; height: 10px; border-radius: 50%; background: var(--line-2); }
+.vrow.talking .vdot { background: var(--frost); box-shadow: 0 0 8px var(--frost); }
+.vslider { display: grid; gap: 4px; font-size: 14px; color: var(--dim); } .vslider.sub { margin: -6px 0 6px 22px; }
+.vslider input { width: 100%; accent-color: var(--frost); }
+#voice-ask { position: fixed; z-index: 66; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: min(520px, calc(100% - 32px)); background: var(--panel); border: 1px solid var(--line-2); border-top: 3px solid var(--frost); padding: 14px 16px; display: grid; gap: 10px; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+#voice-ask b { font-family: var(--f-display); text-transform: uppercase; font-size: 20px; letter-spacing: .04em; } #voice-ask p { margin: 4px 0 0; color: var(--dim); font-size: 14px; }
+.guide { position: relative; }
+.guide-x { position: absolute; top: 4px; right: 4px; width: 30px; height: 30px; border: 0; background: transparent; color: var(--mute); font-size: 20px; line-height: 1; cursor: pointer; pointer-events: auto !important; z-index: 2; }
+.guide-x:hover { color: var(--bone); }
+.guide-txt { padding-right: 26px; }
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
   .ggrid { grid-template-columns: minmax(0, 1fr) 320px; }
@@ -551,6 +569,35 @@ body.shake #app { animation: shake .6s ease; }
   .roster .plist { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .roster .plist li .tags { display: none; }
 }
+
+/* ---------- téléphone à l'horizontale ---------- */
+@media (orientation: landscape) and (max-height: 520px) {
+  .bar .wrap { min-height: 42px; padding-block: 3px; gap: 10px; flex-wrap: nowrap; }
+  .brand { font-size: 16px; } .freq .eyebrow, .meter { display: none; }
+  .phase-clock { gap: 8px; } .phase-name { font-size: 16px; } .bar .timer { font-size: 16px; }
+  .menu-btn { min-height: 30px; padding: 0 8px; font-size: 10px; }
+  #bar-role img { width: 26px; height: 26px; } #bar-role span, #bar-role b { display: none; }
+  /* classique : l'action à gauche, la discussion à droite */
+  .ggrid { grid-template-columns: minmax(0, 1fr) minmax(250px, 38%); gap: 12px; }
+  .stage { order: 1; } .comms { order: 2; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 50px); height: calc(100dvh - 64px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); min-height: 0; }
+  .roster { grid-column: 1 / 2; order: 3; }
+  #scr-game { padding-block: 10px 16px; }
+  .stage-head h2 { font-size: 32px; }
+  /* carte : image à gauche, texte à droite */
+  .cardbox { grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 18px; }
+  .flip { max-width: 200px; } .cardtext h2 { font-size: 32px; } .cardtext { gap: 8px; } .cardtext ul { display: none; }
+  .modal { padding-block: 10px; }
+  /* 3D : interface resserrée pour laisser voir le monde */
+  body.in3d.tablet #scr-game { inset: 42px 0 0 0; }
+  #hud-guide { top: calc(48px + env(safe-area-inset-top, 0px)) !important; width: min(380px, 44%) !important; }
+  #hud-guide .steps { display: none; } #hud-guide .guide { padding: 6px 10px; } #hud-guide .guide-txt b { font-size: 14px; } #hud-guide .guide-txt p { font-size: 12px; line-height: 1.35; }
+  #minimap { top: calc(48px + env(safe-area-inset-top, 0px)) !important; width: 92px !important; height: 92px !important; }
+  #hud-btns { flex-direction: row-reverse !important; flex-wrap: wrap-reverse !important; align-items: flex-end !important; align-content: flex-end; justify-content: flex-start !important; max-width: 52% !important; gap: 5px !important; }
+  #hud-btns .btn { min-height: 34px !important; font-size: 12px !important; padding: 0 10px !important; }
+  #hud-btns .hb-act { width: 70px !important; height: 70px !important; min-height: 70px !important; font-size: 15px !important; }
+  .hud-feed { width: 44% !important; } .hud-feed div:nth-last-child(n+3) { display: none; } .hud-feed div { font-size: 12px; padding: 3px 7px; }
+  #hud-prompt { font-size: 13px; top: calc(50% + 24px); }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .glitch::before, .glitch::after { display: none; }
@@ -567,11 +614,14 @@ body.shake #app { animation: shake .6s ease; }
         <span class="phase-name" id="bar-phase"></span>
         <span class="timer" id="bar-timer"></span>
         <span class="meter" id="bar-meter" title="Liaison avec l'hôte"><i></i><i></i><i></i><i></i></span>
-        <button class="menu-btn" id="bar-3d" data-a="v3d" hidden>VUE 3D</button><button class="menu-btn" data-a="rules" aria-label="Guide">GUIDE</button><span id="bar-role"></span>
+        <button class="menu-btn" id="bar-3d" data-a="v3d" hidden>VUE 3D</button><button class="menu-btn" data-a="rules" aria-label="Guide">GUIDE</button><button class="menu-btn vbtn" id="bar-voice" data-a="voice" hidden>VOCAL</button><span id="bar-role"></span>
         <div class="rel">
           <button class="menu-btn" id="menu-btn" aria-haspopup="true" aria-expanded="false">MENU</button>
           <div class="menu" id="menu" hidden>
             <button data-a="rules">Guide et règles</button>
+            <button data-a="guide-toggle" id="menu-guide">Aide à l’écran : activée</button>
+            <button data-a="voice">Chat vocal</button>
+            <button data-a="fullscreen" id="menu-fs">Plein écran à l’horizontale</button>
             <button data-a="copy-code">Copier le code</button>
             <button data-a="leave" class="red" id="menu-leave">Quitter la partie</button>
           </div>
@@ -697,6 +747,8 @@ body.shake #app { animation: shake .6s ease; }
 </div>
 <div class="modal" id="report" hidden role="dialog" aria-modal="true" aria-label="Rapport de l'aube"><div class="report-box" id="report-in"></div></div>
 <div class="drawer" id="rules" hidden><div class="drawer-in" id="rules-in"></div></div>
+<div class="drawer" id="voice" hidden><div class="drawer-in" id="voice-in"></div></div>
+<div id="voice-ask" role="dialog" aria-label="Chat vocal" hidden><div><b>Chat vocal</b><p>Parle avec les autres joueurs. Ton navigateur va demander l’accès à ton micro.</p></div><div class="row"><button class="btn red small" data-a="voice-yes">Autoriser le micro</button><button class="btn ghost small" data-a="voice-no">Plus tard</button></div></div>
 <div class="trans" id="trans"><div class="horizon"></div><div class="tin"><div class="big" id="trans-big"></div><div class="sub" id="trans-sub"></div></div></div>
 <div class="verdict" id="verdict"><div><div class="vn" id="verdict-name"></div><div class="vs" id="verdict-sub"></div></div></div>
 <div class="infect" id="infect"><div class="in"><h2>Contaminé</h2><p id="infect-p"></p></div></div>
@@ -711,7 +763,7 @@ body.shake #app { animation: shake .6s ease; }
     <div id="hud-btns"></div>
     <div id="menu3d" hidden></div>
     <form id="chat3d" data-chat="g3" hidden><input class="input" id="chat3d-in" maxlength="240" autocomplete="off"><button class="btn small" type="submit">Envoyer</button></form>
-    <div id="hud-lock" hidden><b>Clique pour jouer</b><span>ZQSD ou WASD pour marcher · souris pour regarder · E pour agir · T pour parler · Tab pour la tablette · V vue extérieure · Maj pour courir</span></div>
+    <div id="hud-lock" hidden><b>Clique pour jouer</b><span>ZQSD ou WASD pour marcher · souris pour regarder · E pour agir · T pour écrire · M micro · Tab tablette · G guide · V vue extérieure · Maj pour courir</span></div>
     <div id="joy" hidden><i></i></div>
   </div>
 </div>
@@ -962,7 +1014,7 @@ function makeServerDB() {
   const token = LS.get('ds_token') || (() => { const t = rid(32); LS.set('ds_token', t); return t; })();
   let pid = LS.get('ds_pid') || (() => { const p = 'p-' + rid(14); LS.set('ds_pid', p); return p; })();
   let es = null, cid = null, n = 0, ready = null, readyRes = null;
-  const subs = new Map(); const posCbs = [];
+  const subs = new Map(); const posCbs = [], rtcCbs = [], helloCbs = [];
   const mkSnap = d => ({ id: d.id, exists: !!d.exists, data: () => d.data || undefined, metadata: { fromCache: false, hasPendingWrites: false } });
   const mkQ = arr => ({ docs: arr.map(mkSnap), size: arr.length, empty: !arr.length, docChanges: () => [], metadata: { fromCache: false, hasPendingWrites: false } });
   async function hello() {
@@ -980,8 +1032,9 @@ function makeServerDB() {
       es.addEventListener('hello', ev => {
         cid = JSON.parse(ev.data).cid;
         for (const s of subs.values()) post({ op: 'sub', path: s.path, kind: s.kind, subId: s.id }).catch(() => {});
-        readyRes();
+        readyRes(); helloCbs.forEach(cb => { try { cb(); } catch {} });
       });
+      es.addEventListener('rtc', ev => { try { const m = JSON.parse(ev.data); rtcCbs.forEach(cb => cb(m.from, m.data)); } catch {} });
       es.addEventListener('pos', ev => { try { const m = JSON.parse(ev.data); posCbs.forEach(cb => cb(m.all)); } catch {} });
       es.addEventListener('snap', ev => { const m = JSON.parse(ev.data); const s = subs.get(m.id); if (s) { try { s.cb(m.payload); } catch (err) { console.error(err); } } });
     }).catch(() => setTimeout(connect, 3000));
@@ -1010,7 +1063,9 @@ function makeServerDB() {
     onSnapshot(next, err) { const id = ++n; subs.set(id, { id, path, kind: 'col', cb: pl => next(mkQ(pl)) }); post({ op: 'sub', path, kind: 'col', subId: id }).catch(e2 => err && err(e2)); return () => { subs.delete(id); post({ op: 'unsub', subId: id }).catch(() => {}); }; },
   });
   connect();
-  return { doc: docRef, collection: colRef, pos(code, s, b) { post({ op: 'pos', code, s, b }).catch(() => {}); }, onPos(cb) { posCbs.push(cb); } };
+  return { doc: docRef, collection: colRef, pos(code, s, b) { post({ op: 'pos', code, s, b }).catch(() => {}); }, onPos(cb) { posCbs.push(cb); },
+    vjoin: code => post({ op: 'vjoin', code }), vleave: code => post({ op: 'vleave', code }).catch(() => {}), rtc: (to, data) => post({ op: 'rtc', to, data }).catch(() => {}),
+    onRtc(cb) { rtcCbs.push(cb); }, onHello(cb) { helloCbs.push(cb); }, get pid() { return pid; } };
 }
 let installPrompt = null;
 addEventListener('beforeinstallprompt', ev => { ev.preventDefault(); installPrompt = ev; const b = $('#btn-install'); if (b) b.hidden = false; });
@@ -2087,6 +2142,8 @@ function render() {
   if (scr === 'lobby') renderLobby();
   if (scr === 'game') renderGame();
   if (scr === 'end') renderEnd();
+  vcRender(); vcInvite();
+  const mg = $('#menu-guide'); if (mg) mg.textContent = 'Aide à l’écran : ' + (guideOn() ? 'activée' : 'désactivée');
 }
 function renderNetNote() {
   const el = $('#net-note'); if (!el) return;
@@ -2124,7 +2181,7 @@ function tickTimer() {
 setInterval(() => { if (G.code && G.pub) { tickTimer(); if (!G.isHost) renderBar(); } }, 500);
 
 function playerRow(p, extraTags = '') {
-  return '<li class="' + (p.alive === false ? 'dead ' : '') + (p.pid === G.pid ? 'me' : '') + '"><span class="mark">' + e(ini(p.name)) + '</span><span class="pname">' + e(p.name) + '</span><span class="tags">' + extraTags + '</span></li>';
+  return '<li data-vpid="' + e(p.pid) + '" class="' + (p.alive === false ? 'dead ' : '') + (p.pid === G.pid ? 'me' : '') + '"><span class="mark">' + e(ini(p.name)) + '</span><span class="pname">' + e(p.name) + '</span><span class="tags">' + extraTags + '</span></li>';
 }
 function renderLobby() {
   const pub = G.pub; const host = G.isHost;
@@ -2196,7 +2253,7 @@ function targetsHTML(a, extra = {}) {
   return '<div class="targets">' + list.map(pid => {
     const name = nameOf(pub, pid); const why = a.forbid[pid]; const pressed = (a.changeable ? (sel ?? a.chosen) : sel) === pid;
     const picks = extra.picks ? Object.entries(extra.picks).filter(([, t]) => t === pid).map(([who]) => '<span class="tag red">' + e(nameOf(pub, who)) + '</span>').join('') : '';
-    return '<button class="tgt" data-a="sel" data-kind="' + a.kind + '" data-pid="' + e(pid) + '" aria-pressed="' + pressed + '" ' + (why ? 'disabled' : '') + '><span class="ini">' + e(ini(name)) + '</span><span class="nm">' + e(name) + '</span>' + (why ? '<span class="why">' + e(why) + '</span>' : '') + (picks ? '<span class="picks">' + picks + '</span>' : '') + '</button>';
+    return '<button class="tgt" data-vpid="' + e(pid) + '" data-a="sel" data-kind="' + a.kind + '" data-pid="' + e(pid) + '" aria-pressed="' + pressed + '" ' + (why ? 'disabled' : '') + '><span class="ini">' + e(ini(name)) + '</span><span class="nm">' + e(name) + '</span>' + (why ? '<span class="why">' + e(why) + '</span>' : '') + (picks ? '<span class="picks">' + picks + '</span>' : '') + '</button>';
   }).join('') + '</div>';
 }
 function actHTML(a) {
@@ -2511,7 +2568,15 @@ function openReport(force) {
   $('#report').hidden = false;
   setTimeout(() => { const b = $('#report .btn[data-a="close-report"]'); if (b) b.focus(); }, 50);
 }
+async function goFullscreen() {
+  const d = document.documentElement;
+  try { if (!document.fullscreenElement) { if (d.requestFullscreen) await d.requestFullscreen({ navigationUI: 'hide' }); else if (d.webkitRequestFullscreen) d.webkitRequestFullscreen(); } else await document.exitFullscreen(); } catch {}
+  try { if (document.fullscreenElement && screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch {}
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) toast('Ton navigateur ne permet pas le plein écran ici. Sur iPhone : Partager, puis « Sur l’écran d’accueil » pour jouer en plein écran.');
+}
+function guideOn() { return LS.get('ds_guide', 'on') !== 'off'; }
 function guideHTML() {
+  if (!guideOn()) return '';
   const pub = G.pub, v = G.view, ph = pub.phase;
   const pending = (v.acts || []).filter(a => (a.kind === 'conta' ? !a.chosen : !a.done) && a.targets.some(t => !a.forbid[t]));
   let go = false, title = '', txt = '';
@@ -2536,12 +2601,12 @@ function guideHTML() {
     if (ph === 'night' && v.alive && pending.length) { const k = pending[0].kind; txt = k === 'build' ? 'Va à ton lit et appuie sur ' + act + ' pour construire ta seconde maison (ou garde-la pour plus tard).' : k === 'revive' ? 'Va au cimetière, devant la tombe à réanimer, et appuie sur ' + act + '.' : k === 'conta' ? 'Va à la porte de la cible et appuie sur ' + act + ', ou choisis avec la tanière sur la tablette.' : 'Sors, va à la porte de ta cible et appuie sur ' + act + '. Attention : on peut te voir passer. La tablette marche aussi.'; }
     else if (ph === 'poison') txt = 'Ouvre la tablette pour choisir le faux rôle et la victime.';
     else if (ph === 'vote' && v.canVote && !v.vote) txt = 'Va au poteau du joueur que tu soupçonnes et appuie sur ' + act + '. Pas de soupçon ? Bouton « Voter blanc ».';
-    else if (ph === 'day' && v.canVote && !v.ready && !v.speak) txt = 'Retrouve les autres au feu, parle avec ' + (g3Coarse() ? '« Parler »' : 'T') + ', puis appuie sur « ' + (pub.round === 1 && !CONFIG.FIRST_DAY_VOTE ? 'Passer à la nuit' : 'Prêt à voter') + ' ».';
+    else if (ph === 'day' && v.canVote && !v.ready && !v.speak) txt = 'Retrouve les autres au feu, parle au micro ou écris (' + (g3Coarse() ? '« Écrire »' : 'T') + '), puis appuie sur « ' + (pub.round === 1 && !CONFIG.FIRST_DAY_VOTE ? 'Passer à la nuit' : 'Prêt à voter') + ' ».';
     else if (ph === 'reveal' && !v.ack) txt = 'Ta carte est posée sur ta table. Lis-la, puis appuie sur « J’ai compris ».';
   }
   const steps = [['night', 'Nuit'], ['day', 'Débat'], ['vote', 'Vote'], ['result', 'Verdict']];
   const idx = steps.findIndex(s => s[0] === ph);
-  return '<div class="guide' + (go ? ' go' : '') + '"><ol class="steps" aria-label="Étapes de la manche">' + steps.map((s, i) => '<li class="' + (i === idx ? 'on' : i < idx ? 'past' : '') + '"' + (i === idx ? ' aria-current="step"' : '') + '>' + s[1] + '</li>').join('') + '</ol><div class="guide-txt"><b>' + (go ? '<span class="pulse"></span>' : '') + e(title) + '</b><p>' + e(txt) + '</p></div></div>';
+  return '<div class="guide' + (go ? ' go' : '') + '"><button class="guide-x" data-a="guide-toggle" aria-label="Masquer l’aide à l’écran" title="Masquer l’aide (MENU pour la remettre)">×</button><ol class="steps" aria-label="Étapes de la manche">' + steps.map((s, i) => '<li class="' + (i === idx ? 'on' : i < idx ? 'past' : '') + '"' + (i === idx ? ' aria-current="step"' : '') + '>' + s[1] + '</li>').join('') + '</ol><div class="guide-txt"><b>' + (go ? '<span class="pulse"></span>' : '') + e(title) + '</b><p>' + e(txt) + '</p></div></div>';
 }
 
 /* ===================================================================== carte de rôle */
@@ -2680,7 +2745,8 @@ function renderRules(tab) {
     + '<p>Dernier Signal est un jeu de déduction, comme le Loup-garou. Un joueur a été mordu : il contamine les autres, la nuit, en secret. Les survivants doivent le trouver et l’éliminer par un vote.</p>'
     + '<h3>Lancer une partie</h3><ol><li>Entre ton nom, puis <b>Créer une partie</b>. Tu reçois un code de 5 lettres.</li><li>Envoie ce code aux autres. Ils ouvrent le site, entrent leur nom et le code, puis <b>Rejoindre</b>.</li><li>Dans le salon, l’hôte choisit <b>Classique</b> ou <b>3D</b>, ajoute des bots s’il manque du monde (4 joueurs minimum), puis lance.</li><li>Seul ? <b>Partie d’essai</b> : tu joues contre des bots.</li></ol>'
     + '<h3>Ta première partie en bref</h3><ol><li><b>Ta carte.</b> Elle s’affiche au début. Lis ton rôle, puis appuie sur « J’ai compris ». Ne la montre à personne.</li><li><b>Nuit 1.</b> Si ton rôle a un pouvoir, choisis une cible. Sinon, attends.</li><li><b>Jour 1.</b> ' + (fdv ? 'On discute, mais on ne vote pas : personne n’a encore été contaminé.' : 'On discute, puis on vote.') + '</li><li><b>Nuit 2 et suivantes.</b> Le Mordu contamine quelqu’un chaque nuit.</li><li><b>Jours suivants.</b> Lisez le rapport de l’aube, débattez, puis votez. Pas de soupçon ? Vote blanc.</li></ol>'
-    + '<p class="tip">En haut de l’écran, un bandeau te dit toujours quoi faire maintenant. Le menu <b>Guide</b> est disponible à tout moment, même en pleine partie.</p>';
+    + '<h3>Chat vocal</h3><p>Sur le site du jeu, appuie sur <b>VOCAL</b> (en haut) et autorise le micro. En classique, tout le monde s’entend. En 3D, c’est un chat de proximité : tu entends ceux qui sont près de toi. La nuit, seule la tanière peut se parler. Dans le panneau VOCAL, tu peux couper ton micro, rendre muet un joueur et régler chaque volume.</p>'
+    + '<p class="tip">En haut de l’écran, un bandeau te dit toujours quoi faire maintenant. Tu peux le masquer avec sa croix, et le remettre dans MENU → Aide à l’écran. Le menu <b>Guide</b> est disponible à tout moment, même en pleine partie.</p>';
   if (T === 'rules') b = '<h2>Règles</h2>'
     + '<p>Un joueur reçoit en secret le rôle du <b>Mordu original</b>. Son but : contaminer tous les autres sans être découvert. Les autres sont des survivants : ils doivent le démasquer et l’éliminer par un vote.</p>'
     + '<h3>Une manche</h3><ol><li><b>Nuit.</b> Les rôles à pouvoir agissent en secret. À partir de la deuxième nuit, le Mordu original et les contaminés choisissent une cible. Le Gardien peut l’en protéger. La nuit dure tout son chrono, pour que personne ne devine qui a agi.</li><li><b>Aube.</b> Le jeu annonce ce qui s’est passé, sans dire qui a été contaminé. Chacun reçoit ses résultats en privé.</li><li><b>Jour.</b> Les survivants discutent et partagent leurs soupçons. Quand tout le monde est prêt, ou à la fin du chrono, le vote s’ouvre.</li><li><b>Vote.</b> Chaque survivant vote en secret pour un joueur, ou vote blanc. Le joueur le plus désigné est éliminé et sa carte révélée. En cas d’égalité, ou si les votes blancs sont aussi nombreux, personne ne l’est.</li></ol>'
@@ -2695,7 +2761,7 @@ function renderRules(tab) {
     + '<h3>Agir la nuit</h3><ol><li>Touche le nom d’un joueur pour le choisir.</li><li>Appuie sur le bouton d’action (Protéger, Analyser…).</li><li>Ton choix est enregistré ; le résultat arrive à l’aube.</li></ol>'
     + '<h3>Voter</h3><ol><li>Touche le joueur que tu soupçonnes.</li><li>Appuie sur « Voter contre… », ou sur « Voter blanc ».</li></ol>';
   if (T === '3d') b = '<h2>Mode 3D</h2><p>Le même jeu, dans un monde à explorer à la première personne. Chaque joueur a son logement, avec sa carte posée sur la table.</p>'
-    + '<h3>Commandes</h3><div class="keys"><div><b>Ordinateur</b><ul><li><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou flèches : marcher, <kbd>Maj</kbd> : courir</li><li>Souris : regarder (clique d’abord sur le jeu, <kbd>Échap</kbd> pour libérer la souris)</li><li><kbd>E</kbd> : agir sur ce que tu regardes</li><li><kbd>T</kbd> : parler · <kbd>R</kbd> : prêt</li><li><kbd>Tab</kbd> : tablette · <kbd>V</kbd> : vue extérieure · <kbd>G</kbd> : guide</li></ul></div><div><b>Téléphone</b><ul><li>Pouce gauche : joystick pour marcher</li><li>Glisser à droite : regarder</li><li><b>Agir</b> : utiliser ce que tu regardes</li><li><b>Parler</b>, <b>Tablette</b>, <b>Guide</b> : boutons en bas</li></ul></div></div>'
+    + '<h3>Commandes</h3><div class="keys"><div><b>Ordinateur</b><ul><li><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou flèches : marcher, <kbd>Maj</kbd> : courir</li><li>Souris : regarder (clique d’abord sur le jeu, <kbd>Échap</kbd> pour libérer la souris)</li><li><kbd>E</kbd> : agir sur ce que tu regardes</li><li><kbd>T</kbd> : écrire · <kbd>M</kbd> : micro on/off · <kbd>R</kbd> : prêt</li><li><kbd>Tab</kbd> : tablette · <kbd>V</kbd> : vue extérieure · <kbd>G</kbd> : guide</li></ul></div><div><b>Téléphone</b><ul><li>Pouce gauche : joystick pour marcher</li><li>Glisser à droite : regarder</li><li><b>Agir</b> : utiliser ce que tu regardes</li><li><b>Micro</b>, <b>Écrire</b>, <b>Tablette</b>, <b>Guide</b> : boutons à droite</li><li>Tourne ton téléphone à l’horizontale, et MENU → Plein écran</li></ul></div></div>'
     + '<h3>Où faire quoi</h3><ul><li><b>Ta carte</b> : sur la table de ton logement. Regarde-la et appuie sur Agir. <kbd>Échap</kbd> ou la croix pour la fermer.</li><li><b>La nuit</b>, tu commences chez toi. Pour utiliser ton pouvoir, sors et va à <b>la porte</b> du joueur visé, puis Agir. Les autres peuvent voir ta lanterne passer.</li><li><b>Le Réanimateur</b> agit au <b>cimetière</b>, devant une tombe. <b>Le Constructeur</b> agit depuis son <b>lit</b>.</li><li><b>Le jour</b>, tout le monde se retrouve autour du feu.</li><li><b>Pour voter</b>, va au <b>poteau</b> du joueur (son nom est dessus) et Agir. Ou bouton « Voter blanc ».</li><li>Éliminé, tu deviens un <b>fantôme</b> invisible.</li></ul>'
     + '<p class="tip">Perdu ? Ouvre la <b>tablette</b> : tout le jeu y est en version classique, avec les mêmes boutons. « Vue classique » repasse en 2D à tout moment.</p>';
   $('#rules-in').innerHTML = '<div class="row" style="justify-content:space-between"><span class="eyebrow">Guide du survivant</span><button class="btn ghost small" data-a="close-rules">Fermer</button></div>'
@@ -2717,6 +2783,7 @@ document.addEventListener('click', async ev => {
   if (ev.target.id === 'menu-btn') { menu.hidden = !menu.hidden; $('#menu-btn').setAttribute('aria-expanded', String(!menu.hidden)); return; }
   if (ev.target === $('#card-modal')) { closeCard(); return; }
   if (ev.target === $('#rules')) { $('#rules').hidden = true; return; }
+  if (ev.target === $('#voice')) { $('#voice').hidden = true; return; }
   if (!el || el.disabled) return;
   const a = el.dataset.a;
   try {
@@ -2728,6 +2795,15 @@ document.addEventListener('click', async ev => {
       case 'forget': saveSession(null); G.resume = null; renderResume(null); break;
       case 'rules': openRules(); break;
       case 'rules-tab': renderRules(el.dataset.t); break;
+      case 'guide-toggle': LS.set('ds_guide', guideOn() ? 'off' : 'on'); $('#menu').hidden = true; toast(guideOn() ? 'Aide à l’écran activée.' : 'Aide masquée. Tu peux la remettre depuis MENU.'); render(); if (typeof G3 !== 'undefined' && G3.on) g3Hud(); break;
+      case 'voice': $('#menu').hidden = true; vcOpen(); break;
+      case 'fullscreen': $('#menu').hidden = true; goFullscreen(); break;
+      case 'voice-close': $('#voice').hidden = true; break;
+      case 'voice-on': case 'voice-yes': G.voiceAskDismissed = true; $('#voice-ask').hidden = true; await vcStart(true); break;
+      case 'voice-no': G.voiceAskDismissed = true; vcPrefs().auto = false; vcSave(); $('#voice-ask').hidden = true; toast('Tu peux activer le chat vocal plus tard avec le bouton VOCAL.'); break;
+      case 'voice-off': vcStop(); break;
+      case 'voice-mic': case 'voice-mic3': VC.micOn = !VC.micOn; toast(VC.micOn ? 'Micro activé.' : 'Micro coupé.'); vcRender(); if (typeof G3 !== 'undefined' && G3.on) g3Hud(); break;
+      case 'voice-mute': { const p = el.dataset.p; const pr = vcPrefs(); pr.peers[p] = Object.assign(pr.peers[p] || {}, { mute: !(pr.peers[p] || {}).mute }); vcSave(); vcRender(); break; }
       case 'close-rules': $('#rules').hidden = true; break;
       case 'copy-code': copyCode(); $('#menu').hidden = true; break;
       case 'leave':
@@ -2799,7 +2875,7 @@ document.addEventListener('change', ev => {
   H.S.settings.timers[s.dataset.timer] = parseInt(s.value, 10); hostChanged();
 });
 document.addEventListener('focusout', ev => { if (ev.target.tagName === 'SELECT' && ev.target.closest('#stage')) setTimeout(render, 0); });
-document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { closeCard(); $('#report').hidden = true; $('#rules').hidden = true; $('#menu').hidden = true; } });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { closeCard(); $('#report').hidden = true; $('#rules').hidden = true; $('#voice').hidden = true; $('#menu').hidden = true; } });
 $('#in-code').addEventListener('input', ev => { ev.target.value = ev.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); });
 $('#in-code').addEventListener('keydown', ev => { if (ev.key === 'Enter') $('#btn-join').click(); });
 $('#in-name').addEventListener('keydown', ev => { if (ev.key === 'Enter') ($('#in-code').value.length === 5 ? $('#btn-join') : $('#btn-create')).click(); });
@@ -2829,7 +2905,7 @@ const V3 = { sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], add: (a, b)
 const cmul = (c, k) => [c[0] * k, c[1] * k, c[2] * k];
 class Geo {
   constructor(rand) { this.d = []; this.rand = rand || Math.random; }
-  v(p, n, c, uv) { this.d.push(p[0], p[1], p[2], n[0], n[1], n[2], c[0], c[1], c[2], uv ? uv[0] : 0, uv ? uv[1] : 0); }
+  v(p, n, c, uv) { if (!uv && this.sway) uv = [this.sway * Math.min(1, Math.max(0, p[1]) / 6), 0]; this.d.push(p[0], p[1], p[2], n[0], n[1], n[2], c[0], c[1], c[2], uv ? uv[0] : 0, uv ? uv[1] : 0); }
   face(pts, c, center, uvs, cols) {
     let n = V3.norm(V3.cross(V3.sub(pts[1], pts[0]), V3.sub(pts[2], pts[0])));
     if (center) { const fc = [0, 0, 0]; for (const p of pts) { fc[0] += p[0] / pts.length; fc[1] += p[1] / pts.length; fc[2] += p[2] / pts.length; } if (V3.dot(n, V3.sub(fc, center)) < 0) n = [-n[0], -n[1], -n[2]]; }
@@ -2885,7 +2961,7 @@ const R3 = {
     const gl = canvas.getContext('webgl', { antialias: true, alpha: false, powerPreference: 'high-performance' }) || canvas.getContext('experimental-webgl');
     if (!gl) return false;
     this.gl = gl;
-    const VS = 'attribute vec3 aPos;attribute vec3 aNor;attribute vec3 aCol;attribute vec2 aUV;uniform mat4 uP,uV,uM;uniform vec3 uTint;varying vec3 vCol,vNor,vW;varying vec2 vUV;void main(){vec4 w=uM*vec4(aPos,1.0);vW=w.xyz;vNor=mat3(uM)*aNor;vCol=aCol*uTint;vUV=aUV;gl_Position=uP*uV*w;}';
+    const VS = 'attribute vec3 aPos;attribute vec3 aNor;attribute vec3 aCol;attribute vec2 aUV;uniform mat4 uP,uV,uM;uniform vec3 uTint;uniform float uSway,uWT;varying vec3 vCol,vNor,vW;varying vec2 vUV;void main(){vec4 w=uM*vec4(aPos,1.0);if(uSway>0.5&&aUV.x>0.0){float s=aUV.x;w.x+=sin(uWT*1.7+w.x*0.23+w.z*0.17)*s*0.22;w.z+=cos(uWT*1.3+w.z*0.21+w.x*0.11)*s*0.15;}vW=w.xyz;vNor=mat3(uM)*aNor;vCol=aCol*uTint;vUV=aUV;gl_Position=uP*uV*w;}';
     const FS = '#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\n'
       + 'varying vec3 vCol,vNor,vW;varying vec2 vUV;uniform vec3 uSunDir,uSunCol,uSky,uGnd,uFogCol,uZen,uCam;uniform float uFogD,uEmis,uUseTex,uAlpha,uMode,uTime,uNight,uNoise;uniform sampler2D uTex;uniform vec3 uLP[8];uniform vec3 uLC[8];uniform float uLR[8];'
       + 'float h3(vec3 p){p=fract(p*0.3183099+0.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}'
@@ -2902,14 +2978,14 @@ const R3 = {
       + 'if(uMode>0.5&&uMode<1.5){float w=vn(vec3(vW.xz*0.9,uTime*0.7))*0.5+vn(vec3(vW.xz*2.6,uTime*1.3))*0.5;base*=0.7+w*0.7;}'
       + 'vec3 n=normalize(vNor);vec3 L=mix(uGnd,uSky,n.y*0.5+0.5)+uSunCol*max(dot(n,-uSunDir),0.0);'
       + 'for(int i=0;i<8;i++){vec3 dl=uLP[i]-vW;float ds=length(dl);float at=clamp(1.0-ds/max(uLR[i],0.001),0.0,1.0);at*=at;L+=uLC[i]*at*(0.35+0.65*max(dot(n,dl/max(ds,0.001)),0.0));}'
-      + 'vec3 col=mix(base*L,base,uEmis);float dist=length(vW-uCam);float f=1.0-exp(-pow(dist*uFogD,1.5));'
+      + 'vec3 col=mix(base*L,base,uEmis);if(uMode>0.5&&uMode<1.5){vec3 vd=normalize(vW-uCam);vec3 rf=reflect(vd,vec3(0.0,1.0,0.0));col=mix(col,uZen*0.9+uFogCol*0.2,0.28*(1.0-abs(vd.y)));col+=uSunCol*pow(max(dot(rf,-uSunDir),0.0),80.0)*1.6;}float dist=length(vW-uCam);float f=1.0-exp(-pow(dist*uFogD,1.5));'
       + 'gl_FragColor=vec4(mix(col,uFogCol,clamp(f,0.0,1.0)*(1.0-uEmis*0.35)),a);}';
     const sh = (t, src) => { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
     const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(p);
     if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
     this.prog = p; gl.useProgram(p);
     for (const n of ['aPos', 'aNor', 'aCol', 'aUV']) this.loc[n] = gl.getAttribLocation(p, n);
-    for (const n of ['uP', 'uV', 'uM', 'uTint', 'uSunDir', 'uSunCol', 'uSky', 'uGnd', 'uFogCol', 'uZen', 'uCam', 'uFogD', 'uEmis', 'uUseTex', 'uAlpha', 'uTex', 'uMode', 'uTime', 'uNight', 'uNoise']) this.loc[n] = gl.getUniformLocation(p, n);
+    for (const n of ['uP', 'uV', 'uM', 'uTint', 'uSunDir', 'uSunCol', 'uSky', 'uGnd', 'uFogCol', 'uZen', 'uCam', 'uFogD', 'uEmis', 'uUseTex', 'uAlpha', 'uTex', 'uMode', 'uTime', 'uNight', 'uNoise', 'uSway', 'uWT']) this.loc[n] = gl.getUniformLocation(p, n);
     this.loc.uLP = gl.getUniformLocation(p, 'uLP'); this.loc.uLC = gl.getUniformLocation(p, 'uLC'); this.loc.uLR = gl.getUniformLocation(p, 'uLR');
     gl.enable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
     const cg = new Geo(() => 0.5); cg.box(0, 10, 0, 1, 1, 1, [1, 1, 1], 0, null, 0); cg.d = cg.d.map((v, i) => (i % 11 === 1 ? v - 10 : (i % 11 >= 6 && i % 11 <= 8 ? 1 : v))); this.cube = this.mesh(cg);
@@ -2948,7 +3024,7 @@ const R3 = {
     gl.useProgram(this.prog);
     gl.uniformMatrix4fv(L.uP, false, P); gl.uniformMatrix4fv(L.uV, false, V);
     gl.uniform3fv(L.uSunDir, env.sunDir); gl.uniform3fv(L.uSunCol, env.sun); gl.uniform3fv(L.uSky, env.sky); gl.uniform3fv(L.uGnd, env.gnd); gl.uniform3fv(L.uFogCol, env.fog); gl.uniform3fv(L.uZen, env.zen);
-    gl.uniform3fv(L.uCam, cam); gl.uniform1f(L.uFogD, env.fogD); gl.uniform1f(L.uTime, time); gl.uniform1f(L.uNight, env.night);
+    gl.uniform3fv(L.uCam, cam); gl.uniform1f(L.uFogD, env.fogD); gl.uniform1f(L.uTime, time); gl.uniform1f(L.uWT, time % 1000); gl.uniform1f(L.uNight, env.night);
     const lp = new Float32Array(24), lc = new Float32Array(24), lr = new Float32Array(8);
     lights.slice(0, 8).forEach((l, i) => { lp.set(l.p, i * 3); lc.set(l.c, i * 3); lr[i] = l.r; });
     gl.uniform3fv(L.uLP, lp); gl.uniform3fv(L.uLC, lc); gl.uniform1fv(L.uLR, lr);
@@ -2960,7 +3036,7 @@ const R3 = {
     const gl = this.gl, L = this.loc;
     gl.uniformMatrix4fv(L.uM, false, M || M4.id());
     gl.uniform3fv(L.uTint, opts.tint || [1, 1, 1]); gl.uniform1f(L.uEmis, opts.emis || 0); gl.uniform1f(L.uAlpha, opts.alpha == null ? 1 : opts.alpha);
-    gl.uniform1f(L.uMode, opts.mode || 0); gl.uniform1f(L.uNoise, opts.noise || 0);
+    gl.uniform1f(L.uMode, opts.mode || 0); gl.uniform1f(L.uNoise, opts.noise || 0); gl.uniform1f(L.uSway, opts.sway ? 1 : 0);
     if (opts.tex) { gl.uniform1f(L.uUseTex, 1); gl.bindTexture(gl.TEXTURE_2D, opts.tex); } else gl.uniform1f(L.uUseTex, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, mesh.b);
     const st = 44;
@@ -3013,9 +3089,11 @@ function layout3d(n) {
 /* petits éléments de décor réutilisables */
 const P3 = {
   pine(g, x, z, h, rand, tone = 1) {
+    const sw0 = g.sway; g.sway = 0;
     const tr = [0.36, 0.2, 0.12].map(v => v * tone);
     g.cyl(x, 0, z, 0.32 + h * 0.025, h * 0.62, 7, tr, 0.12 + h * 0.008);
-    for (let k = 0; k < 4; k++) { const y = h * (0.28 + k * 0.17), r = (2.5 - k * 0.5) * (h / 14); const c = [0.13 + rand() * 0.05, 0.27 + rand() * 0.07 - k * 0.01, 0.13 + rand() * 0.04].map(v => v * tone * (0.85 + k * 0.08)); g.cyl(x + (rand() - 0.5) * 0.2, y, z + (rand() - 0.5) * 0.2, r, h * 0.3, 8, c, 0); }
+    for (let k = 0; k < 4; k++) { const y = h * (0.28 + k * 0.17), r = (2.5 - k * 0.5) * (h / 14); const c = [0.13 + rand() * 0.05, 0.27 + rand() * 0.07 - k * 0.01, 0.13 + rand() * 0.04].map(v => v * tone * (0.85 + k * 0.08)); g.sway = 0.9; g.cyl(x + (rand() - 0.5) * 0.2, y, z + (rand() - 0.5) * 0.2, r, h * 0.3, 8, c, 0); g.sway = 0; }
+    g.sway = sw0;
   },
   oak(g, x, z, h, rand) {
     g.cyl(x, 0, z, 0.35, h * 0.55, 6, [0.33, 0.24, 0.16], 0.24);
@@ -3029,9 +3107,11 @@ const P3 = {
   rock(g, x, z, s, rand, col = [0.42, 0.42, 0.4]) {
     g.box(x, s * 0.35, z, s * 1.3, s * 0.8, s, col, rand() * 3); g.box(x + s * 0.3, s * 0.25, z + s * 0.2, s * 0.7, s * 0.6, s * 0.7, col.map(v => v * 0.9), rand() * 3);
   },
-  bush(g, x, z, rand, col = [0.22, 0.36, 0.16]) { for (let k = 0; k < 3; k++) { const s = 0.6 + rand() * 0.6; g.box(x + (rand() - 0.5) * 0.9, s * 0.45, z + (rand() - 0.5) * 0.9, s * 1.2, s, s * 1.1, col.map(v => v * (0.85 + rand() * 0.3)), rand() * 3); } },
+  bush(g, x, z, rand, col = [0.22, 0.36, 0.16]) { g.sway = 3; for (let k = 0; k < 3; k++) { const s = 0.6 + rand() * 0.6; g.box(x + (rand() - 0.5) * 0.9, s * 0.45, z + (rand() - 0.5) * 0.9, s * 1.2, s, s * 1.1, col.map(v => v * (0.85 + rand() * 0.3)), rand() * 3); } g.sway = 0; },
   tuft(g, x, z, rand, col) {
+    g.sway = 8;
     for (let k = 0; k < 3; k++) { const a = rand() * 6.28, h = 0.22 + rand() * 0.3, w = 0.07; const ox = Math.cos(a) * w, oz = Math.sin(a) * w, lx = Math.cos(a + 0.3) * 0.12, lz = Math.sin(a + 0.3) * 0.12; const c = col.map(v => v * (0.8 + rand() * 0.45)); g.face([[x - ox, 0, z - oz], [x + ox, 0, z + oz], [x + lx, h, z + lz]], c, null, null, [cmul(c, 0.6), cmul(c, 0.6), cmul(c, 1.25)]); }
+    g.sway = 0;
   },
   crate(g, x, y, z, s, rand, ry = 0) { const c = [0.45, 0.33, 0.2]; g.box(x, y + s / 2, z, s, s, s, c, ry); g.box(x, y + s / 2, z, s * 1.02, s * 0.14, s * 1.02, c.map(v => v * 0.7), ry, null, 0); },
   barrel(g, x, z, col = [0.45, 0.22, 0.15]) { g.cyl(x, 0, z, 0.42, 1.1, 10, col); g.cyl(x, 0.3, z, 0.44, 0.07, 10, col.map(v => v * 0.6)); g.cyl(x, 0.78, z, 0.44, 0.07, 10, col.map(v => v * 0.6)); },
@@ -3405,7 +3485,7 @@ function g3Bind() {
     const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement && document.activeElement.tagName);
     if (ev.code === 'Tab' && !typing) { ev.preventDefault(); g3Tablet(!G3.tablet); return; }
     if (typing) { if (ev.code === 'Escape' && G3.chatOpen) g3Chat(false); return; }
-    if (!$('#rules').hidden) return;
+    if (!$('#rules').hidden || !$('#voice').hidden) return;
     if (!$('#card-modal').hidden) { if (['Escape', 'KeyE', 'Space', 'Enter'].includes(ev.code) && !(G.pub.phase === 'reveal' && G.view && !G.view.ack && ev.code !== 'Escape')) { ev.preventDefault(); closeCard(); } return; }
     if (!$('#report').hidden) { if (['Escape', 'KeyE', 'Space', 'Enter'].includes(ev.code)) { ev.preventDefault(); $('#report').hidden = true; } return; }
     if (G3.menu) { const n = parseInt(ev.key, 10); if (n >= 1 && n <= G3.menu.length) { ev.preventDefault(); g3Do(G3.menu[n - 1]); } if (ev.code === 'Escape') { G3.menu = null; g3Menu(); } if (ev.code === 'KeyE' && G3.menu.length === 1) g3Do(G3.menu[0]); return; }
@@ -3415,6 +3495,7 @@ function g3Bind() {
     if (ev.code === 'KeyT' || ev.code === 'Enter') { ev.preventDefault(); g3Chat(true); }
     if (ev.code === 'KeyV') G3.third = !G3.third;
     if (ev.code === 'KeyG') { ev.preventDefault(); openRules('3d'); }
+    if (ev.code === 'KeyM') { ev.preventDefault(); if (VC.on) { VC.micOn = !VC.micOn; toast(VC.micOn ? 'Micro activé.' : 'Micro coupé.'); vcRender(); g3Hud(); } else vcOpen(); }
     if (ev.code === 'KeyR') { const v = G.view; if (G.pub.phase === 'day' && v.canVote && !v.ready) { send({ t: 'ready' }); toast('Tu es prêt à voter.'); } }
   });
   addEventListener('keyup', ev => { G3.keys[ev.code] = false; });
@@ -3508,8 +3589,10 @@ function g3Menu() {
   el.innerHTML = '<span class="eyebrow">' + (G3.menu.length > 1 ? 'Choisis une action' : 'Confirmer') + '</span>' + G3.menu.map((o, i) => '<button class="btn ' + (i === 0 ? 'red' : 'ghost') + ' small" data-a="m3" data-i="' + i + '"><span class="mono">' + (i + 1) + '</span> ' + e(o.label) + '</button>').join('') + '<button class="link" data-a="m3-close">Annuler (Échap)</button>';
 }
 /* --- interface en jeu --- */
+function vcHudBtn(coarse) { if (!vcAvailable()) return ''; if (!VC.on) return '<button class="btn ghost small" data-a="voice">Vocal' + (coarse ? '' : ' <span class="mono">M</span>') + '</button>'; return '<button class="btn small ' + (VC.micOn && VC.mic ? 'frost' : 'ghost') + ' vbtn3" data-vpid="' + e(G.pid) + '" data-a="voice-mic3">' + (VC.micOn && VC.mic ? 'Micro on' : 'Micro off') + (coarse ? '' : ' <span class="mono">M</span>') + '</button>'; }
 function g3Hud() {
-  if (!G3.on) return; const pub = G.pub, v = G.view;
+  if (!G3.on) return;
+  if (g3Coarse() && innerHeight > innerWidth && !G.rotHint) { G.rotHint = true; toast('Astuce : tourne ton téléphone à l’horizontale pour mieux voir. MENU → Plein écran.'); } const pub = G.pub, v = G.view;
   const night = pub.phase === 'night';
   setHTML($('#hud-guide'), v && !v.mj ? guideHTML() : '<div class="guide"><div class="guide-txt"><b>Maître du jeu</b><p>Ouvre la tablette (Tab) pour le panneau de contrôle.</p></div></div>');
   const btns = [], coarse = g3Coarse();
@@ -3518,10 +3601,10 @@ function g3Hud() {
   if (coarse) { // téléphone : gros bouton Agir en bas à droite, petits boutons au-dessus
     btns.push('<button class="btn red hb-act" data-a="e3">Agir</button>');
     if (phaseBtn) btns.push(phaseBtn);
-    btns.push('<button class="btn ghost small" data-a="c3">Parler</button>', '<button class="btn ghost small" data-a="t3">Tablette</button>', '<button class="btn ghost small" data-a="rules">Guide</button>', '<button class="btn ghost small" data-a="v2d">2D</button>');
+    btns.push(vcHudBtn(true), '<button class="btn ghost small" data-a="c3">Écrire</button>', '<button class="btn ghost small" data-a="t3">Tablette</button>', '<button class="btn ghost small" data-a="rules">Guide</button>', '<button class="btn ghost small" data-a="v2d">2D</button>');
   } else {
     if (phaseBtn) btns.push(phaseBtn);
-    btns.push('<button class="btn ghost small" data-a="t3">Tablette <span class="mono">Tab</span></button>', '<button class="btn ghost small" data-a="c3">Parler <span class="mono">T</span></button>', '<button class="btn ghost small" data-a="rules">Guide <span class="mono">G</span></button>', '<button class="btn ghost small" data-a="v2d">Vue classique</button>');
+    btns.push(vcHudBtn(false), '<button class="btn ghost small" data-a="t3">Tablette <span class="mono">Tab</span></button>', '<button class="btn ghost small" data-a="c3">Écrire <span class="mono">T</span></button>', '<button class="btn ghost small" data-a="rules">Guide <span class="mono">G</span></button>', '<button class="btn ghost small" data-a="v2d">Vue classique</button>');
   }
   setHTML($('#hud-btns'), btns.join(''));
   $('#hud-lock').hidden = G3.locked || g3Coarse() || G3.tablet || !!G3.menu || G3.chatOpen;
@@ -3603,7 +3686,7 @@ function g3Particles(dt, E, m) {
   for (const em of w.emit) {
     if (em.kind === 'fire') {
       em.acc = (em.acc || 0) + dt * 26 * (em.s || 1);
-      while (em.acc > 1) { em.acc--; P.push({ k: 'flame', x: em.p[0] + (Math.random() - 0.5) * 0.5 * (em.s || 1), y: em.p[1], z: em.p[2] + (Math.random() - 0.5) * 0.5 * (em.s || 1), vy: 1.1 + Math.random() * 0.9, vx: (Math.random() - 0.5) * 0.25, vz: (Math.random() - 0.5) * 0.25, life: 0, max: 0.55 + Math.random() * 0.4, s: (0.7 + Math.random() * 0.5) * (em.s || 1) }); if (Math.random() < 0.18) P.push({ k: 'ember', x: em.p[0], y: em.p[1] + 0.4, z: em.p[2], vy: 1.5 + Math.random() * 1.6, vx: (Math.random() - 0.5) * 0.9, vz: (Math.random() - 0.5) * 0.9, life: 0, max: 1.6 + Math.random() * 1.6, s: 0.07 }); }
+      while (em.acc > 1) { em.acc--; P.push({ k: 'flame', x: em.p[0] + (Math.random() - 0.5) * 0.5 * (em.s || 1), y: em.p[1], z: em.p[2] + (Math.random() - 0.5) * 0.5 * (em.s || 1), vy: 1.1 + Math.random() * 0.9, vx: (Math.random() - 0.5) * 0.25, vz: (Math.random() - 0.5) * 0.25, life: 0, max: 0.55 + Math.random() * 0.4, s: (0.7 + Math.random() * 0.5) * (em.s || 1) }); if (Math.random() < 0.09) P.push({ k: 'smoke', x: em.p[0] + (Math.random() - 0.5) * 0.4, y: em.p[1] + 0.9 * (em.s || 1), z: em.p[2] + (Math.random() - 0.5) * 0.4, vy: 0.7 + Math.random() * 0.4, vx: 0.15 + (Math.random() - 0.5) * 0.2, vz: (Math.random() - 0.5) * 0.2, life: 0, max: 5 + Math.random() * 3, s: 0.6 }); if (Math.random() < 0.18) P.push({ k: 'ember', x: em.p[0], y: em.p[1] + 0.4, z: em.p[2], vy: 1.5 + Math.random() * 1.6, vx: (Math.random() - 0.5) * 0.9, vz: (Math.random() - 0.5) * 0.9, life: 0, max: 1.6 + Math.random() * 1.6, s: 0.07 }); }
     } else if (em.kind === 'reactor') {
       em.acc = (em.acc || 0) + dt * 10;
       while (em.acc > 1) { em.acc--; const a = Math.random() * 6.28; P.push({ k: 'mote', c: [0.35, 1, 0.75], x: Math.cos(a) * 1.3, y: 0.8, z: Math.sin(a) * 1.3, vy: 0.6 + Math.random() * 0.8, vx: 0, vz: 0, life: 0, max: 3 + Math.random() * 2, s: 0.12 }); }
@@ -3622,9 +3705,12 @@ function g3Particles(dt, E, m) {
   }
 }
 function g3DrawParticles(E, time) {
+  R3.blend(true);
+  for (const p of G3.parts) if (p.k === 'smoke') { const f = p.life / p.max; const s = p.s * (1 + f * 3.2); const g = E.night > 0.5 ? 0.16 : 0.5; g3Billboard(R3.glow, p.x, p.y, p.z, s, s, Math.min(1, f * 6) * (1 - f) * 0.32, [g, g, g * 1.04]); }
   R3.blend('add');
   for (const p of G3.parts) {
     const f = p.life / p.max;
+    if (p.k === 'smoke') continue;
     if (p.k === 'flame') { const s = p.s * (1 - f * 0.7); g3Billboard(R3.flame, p.x, p.y, p.z, s, s * 1.35, (1 - f) * 0.9); continue; }
     let a, col;
     if (p.k === 'ember') { a = (1 - f); col = [1, 0.55, 0.2]; }
@@ -3653,7 +3739,7 @@ function g3Frame(t) {
   // performance : si l'appareil peine, on baisse la résolution
   G3.fpsAcc = (G3.fpsAcc || 0) * 0.95 + rdt * 0.05; if (!G3.lowRes && G3.fpsAcc > 0.045 && t > 8000) { G3.lowRes = true; }
   // déplacements
-  const m = G3.me; const busy = G3.tablet || G3.menu || G3.chatOpen || !$('#card-modal').hidden || !$('#report').hidden || !$('#rules').hidden;
+  const m = G3.me; const busy = G3.tablet || G3.menu || G3.chatOpen || !$('#card-modal').hidden || !$('#report').hidden || !$('#rules').hidden || !$('#voice').hidden;
   let fx = 0, fz = 0;
   if (!busy) {
     const k = G3.keys;
@@ -3701,7 +3787,7 @@ function g3Frame(t) {
   ls.sort((p1, p2) => Math.hypot(p1.p[0] - m.x, p1.p[2] - m.z) - Math.hypot(p2.p[0] - m.x, p2.p[2] - m.z));
   const lights = dyn.concat(ls.map(l => ({ p: l.p, c: l.c.map(x => x * (0.3 + 0.7 * E.night)), r: l.r })));
   R3.frame(E, P, V, eye, lights, time);
-  R3.draw(G3.mesh, null, { noise: 0.42 });
+  R3.draw(G3.mesh, null, { noise: 0.42, sway: true });
   R3.draw(G3.emMesh, null, { emis: 0.45 + 0.55 * E.night });
   if (G3.watMesh && G3.watMesh.n) R3.draw(G3.watMesh, null, { mode: 1, emis: 0.15 });
   // tombes
@@ -3737,6 +3823,7 @@ function g3Frame(t) {
     const d = Math.hypot(o.x - m.x, o.z - m.z); if (d > (night ? 10 : 28)) continue;
     let tg = G3.tagTex.get(pid); if (!tg) { tg = R3.textTex(nameOf(pub, pid), { size: 60, color: '#e3dfd5', bg: 'rgba(0,0,0,0.5)', round: true }); G3.tagTex.set(pid, tg); }
     g3Billboard(tg, o.x, 2.42, o.z, 1.0, 0.25);
+    if (vcSpeaking(pid)) { R3.blend('add'); const k = 0.75 + Math.sin(time * 14) * 0.15; g3Billboard(R3.glow, o.x, 2.68, o.z, 0.5 * k, 0.5 * k, 0.9, [0.55, 0.95, 1]); R3.blend(true); }
     const msg = lastMsg[pid]; if (msg) { const key = pid + msg.t; let bt = G3.bubTex.get(key); if (!bt) { const words = msg.txt.length > 60 ? msg.txt.slice(0, 57) + '…' : msg.txt; const lines = words.match(/.{1,30}(\s|$)/g) || [words]; bt = R3.textTex(lines.slice(0, 2).map(s => s.trim()), { w: 512, h: 160, size: 40, weight: '600', color: '#111', bg: 'rgba(240,236,228,0.95)' }); G3.bubTex.set(key, bt); if (G3.bubTex.size > 40) G3.bubTex.delete(G3.bubTex.keys().next().value); } g3Billboard(bt, o.x, 3.0, o.z, 1.8, 0.56); }
   }
   // lueurs autour des lanternes la nuit
@@ -3887,6 +3974,208 @@ function modePanelHTML(host) {
   if (mode === '3d') h += '<div class="maps">' + Object.entries(MAPS3D).map(([id, M]) => '<button class="mapcard map-' + id + '" data-a="set-map" data-m="' + id + '" aria-pressed="' + (map === id) + '" ' + (host ? '' : 'disabled') + '><b>' + e(M.name) + '</b><span>' + e(M.desc) + '</span><i>' + e(M.home.charAt(0).toUpperCase() + M.home.slice(1)) + ' pour chaque joueur</i></button>').join('') + '</div>';
   if (host && window.claude && typeof window.claude.use === 'function' && !NET.server) h += '<label class="check"><input type="checkbox" id="in-ai" data-a="ai-toggle" ' + (st.ai ? 'checked' : '') + '> Bots pilotés par l’IA Claude : ils lisent la discussion et raisonnent sur les faits de la partie (utilise ton compte Claude).</label>';
   return h;
+}
+
+/* =====================================================================
+   CHAT VOCAL (WebRTC, de joueur à joueur ; le serveur ne fait que présenter les joueurs)
+   - Mode classique : tout le monde s'entend, selon les règles du canal public
+     (la nuit, seuls les membres de la tanière s'entendent entre eux).
+   - Mode 3D : chat de proximité, le son baisse avec la distance et vient du bon côté.
+   ===================================================================== */
+const VOICE = {
+  NEAR: 8,          // en 3D : volume plein à moins de 8 m (autour du feu, tout le monde s'entend)
+  FAR: 26,          // en 3D : on n'entend plus personne au-delà de 26 m
+  ICE: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }],
+};
+const VC = {
+  on: false, joining: false, code: null, ctx: null, mic: null, micGain: null, micAn: null, micOn: true, peers: new Map(), prefs: null, bound: false, level: 0, err: '',
+};
+function vcAvailable() { return !!(NET.server && !NET.demo && window.RTCPeerConnection && navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.isSecureContext); }
+function vcPrefs() { if (!VC.prefs) VC.prefs = LS.get('ds_voice', null) || { auto: null, micVol: 1, outVol: 1, peers: {} }; return VC.prefs; }
+function vcSave() { LS.set('ds_voice', VC.prefs); }
+async function vcStart(fromClick) {
+  if (VC.on || VC.joining || !vcAvailable() || !G.code) return;
+  VC.joining = true; VC.err = '';
+  try {
+    if (!VC.ctx) VC.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (VC.ctx.state === 'suspended') await VC.ctx.resume().catch(() => {});
+    if (!VC.mic) {
+      try { VC.mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
+      catch (err) { VC.mic = null; VC.err = 'Micro refusé : tu entends les autres mais ils ne t’entendent pas. Autorise le micro dans les réglages du navigateur (icône à gauche de l’adresse).'; }
+      VC.micGain = VC.ctx.createGain(); VC.micAn = VC.ctx.createAnalyser(); VC.micAn.fftSize = 512;
+      if (VC.mic) { const src = VC.ctx.createMediaStreamSource(VC.mic); src.connect(VC.micGain); }
+      VC.micGain.connect(VC.micAn);
+    }
+    vcPrefs().auto = true; vcSave();
+    VC.micGain.gain.value = VC.micOn ? vcPrefs().micVol : 0;
+    if (!VC.bound) {
+      VC.bound = true;
+      NET.real.onRtc((from, data) => vcSignal(from, data));
+      NET.real.onHello(() => { if (VC.on && VC.code) NET.real.vjoin(VC.code).catch(() => {}); });
+      setInterval(vcTick, 150);
+    }
+    VC.code = G.code; await NET.real.vjoin(G.code);
+    VC.on = true;
+    if (!VC.err) toast('Chat vocal activé' + (G.pub && G.pub.settings && G.pub.settings.mode === '3d' ? ' : on entend les joueurs proches.' : '.'));
+    else toast(VC.err, true);
+  } catch (err) { VC.err = 'Le chat vocal n’a pas pu démarrer.'; toast(VC.err, true); }
+  VC.joining = false; vcRender(); render();
+}
+function vcStop(save = true) {
+  if (!VC.on) return;
+  VC.on = false; NET.real.vleave(VC.code);
+  for (const pid of [...VC.peers.keys()]) vcDrop(pid);
+  if (VC.mic) { VC.mic.getTracks().forEach(t => t.stop()); VC.mic = null; VC.micGain = null; }
+  if (save) { vcPrefs().auto = false; vcSave(); }
+  vcRender(); render();
+}
+function vcPeer(pid) {
+  let p = VC.peers.get(pid); if (p) return p;
+  const pc = new RTCPeerConnection({ iceServers: VOICE.ICE });
+  const out = VC.ctx.createGain(); out.gain.value = 0; VC.micGain.connect(out);
+  const dest = VC.ctx.createMediaStreamDestination(); out.connect(dest);
+  const track = dest.stream.getAudioTracks()[0]; pc.addTrack(track, dest.stream);
+  p = { pid, pc, out, dest, gain: null, pan: null, an: null, el: null, level: 0, state: 'connexion' };
+  pc.onicecandidate = ev => { if (ev.candidate) NET.real.rtc(pid, { t: 'ice', c: ev.candidate.toJSON ? ev.candidate.toJSON() : ev.candidate }); };
+  pc.onconnectionstatechange = () => { p.state = pc.connectionState === 'connected' ? 'ok' : pc.connectionState === 'failed' ? 'échec' : pc.connectionState === 'disconnected' ? 'coupé' : 'connexion'; if (pc.connectionState === 'failed') { vcDrop(pid); if (VC.on) NET.real.rtc(pid, { t: 'hello' }); } vcRender(); };
+  pc.ontrack = ev => {
+    const stream = ev.streams[0] || new MediaStream([ev.track]);
+    // Chrome ne joue un flux distant dans WebAudio que s'il est aussi branché sur un élément audio (muet)
+    const el = new Audio(); el.muted = true; el.srcObject = stream; el.play().catch(() => {}); p.el = el;
+    const src = VC.ctx.createMediaStreamSource(stream);
+    p.gain = VC.ctx.createGain(); p.gain.gain.value = 0; p.an = VC.ctx.createAnalyser(); p.an.fftSize = 512;
+    p.pan = VC.ctx.createStereoPanner ? VC.ctx.createStereoPanner() : null;
+    src.connect(p.an); src.connect(p.gain);
+    if (p.pan) { p.gain.connect(p.pan); p.pan.connect(VC.ctx.destination); } else p.gain.connect(VC.ctx.destination);
+    vcRender();
+  };
+  VC.peers.set(pid, p); return p;
+}
+function vcDrop(pid) {
+  const p = VC.peers.get(pid); if (!p) return;
+  try { p.pc.close(); } catch {} try { p.out.disconnect(); } catch {} try { p.gain && p.gain.disconnect(); } catch {} if (p.el) p.el.srcObject = null;
+  VC.peers.delete(pid); vcRender();
+}
+async function vcOffer(pid) {
+  const p = vcPeer(pid); const o = await p.pc.createOffer(); await p.pc.setLocalDescription(o);
+  NET.real.rtc(pid, { t: 'offer', sdp: p.pc.localDescription.sdp });
+}
+async function vcSignal(from, d) {
+  if (!VC.on || from === G.pid || !d) return;
+  const me = G.pid;
+  try {
+    if (d.t === 'hello' || d.t === 'here') {
+      if (d.t === 'hello') { if (VC.peers.has(from)) vcDrop(from); NET.real.rtc(from, { t: 'here' }); }
+      if (me < from && !VC.peers.has(from)) await vcOffer(from);
+    } else if (d.t === 'offer') {
+      if (VC.peers.has(from) && VC.peers.get(from).pc.signalingState !== 'stable') vcDrop(from);
+      const p = vcPeer(from); await p.pc.setRemoteDescription({ type: 'offer', sdp: d.sdp });
+      const a = await p.pc.createAnswer(); await p.pc.setLocalDescription(a);
+      NET.real.rtc(from, { t: 'answer', sdp: p.pc.localDescription.sdp });
+      for (const c of p.pend || []) await p.pc.addIceCandidate(c).catch(() => {}); p.pend = null;
+    } else if (d.t === 'answer') {
+      const p = VC.peers.get(from); if (p && p.pc.signalingState === 'have-local-offer') { await p.pc.setRemoteDescription({ type: 'answer', sdp: d.sdp }); for (const c of p.pend || []) await p.pc.addIceCandidate(c).catch(() => {}); p.pend = null; }
+    } else if (d.t === 'ice') {
+      const p = VC.peers.get(from); if (!p) return;
+      if (!p.pc.remoteDescription) (p.pend = p.pend || []).push(d.c); else await p.pc.addIceCandidate(d.c).catch(() => {});
+    } else if (d.t === 'bye') vcDrop(from);
+  } catch (err) { console.warn('vocal', err); }
+}
+/* qui peut parler à qui : les mêmes règles que le canal écrit */
+function vcCanSendTo(pid) {
+  const v = G.view, pub = G.pub; if (!v || !pub || !VC.micOn) return false;
+  if (v.mj) return true;
+  if (v.canChat) return true;
+  return !!(v.lair && v.alive !== false && (v.lair.members || []).includes(pid));
+}
+function vcHearFactor(pid) {
+  const pub = G.pub, v = G.view; if (!pub) return 0;
+  const pr = vcPrefs().peers[pid] || {}; if (pr.mute) return 0;
+  let k = pr.vol == null ? 1 : pr.vol;
+  const lairMate = v && v.lair && (v.lair.members || []).includes(pid);
+  const isMJ = pub.mj && pid === pub.host;
+  // en 3D : la distance compte (sauf tanière, maître du jeu, salon et fin de partie)
+  if (pub.settings && pub.settings.mode === '3d' && !lairMate && !isMJ && !['lobby', 'end'].includes(pub.phase)) {
+    const o = typeof G3 !== 'undefined' && G3.others.get(pid); const me = typeof G3 !== 'undefined' ? G3.me : null;
+    let mx = null, mz = null;
+    if (G3.on) { mx = me.x; mz = me.z; }
+    else { const i = pub.players.findIndex(p => p.pid === G.pid); const h = i >= 0 ? layout3d(pub.players.length).homes[i] : null; if (h) { const sp = ['poison', 'reveal', 'night'].includes(pub.phase) ? h.inside : h.spot; mx = sp[0]; mz = sp[1]; } }
+    if (!o || mx == null) return 0;
+    const ox = G3.on ? o.x : (o.tx == null ? o.x : o.tx), oz = G3.on ? o.z : (o.tz == null ? o.z : o.tz);
+    const d = Math.hypot(ox - mx, oz - mz);
+    const f = d <= VOICE.NEAR ? 1 : d >= VOICE.FAR ? 0 : 1 - (d - VOICE.NEAR) / (VOICE.FAR - VOICE.NEAR);
+    k *= f * f;
+    if (G3.on) { const dx = ox - mx, dz = oz - mz; const rx = Math.cos(me.yaw), rz = -Math.sin(me.yaw); vcPan(pid, Math.max(-0.85, Math.min(0.85, (dx * rx + dz * rz) / Math.max(1, d)))); }
+  } else vcPan(pid, 0);
+  return k * vcPrefs().outVol;
+}
+function vcPan(pid, x) { const p = VC.peers.get(pid); if (p && p.pan) p.pan.pan.value = x; }
+const vcLevel = an => { if (!an) return 0; const a = new Uint8Array(an.fftSize); an.getByteTimeDomainData(a); let m = 0; for (const v of a) m = Math.max(m, Math.abs(v - 128)); return m / 128; };
+function vcTick() {
+  if (!VC.on) return;
+  if (G.code !== VC.code) { vcStop(false); return; }
+  const t = VC.ctx.currentTime;
+  if (VC.micGain) VC.micGain.gain.setTargetAtTime(VC.micOn ? vcPrefs().micVol : 0, t, 0.05);
+  VC.level = vcLevel(VC.micAn);
+  for (const [pid, p] of VC.peers) {
+    p.out.gain.setTargetAtTime(vcCanSendTo(pid) ? 1 : 0, t, 0.05);
+    if (p.gain) p.gain.gain.setTargetAtTime(vcHearFactor(pid), t, 0.1);
+    p.level = p.gain && p.gain.gain.value > 0.02 ? vcLevel(p.an) : 0;
+  }
+  vcIndicators();
+}
+function vcSpeaking(pid) { if (!VC.on) return false; if (pid === G.pid) return VC.micOn && VC.level > 0.08 && VC.mic; const p = VC.peers.get(pid); return !!(p && p.level > 0.06); }
+function vcIndicators() {
+  document.querySelectorAll('[data-vpid]').forEach(el => el.classList.toggle('talking', !!vcSpeaking(el.dataset.vpid)));
+  const b = $('#bar-voice'); if (b) b.classList.toggle('talking', !!vcSpeaking(G.pid));
+}
+/* --- panneau du chat vocal --- */
+function vcOpen() { if (typeof G3 !== 'undefined' && document.pointerLockElement) document.exitPointerLock(); $('#voice').hidden = false; vcRender(); }
+function vcRender() {
+  const box = $('#voice-in'); const bar = $('#bar-voice');
+  if (bar) { bar.hidden = !G.code || !vcAvailable() && !NET.demo; bar.textContent = !VC.on ? 'VOCAL' : VC.micOn && VC.mic ? 'MICRO ON' : 'MICRO OFF'; bar.classList.toggle('on', VC.on && VC.micOn && !!VC.mic); bar.classList.toggle('off', VC.on && (!VC.micOn || !VC.mic)); }
+  if (!box || $('#voice').hidden) return;
+  const pub = G.pub; const pr = vcPrefs();
+  let h = '<div class="row" style="justify-content:space-between"><span class="eyebrow">Chat vocal</span><button class="btn ghost small" data-a="voice-close">Fermer</button></div>';
+  if (!vcAvailable()) {
+    h += '<h2>Chat vocal</h2><p>' + (NET.demo ? 'Pas de chat vocal dans la partie d’essai : les bots ne parlent pas.' : 'Le chat vocal marche sur le site du jeu (dernier-signal.onrender.com, ou ton propre serveur), pas dans cette page. Il faut aussi un navigateur récent et une adresse en https.') + '</p>';
+    box.innerHTML = h; return;
+  }
+  const three = pub && pub.settings && pub.settings.mode === '3d';
+  h += '<h2>Chat vocal</h2><p>' + (three ? 'Mode 3D : chat de proximité. Tu entends les joueurs proches de toi ; plus ils s’éloignent, plus leur voix baisse.' : 'Tout le monde s’entend, comme autour d’une table.') + ' La nuit, seule la tanière peut se parler. Les éliminés et les contaminés écoutent sans être entendus des survivants.</p>';
+  if (!VC.on) h += '<div class="row"><button class="btn red" data-a="voice-on">' + (VC.joining ? 'Connexion…' : 'Activer le chat vocal') + '</button></div><p class="dim">Ton navigateur va te demander l’autorisation d’utiliser le micro.</p>';
+  else {
+    if (VC.err) h += '<p class="tip">' + e(VC.err) + '</p>';
+    h += '<div class="vrow me" data-vpid="' + e(G.pid) + '"><span class="vdot"></span><b>Toi</b><button class="btn small ' + (VC.micOn ? 'frost' : 'ghost') + '" data-a="voice-mic" ' + (VC.mic ? '' : 'disabled') + '>' + (VC.micOn ? 'Micro activé' : 'Micro coupé') + '</button></div>'
+      + '<label class="vslider"><span>Volume de ton micro</span><input type="range" id="v-mic" min="0" max="2" step="0.05" value="' + pr.micVol + '" data-vset="mic"></label>'
+      + '<label class="vslider"><span>Volume général</span><input type="range" id="v-out" min="0" max="2" step="0.05" value="' + pr.outVol + '" data-vset="out"></label>'
+      + '<h3>Joueurs</h3>';
+    const players = (pub ? pub.players : []).filter(p => p.pid !== G.pid && !p.bot);
+    if (!players.length) h += '<p class="dim">Personne d’autre pour l’instant.</p>';
+    for (const p of players) {
+      const peer = VC.peers.get(p.pid); const pp = pr.peers[p.pid] || {};
+      const st = !peer ? 'pas connecté au vocal' : peer.state === 'ok' ? '' : peer.state;
+      h += '<div class="vrow" data-vpid="' + e(p.pid) + '"><span class="vdot"></span><b>' + e(p.name) + '</b>' + (st ? '<small>' + e(st) + '</small>' : '')
+        + '<button class="btn small ' + (pp.mute ? 'red' : 'ghost') + '" data-a="voice-mute" data-p="' + e(p.pid) + '" aria-pressed="' + !!pp.mute + '">' + (pp.mute ? 'Muet' : 'Rendre muet') + '</button></div>'
+        + '<label class="vslider sub"><span>Volume de ' + e(p.name) + '</span><input type="range" id="v-p-' + e(p.pid) + '" min="0" max="2" step="0.05" value="' + (pp.vol == null ? 1 : pp.vol) + '" data-vset="peer" data-p="' + e(p.pid) + '"></label>';
+    }
+    h += '<div class="row"><button class="btn ghost small" data-a="voice-off">Quitter le chat vocal</button></div>';
+  }
+  const keep = document.activeElement && document.activeElement.closest && document.activeElement.closest('#voice-in input[type=range]');
+  if (keep) return; // ne pas casser un curseur en cours de réglage
+  box.innerHTML = h; vcIndicators();
+}
+document.addEventListener('input', ev => {
+  const el = ev.target; if (!el.dataset || !el.dataset.vset) return; const pr = vcPrefs(); const val = parseFloat(el.value);
+  if (el.dataset.vset === 'mic') pr.micVol = val; else if (el.dataset.vset === 'out') pr.outVol = val; else { const p = el.dataset.p; pr.peers[p] = Object.assign(pr.peers[p] || {}, { vol: val }); }
+  vcSave();
+});
+/* bandeau d'autorisation à l'arrivée dans une partie */
+function vcInvite() {
+  const el = $('#voice-ask'); if (!el) return;
+  const show = vcAvailable() && G.code && !VC.on && !VC.joining && vcPrefs().auto == null && !G.voiceAskDismissed;
+  el.hidden = !show;
+  if (vcAvailable() && G.code && !VC.on && !VC.joining && vcPrefs().auto === true && !G.voiceAuto) { G.voiceAuto = true; const go = () => { removeEventListener('pointerdown', go, true); vcStart(true); }; addEventListener('pointerdown', go, true); }
 }
 
 /* ===================================================================== démarrage */

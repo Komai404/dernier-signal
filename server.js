@@ -118,6 +118,10 @@ setInterval(() => {
 }, 150);
 const cleanPos = s => s && typeof s === 'object' && typeof s.pid === 'string' && SEG.test(s.pid) ? { pid: s.pid, x: +s.x || 0, z: +s.z || 0, r: +s.r || 0, w: s.w ? 1 : 0, s: Array.isArray(s.s) ? s.s.slice(0, 7).map(n => (n | 0) % 16) : null } : null;
 
+/* ---------- chat vocal : relais de signalisation WebRTC (le son passe directement entre joueurs) ---------- */
+function voicePeers(code, except) { const out = []; for (const c of conns.values()) if (c.vroom === code && c !== except) out.push(c); return out; }
+function voiceBye(conn) { const code = conn.vroom; conn.vroom = null; if ([...conns.values()].some(c => c.vroom === code && c.pid === conn.pid)) return; for (const c of voicePeers(code, conn)) emit(c, 'rtc', { from: conn.pid, data: { t: 'bye' } }); }
+
 /* ---------- HTTP ---------- */
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
 function json(res, code, obj) { res.writeHead(code, { 'content-type': 'application/json', 'cache-control': 'no-store' }); res.end(JSON.stringify(obj)); }
@@ -148,7 +152,7 @@ async function api(req, res, url) {
     const conn = { res, pid, subs: new Map() }; conns.set(cid, conn);
     emit(conn, 'hello', { cid });
     const ping = setInterval(() => { try { res.write(': ping\n\n'); } catch {} }, 20000);
-    req.on('close', () => { clearInterval(ping); conns.delete(cid); });
+    req.on('close', () => { clearInterval(ping); conns.delete(cid); if (conn.vroom) voiceBye(conn); });
     return;
   }
   if (url.pathname.endsWith('/api/op') && req.method === 'POST') {
@@ -188,6 +192,21 @@ async function api(req, res, url) {
         const r = roomOf(code); const t = Date.now();
         const me = cleanPos(b.s); if (me && me.pid === pid) { r.all[pid] = me; r.seen[pid] = t; r.dirty = true; }
         if (Array.isArray(b.b) && owners[code] === pid) for (const bs of b.b.slice(0, 16)) { const c = cleanPos(bs); if (c && c.pid.startsWith('bot-')) { r.all[c.pid] = c; r.seen[c.pid] = t; r.dirty = true; } }
+        return json(res, 200, { result: null });
+      }
+      case 'vjoin': case 'vleave': {
+        const conn = conns.get(b.cid); const code = typeof b.code === 'string' && SEG.test(b.code) ? b.code : null;
+        if (!conn || conn.pid !== pid || !code || !store.has('ds/' + code)) return json(res, 400, { code: 'invalid_argument' });
+        if (b.op === 'vleave') { if (conn.vroom) voiceBye(conn); return json(res, 200, { result: null }); }
+        if (conn.vroom && conn.vroom !== code) voiceBye(conn);
+        conn.vroom = code;
+        for (const c of voicePeers(code, conn)) if (c.pid !== pid) emit(c, 'rtc', { from: pid, data: { t: 'hello' } });
+        return json(res, 200, { result: null });
+      }
+      case 'rtc': {
+        const conn = conns.get(b.cid); if (!conn || conn.pid !== pid || !conn.vroom) return json(res, 409, { code: 'unavailable' });
+        if (typeof b.to !== 'string' || !SEG.test(b.to) || !b.data || typeof b.data !== 'object' || JSON.stringify(b.data).length > 20000) return json(res, 400, { code: 'invalid_argument' });
+        for (const c of voicePeers(conn.vroom, conn)) if (c.pid === b.to) emit(c, 'rtc', { from: pid, data: b.data });
         return json(res, 200, { result: null });
       }
       case 'unsub': { const conn = conns.get(b.cid); if (conn) conn.subs.delete(b.subId); return json(res, 200, { result: null }); }
