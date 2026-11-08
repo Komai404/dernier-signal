@@ -704,6 +704,54 @@ body.thfx-glitch #app { animation: glitchapp 7s steps(1) infinite; } @keyframes 
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .glitch::before, .glitch::after { display: none; }
 }
+/* activités en 3D */
+.life-in { position: relative; width: min(760px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); padding: 24px 20px 20px; display: grid; gap: 14px; align-content: start; }
+.life-in h2 { margin: 0; padding-right: 56px; font-family: var(--f-display); font-weight: 900; font-size: 32px; text-transform: uppercase; }
+.life-in h3 { margin: 4px 0 0; font-family: var(--f-display); font-weight: 800; font-size: 20px; text-transform: uppercase; letter-spacing: .04em; }
+.life-in p, .life-in li { margin: 0; color: var(--dim); font-size: 16px; }
+.life-in b { color: var(--bone); }
+.lf-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.lf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.lf-card { border: 1px solid var(--line); padding: 12px; display: grid; gap: 6px; align-content: start; background: rgba(255,255,255,.02); }
+.lf-card.ok { border-color: #3ad96a; }
+.lf-card small { color: var(--dim); font-size: 14px; }
+.lf-card .btn { justify-self: start; }
+.lf-bar { height: 8px; background: rgba(255,255,255,.08); }
+.lf-bar i { display: block; height: 100%; background: var(--frost); }
+.lf-ing { display: flex; flex-wrap: wrap; gap: 8px; }
+.lf-ing span { border: 1px solid var(--line); padding: 6px 10px; font: 600 13px/1.2 var(--f-mono); color: var(--bone); }
+.lf-ing i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; background: var(--c); }
+.lf-house { display: grid; gap: 8px; }
+.lf-house .lv { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); padding: 10px 12px; }
+.lf-house .lv.on { border-color: var(--frost); }
+.lf-house .lv.next { border-color: var(--signal); }
+.lf-house .lv small { color: var(--dim); }
+.lf-house .grow { flex: 1; min-width: 0; }
+.lf-game { display: grid; gap: 10px; justify-items: center; }
+.lf-game canvas { width: 100%; max-width: 640px; background: #07080a; border: 1px solid var(--line); touch-action: none; cursor: pointer; }
+.lf-pad { display: grid; grid-template-columns: repeat(4, 56px); gap: 8px; }
+.lf-pad .btn { min-height: 48px; font-size: 20px; }
+.lf-meter { position: relative; width: 100%; height: 52px; border: 1px solid var(--line); background: #0b0d10; cursor: pointer; overflow: hidden; }
+.lf-meter .zone { position: absolute; top: 0; bottom: 0; background: rgba(58,217,106,.3); border-left: 2px solid #3ad96a; border-right: 2px solid #3ad96a; }
+.lf-meter .needle { position: absolute; top: 0; bottom: 0; width: 4px; background: var(--signal); }
+.lf-stars { font-size: 44px; color: #ffd36b; letter-spacing: .1em; }
+.lf-quote { font-size: 20px !important; color: var(--bone) !important; font-style: italic; line-height: 1.5; }
+.lf-pond { position: relative; height: 150px; border: 1px solid var(--line); background: linear-gradient(#16303a, #0b1a20); cursor: pointer; overflow: hidden; }
+.lf-bob { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px; border-radius: 50%; background: linear-gradient(#e63a2e 50%, #f2f2f2 50%); animation: bob 2s ease-in-out infinite; }
+.lf-bob.bite { animation: bite .18s linear infinite; box-shadow: 0 0 0 8px rgba(139,208,212,.25); }
+@keyframes bob { 50% { transform: translateY(4px); } }
+@keyframes bite { 50% { transform: translateY(12px); } }
+#life-hud { position: absolute; left: 50%; top: 74px; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; pointer-events: none; z-index: 3; }
+#life-hud span { background: rgba(10,12,14,.86); border: 1px solid var(--line-2); padding: 6px 12px; font: 600 14px/1.2 var(--f-mono); color: var(--bone); }
+#life-sleep { position: fixed; inset: 0; z-index: 66; display: grid; place-items: center; text-align: center; padding: 24px; background: radial-gradient(circle at 50% 40%, rgba(22,28,60,.9), rgba(2,3,8,.97)); }
+#life-sleep[hidden], #life-sleepbtn[hidden] { display: none !important; }
+#life-sleep > div { display: grid; gap: 14px; justify-items: center; max-width: 520px; }
+#life-sleep .z { font: 900 64px/1 var(--f-display); color: #8fb0ff; animation: zz 2.4s ease-in-out infinite; }
+#life-sleep p { margin: 0; color: var(--bone); font-size: 18px; }
+#life-sleep p.dim { color: var(--dim); font-size: 16px; }
+@keyframes zz { 50% { transform: translateY(-10px); opacity: .6; } }
+.lf-sleepbtn { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); z-index: 55; }
+@media (prefers-reduced-motion: reduce) { #life-sleep .z, .lf-bob { animation: none; } .lf-bob.bite { animation: none; transform: translateY(10px); } }
 </style>
 
 <div class="atmo" aria-hidden="true"></div>
@@ -1331,6 +1379,7 @@ function publicDoc() {
     v: 1, code: S.code, host: S.host, hostName: S.hostName, mj: S.mj, hostPub: S.hostPub, hb: H.hb, now: t,
     phase: S.phase, round: S.round, endsAt: S.endsAt, ev: S.ev, paused: !!S.paused, pauseLeft: S.pauseLeft || 0,
     players: S.order.map(id => { const p = P(id); return { pid: id, name: p.name, bot: p.bot, host: p.host, alive: p.alive, prof: p.prof || null, on: p.bot || p.host || (t - (H.seenLocal[id] || 0) < 65000), ack: S.phase === 'reveal' ? p.ack : undefined }; }),
+    sleep: S.phase === 'night' ? [alivePids().filter(id => !P(id).bot && P(id).sleep).length, alivePids().filter(id => !P(id).bot).length] : null,
     chat: S.chat, announce: S.announce, ghost: S.revive && S.revive.said ? { pid: S.revive.pid, txt: S.revive.said, r: S.revive.round } : null,
     settings: S.settings, inPlay: S.phase === 'lobby' ? null : inPlay, cover: S.cover && S.phase !== 'lobby' && S.phase !== 'poison' ? S.cover.role : null,
     winner: end ? S.winner : null, winReason: end ? S.winReason : '',
@@ -1425,6 +1474,7 @@ function hostHandle(pid, m) {
       if (!lairMembers().includes(pid)) return false;
       pushChat(S.lair, { pid, txt, t: now() }, 80); if (!p.bot) brainOnChat(pid, txt, 'lair'); return true;
     }
+    case 'sleep': if (p && p.alive && S.phase === 'night') { p.sleep = !!m.on; return true; } return false;
     case 'prof': { if (!p) return false; const c = cleanProf(m.prof); if (!c) return false; p.prof = c; return true; }
     case 'cheat': return hostCheat(pid, p, m);
     case 'lairJoin': {
@@ -1631,7 +1681,7 @@ function hostCanStart() {
   return { ok: true };
 }
 function stat(kind, o) { const S = H.S; S.stats = S.stats || { conta: [], elim: [] }; S.stats[kind].push(o); }
-function setPhase(ph, secs) { const S = H.S; S.phaseAt = now(); if (ph !== S.phase) S.botReplies = (S.botReplies || []).filter(r => r.ctx && r.ctx.where === 'lair'); S.paused = false; S.pauseLeft = 0; S.phase = ph; S.endsAt = secs ? now() + secs * 1000 : 0; S.closeAt = 0; S.ev++; }
+function setPhase(ph, secs) { const S = H.S; S.phaseAt = now(); for (const id of S.order) if (P(id)) P(id).sleep = false; if (ph !== S.phase) S.botReplies = (S.botReplies || []).filter(r => r.ctx && r.ctx.where === 'lair'); S.paused = false; S.pauseLeft = 0; S.phase = ph; S.endsAt = secs ? now() + secs * 1000 : 0; S.closeAt = 0; S.ev++; }
 function beginNight(r) {
   const S = H.S; S.round = r; setPhase('night', S.settings.timers.night);
   S.night = { acts: {}, conta: {}, done: {}, pass: {}, campStart: Object.fromEntries(S.order.map(id => [id, P(id).camp])), botAt: {} };
@@ -2324,6 +2374,8 @@ function hostTick() {
     for (const [id, at] of Object.entries(S.night.botAt)) if (at && t >= at) { S.night.botAt[id] = 0; botAct(id); changed = true; }
     for (const c of S.night.botLair || []) if (!c.done && t >= c.at) { c.done = true; botSay(c.pid, 'lair'); changed = true; }
     const req = requiredActors();
+    const hum = alivePids().filter(id => !P(id).bot);
+    if (!S.closeAt && hum.length && hum.every(id => P(id).sleep) && req.filter(id => P(id).bot).every(id => S.night.done[id])) { S.closeAt = t + 3500; pushChat(S.chat, { sys: true, txt: 'Tout le monde dort… l’aube arrive plus tôt.', t }, 100); changed = true; }
     if (CONFIG.NIGHT_ENDS_EARLY && !S.closeAt && req.every(id => S.night.done[id])) { S.closeAt = Math.max(t + 4000, (S.night.start || t) + CONFIG.MIN_NIGHT_SECONDS * 1000); }
     if (S.closeAt && t >= S.closeAt) { advance(); return; }
   } else if (S.phase === 'day') {
@@ -3140,6 +3192,7 @@ function renderRules(tab) {
   if (T === '3d') b = '<h2>Mode 3D</h2><p>Le même jeu, dans un monde à explorer à la première personne. Chaque joueur a son logement, avec sa carte posée sur la table.</p>'
     + '<h3>Commandes</h3><div class="keys"><div><b>Ordinateur</b><ul><li><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou flèches : marcher, <kbd>Maj</kbd> : courir</li><li>Souris : regarder (clique d’abord sur le jeu, <kbd>Échap</kbd> pour libérer la souris)</li><li><kbd>E</kbd> : agir sur ce que tu regardes</li><li><kbd>T</kbd> : écrire · <kbd>M</kbd> : micro on/off · <kbd>R</kbd> : prêt</li><li><kbd>Tab</kbd> : tablette · <kbd>V</kbd> : vue extérieure · <kbd>G</kbd> : guide</li></ul></div><div><b>Téléphone</b><ul><li>Pouce gauche : joystick pour marcher</li><li>Glisser à droite : regarder</li><li><b>Agir</b> : utiliser ce que tu regardes</li><li><b>Micro</b>, <b>Écrire</b>, <b>Tablette</b>, <b>Guide</b> : boutons à droite</li><li>Tourne ton téléphone à l’horizontale, et MENU → Plein écran</li></ul></div></div>'
     + '<h3>Où faire quoi</h3><ul><li><b>Ta carte</b> : sur la table de ton logement. Regarde-la et appuie sur Agir. <kbd>Échap</kbd> ou la croix pour la fermer.</li><li><b>La nuit</b>, tu commences chez toi. Pour utiliser ton pouvoir, sors et va à <b>la porte</b> du joueur visé, puis Agir. Les autres peuvent voir ta lanterne passer.</li><li><b>Le Réanimateur</b> agit au <b>cimetière</b>, devant une tombe. <b>Le Constructeur</b> agit depuis son <b>lit</b>.</li><li><b>Le jour</b>, tout le monde se retrouve autour du feu.</li><li><b>Pour voter</b>, va au <b>poteau</b> du joueur (son nom est dessus) et Agir. Ou bouton « Voter blanc ».</li><li>Éliminé, tu deviens un <b>fantôme</b> invisible.</li></ul>'
+    + '<h3>Les temps morts</h3><ul><li><kbd>J</kbd> ou <b>Activités</b> : les défis du jour, ta cuisine, les lieux et ta maison.</li><li><b>Quatre lieux</b> autour du village (points de couleur sur la mini-carte) : l’étang pour pêcher, la clairière et sa pierre ancienne, le parcours chronométré, le vieux puits aux vœux.</li><li><b>Cueille</b> champignons, baies et herbes dans les bois, <b>cuisine</b> au feu de camp ou chez toi, puis <b>mange</b> pour courir plus vite.</li><li><b>5 signaux cachés</b> par partie : de petites antennes à lumière rouge.</li><li><b>Ta maison grandit</b> (onglet Maison) : cuisine, salle de jeux avec bornes d’arcade, salon, jardin, puis manoir.</li><li><b>La nuit</b>, quand tu as fini, va dans ton lit et choisis <b>Aller dormir</b>. Si tous les joueurs dorment, l’aube arrive plus vite.</li></ul>'
     + '<p class="tip">Perdu ? Ouvre la <b>tablette</b> : tout le jeu y est en version classique, avec les mêmes boutons. « Vue classique » repasse en 2D à tout moment.</p>';
   $('#rules-in').innerHTML = '<div class="row" style="justify-content:space-between"><span class="eyebrow">Guide du survivant</span><button class="btn ghost small" data-a="close-rules">Fermer</button></div>'
     + '<div class="rtabs" role="tablist">' + tabs.map(([k, l]) => '<button role="tab" data-a="rules-tab" data-t="' + k + '" aria-selected="' + (k === T) + '">' + l + '</button>').join('') + '</div>' + b;
@@ -3496,7 +3549,9 @@ function layout3d(n) {
   }
   const ca = (n > 1 ? 0.5 / n : 0.5) * Math.PI * 2 + 0.3;
   const cem = [Math.cos(ca) * (R + 17), Math.sin(ca) * (R + 17)];
-  return { R, homes, cem, edge: 82 };
+  const zones = ['etang', 'clairiere', 'parcours', 'puits'].map((id, k) => { const a = 0.3 + Math.PI / 4 + k * Math.PI / 2; const rz = R + 40; const cx = Math.cos(a) * rz, cz = Math.sin(a) * rz; const ry = Math.atan2(Math.cos(a), Math.sin(a)); const cs = Math.cos(ry), sn = Math.sin(ry);
+    return { id, a, cx, cz, ry, r: { etang: 8, clairiere: 8.5, parcours: 15, puits: 6.5 }[id], W: (x, z) => [cx + x * cs + z * sn, cz - x * sn + z * cs] }; });
+  return { R, homes, cem, zones, edge: Math.max(82, R + 60) };
 }
 /* petits éléments de décor réutilisables */
 const P3 = {
@@ -3532,20 +3587,23 @@ const P3 = {
     for (const [a, b] of [[-1.3, -0.95], [1.3, -0.95], [-1.3, 0.95], [1.3, 0.95]]) { const [wx, wz] = W(a, b); g.box(wx, 0.32, wz, 0.7, 0.64, 0.25, [0.08, 0.08, 0.09], ry); } },
   lamp(g, em, lights, x, z, col = [1, 0.78, 0.45]) { g.cyl(x, 0, z, 0.12, 5.6, 6, [0.22, 0.22, 0.24]); g.box(x, 5.65, z, 0.7, 0.18, 0.5, [0.2, 0.2, 0.22]); em.box(x, 5.5, z, 0.5, 0.1, 0.34, col); lights.push({ p: [x, 5.2, z], c: col.map(v => v * 0.9), r: 12 }); },
 };
-function buildWorld3d(mapId, n, seed) {
+function buildWorld3d(mapId, n, seed, levels) {
   const M = MAPS3D[mapId] || MAPS3D.foret; const rand = mulberry(seed);
   const g = new Geo(rand), em = new Geo(rand), wat = new Geo(rand);
   const L = layout3d(n); const col = [], lights = [], circles = [], emit = [];
+  L.homes.forEach((h, i) => { h.lvl = Math.max(1, Math.min(6, (levels && levels[i]) | 0 || 1)); if (h.lvl >= 2) h.shack = h.W(-5.5, -8); });
   const R = L.R;
   const free = (x, z, pad = 2) => {
     const r = Math.hypot(x, z); if (r < 12) return false;
     for (const h of L.homes) { if (Math.hypot(x - h.cx, z - h.cz) < 6 + pad) return false; const ang = Math.atan2(z, x); let d = Math.abs(((ang - h.a) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI); if (r < R + 6 && d * r < 3.6 + pad) return false; }
     if (Math.hypot(x - L.cem[0], z - L.cem[1]) < 10) return false;
+    for (const h of L.homes) if (h.lvl > 1) { const f = homeFoot(h.lvl); const dx = x - h.cx, dz = z - h.cz, cs = Math.cos(h.ry), sn = Math.sin(h.ry); const lx = dx * cs - dz * sn, lz = dx * sn + dz * cs; if (lx > f[0] - pad && lx < f[1] + pad && lz > f[2] - pad && lz < f[3] + pad) return false; }
+    for (const zn of L.zones) if (Math.hypot(x - zn.cx, z - zn.cz) < zn.r + pad) return false;
     return true;
   };
   const shade = M.ground.map(v => v * 0.55);
   // sol : grille à couleurs variables (taches d'herbe, de terre)
-  const S = 100, cell = 6.25, N = Math.round(2 * S / cell);
+  const S = 120, cell = 6.25, N = Math.round(2 * S / cell);
   const gc = (x, z) => { const k = 0.5 + 0.25 * Math.sin(x * 0.083 + Math.sin(z * 0.05) * 2) + 0.25 * Math.sin(z * 0.071 + x * 0.021); const j = 0.92 + ((hashStr(Math.round(x) + ':' + Math.round(z)) % 1000) / 1000) * 0.14; return [0, 1, 2].map(i => (M.ground[i] * (1 - k) + M.ground2[i] * k) * j); };
   for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) { const x0 = -S + i * cell, z0 = -S + j * cell, x1 = x0 + cell, z1 = z0 + cell; g.face([[x0, 0, z0], [x1, 0, z0], [x1, 0, z1], [x0, 0, z1]], M.ground, [x0, -1, z0], null, [gc(x0, z0), gc(x1, z0), gc(x1, z1), gc(x0, z1)]); }
   // place centrale (dallage) et chemins
@@ -3576,7 +3634,8 @@ function buildWorld3d(mapId, n, seed) {
   lights.push({ p: [0, 1.6, 0], c: fireCol.map(v => v * 1.7), r: 17, fire: true });
   circles.push({ x: 0, z: 0, r: mapId === 'labo' ? 2.8 : 1.6 });
   // logements
-  for (const h of L.homes) buildHome(g, em, M.home, h, col, lights, rand, M);
+  for (const h of L.homes) { buildHome(g, em, M.home, h, col, lights, rand, M); buildAnnex(g, em, wat, h, M.home, col, lights, circles, M, rand); }
+  for (const zn of L.zones) buildZone(g, em, wat, zn, mapId, col, lights, circles, M, rand);
   // poteaux de vote
   for (const h of L.homes) { const [x, z] = h.post; g.box(x, 1.0, z, 0.2, 2.0, 0.2, [0.36, 0.28, 0.2]); g.box(x, 1.75, z, 0.5, 0.08, 0.08, [0.3, 0.23, 0.16], -h.a); g.shadow(x, z, 0.35, cmul(M.plaza, 0.6), 8); circles.push({ x, z, r: 0.25 }); }
   // cimetière
@@ -3598,8 +3657,13 @@ function buildWorld3d(mapId, n, seed) {
   for (let i = 0; i < tufts; i++) { const a = rand() * Math.PI * 2, r = 11.5 + Math.sqrt(rand()) * 76; const x = Math.cos(a) * r, z = Math.sin(a) * r; if (!free(x, z, -1.5)) continue; P3.tuft(g, x, z, rand, M.grass); }
   // bordure
   const E = L.edge;
-  for (let i = 0; i < 130; i++) { const a = i / 130 * Math.PI * 2; const r = E + rand() * 7; edgeProp(mapId, g, em, Math.cos(a) * r, Math.sin(a) * r, rand); }
-  return { geo: g, em, wat, col, lights, circles, L, M, emit, shade };
+  if (mapId === 'foret' || mapId === 'ville') for (let i = 0; i < 700; i++) { const a = rand() * Math.PI * 2, r = 76 + rand() * (E - 78); const x = Math.cos(a) * r, z = Math.sin(a) * r; if (r > E - 2 || !free(x, z, 2)) continue; const k = rand(); if (mapId === 'foret') { if (k < 0.55) { P3.pine(g, x, z, 11 + rand() * 12, rand); circles.push({ x, z, r: 0.75 }); } else if (k < 0.8) P3.bush(g, x, z, rand); else { const s2 = 0.6 + rand(); P3.rock(g, x, z, s2, rand); circles.push({ x, z, r: s2 * 0.7 }); } } else if (k < 0.4) { P3.deadTree(g, x, z, 4 + rand() * 4, rand); circles.push({ x, z, r: 0.35 }); } else if (k < 0.6) P3.bush(g, x, z, rand); }
+  // ingrédients à cueillir (les mêmes pour tous les joueurs)
+  const spots = []; { const cl = L.zones.find(zz => zz.id === 'clairiere'); for (let k = 0; k < 6; k++) { const aa = k / 6 * Math.PI * 2 + 0.4, rr = 2.3 + (k % 2) * 1.6; const [x, z] = cl.W(Math.cos(aa) * rr, Math.sin(aa) * rr); spots.push({ id: 's' + spots.length, kind: 'champignon', x, z }); } }
+  for (let tries = 0; spots.length < 34 && tries < 3000; tries++) { const a = rand() * Math.PI * 2, r = L.R + 18 + rand() * (E - L.R - 24); const x = Math.cos(a) * r, z = Math.sin(a) * r; if (!free(x, z, 0.5)) continue; const k = rand(); spots.push({ id: 's' + spots.length, kind: k < 0.36 ? 'baie' : k < 0.7 ? 'herbe' : 'champignon', x, z }); }
+  L.spots = spots;
+  for (let i = 0, nE = Math.round(130 * E / 82); i < nE; i++) { const a = i / nE * Math.PI * 2; const r = E + rand() * 7; edgeProp(mapId, g, em, Math.cos(a) * r, Math.sin(a) * r, rand); }
+  return { geo: g, em, wat, col, lights, circles, L, M, emit, shade, free };
 }
 function edgeProp(mapId, g, em, x, z, rand) {
   if (mapId === 'foret') { P3.pine(g, x, z, 15 + rand() * 12, rand, 0.8); if (rand() < 0.5) P3.bush(g, x * 0.96, z * 0.96, rand); }
@@ -3616,15 +3680,17 @@ function buildHome(g, em, type, h, col, lights, rand, M) {
   const shadowSq = (s, c) => { g.face([Pt(-s, 0.015, -s), Pt(s, 0.015, -s), Pt(s, 0.015, s), Pt(-s, 0.015, s)], c, Pt(0, -1, 0)); };
   const wallsBox = (wc, height, thick, inner) => {
     const lo = wc.map(v => v * 0.8);
-    B(-3, height / 2, 0, thick, height, 6, wc); C(-3, 0, thick, 6);
-    B(3, height / 2, 0, thick, height, 6, wc); C(3, 0, thick, 6);
+    for (const sx of [-1, 1]) { const gap = sx > 0 ? h.lvl >= 2 : h.lvl >= 3;
+      if (!gap) { B(sx * 3, height / 2, 0, thick, height, 6, wc); C(sx * 3, 0, thick, 6); continue; }
+      B(sx * 3, height / 2, 0.95, thick, height, 4.1, wc); C(sx * 3, 0.95, thick, 4.1); B(sx * 3, height / 2, -2.75, thick, height, 0.5, wc); C(sx * 3, -2.75, thick, 0.5);
+      B(sx * 3, (2.2 + height) / 2, -1.8, thick, height - 2.2, 1.4, wc); for (const zz of [-2.5, -1.1]) B(sx * 3, 1.1, zz, thick + 0.08, 2.2, 0.1, lo); }
     B(0, height / 2, 3, 6, height, thick, wc); C(0, 3, 6, thick);
     B(-1.95, height / 2, -3, 2.1, height, thick, wc); C(-1.95, -3, 2.1, thick);
     B(1.95, height / 2, -3, 2.1, height, thick, wc); C(1.95, -3, 2.1, thick);
     B(0, height - 0.35, -3, 1.8, 0.7, thick, wc);
     // plinthe intérieure et sol intérieur
     if (inner) { g.face([Pt(-2.85, 0.03, -2.85), Pt(2.85, 0.03, -2.85), Pt(2.85, 0.03, 2.85), Pt(-2.85, 0.03, 2.85)], inner, Pt(0, -1, 0)); }
-    B(-2.8, 0.25, 0, 0.08, 0.5, 5.6, lo); B(2.8, 0.25, 0, 0.08, 0.5, 5.6, lo); B(0, 0.25, 2.8, 5.6, 0.5, 0.08, lo);
+    for (const sx of [-1, 1]) { if (sx > 0 ? h.lvl >= 2 : h.lvl >= 3) { B(sx * 2.8, 0.25, 0.85, 0.08, 0.5, 3.9, lo); B(sx * 2.8, 0.25, -2.65, 0.08, 0.5, 0.3, lo); } else B(sx * 2.8, 0.25, 0, 0.08, 0.5, 5.6, lo); } B(0, 0.25, 2.8, 5.6, 0.5, 0.08, lo);
     // encadrement de porte
     B(-0.95, height / 2 - 0.35, -3.12, 0.16, height - 0.7, 0.18, lo); B(0.95, height / 2 - 0.35, -3.12, 0.16, height - 0.7, 0.18, lo); B(0, height - 0.72, -3.12, 2.06, 0.16, 0.18, lo);
   };
@@ -3632,8 +3698,12 @@ function buildHome(g, em, type, h, col, lights, rand, M) {
   if (type === 'tente') {
     const cc = [[0.42, 0.44, 0.26], [0.55, 0.47, 0.31], [0.52, 0.31, 0.21], [0.32, 0.4, 0.33], [0.3, 0.33, 0.4]][h.i % 5];
     const P = Pt, ctr = P(0, 1, 0), dk = cmul(cc, 0.7);
-    g.face([P(-3.1, 0, -3), P(0, 2.9, -3), P(0, 2.9, 3), P(-3.1, 0, 3)], cc, ctr, null, [dk, cc, cc, dk]);
-    g.face([P(3.1, 0, -3), P(0, 2.9, -3), P(0, 2.9, 3), P(3.1, 0, 3)], cmul(cc, 0.9), ctr, null, [cmul(dk, 0.9), cmul(cc, 0.9), cmul(cc, 0.9), cmul(dk, 0.9)]);
+    const tside = (s, c1, d1) => { const seg = (z0, z1) => g.face([P(s * 3.1, 0, z0), P(0, 2.9, z0), P(0, 2.9, z1), P(s * 3.1, 0, z1)], c1, ctr, null, [d1, c1, c1, d1]);
+      if (!(s > 0 ? h.lvl >= 2 : h.lvl >= 3)) return seg(-3, 3);
+      seg(-3, -2.5); seg(-1.1, 3); g.face([P(s * 0.855, 2.1, -2.5), P(0, 2.9, -2.5), P(0, 2.9, -1.1), P(s * 0.855, 2.1, -1.1)], c1, ctr);
+      g.face([P(s * 3.12, 2.15, -2.5), P(s * 0.855, 2.15, -2.5), P(s * 0.855, 2.15, -1.1), P(s * 3.12, 2.15, -1.1)], cmul(c1, 0.8), P(s * 2, 1, -1.8));
+      for (const zz of [-2.5, -1.1]) g.face([P(s * 3.12, 0, zz), P(s * 3.12, 2.15, zz), P(s * 0.855, 2.15, zz)], cmul(c1, 0.75), P(s * 2, 1, -1.8)); };
+    tside(-1, cc, dk); tside(1, cmul(cc, 0.9), cmul(dk, 0.9));
     g.face([P(-3.1, 0, 3), P(3.1, 0, 3), P(0, 2.9, 3)], cmul(cc, 0.82), ctr);
     g.face([P(-3.1, 0, -3), P(-0.9, 0, -3), P(-0.9, 2.06, -3), P(0, 2.9, -3)], cmul(cc, 0.85), ctr);
     g.face([P(3.1, 0, -3), P(0.9, 0, -3), P(0.9, 2.06, -3), P(0, 2.9, -3)], cmul(cc, 0.85), ctr);
@@ -3643,9 +3713,9 @@ function buildHome(g, em, type, h, col, lights, rand, M) {
     // mât, faîtage, tapis de sol, haubans
     for (const s of [-1, 1]) g.beam(P(s * 0.98, 0, -3.05), P(0, 2.92, -3.05), 0.09, [0.3, 0.22, 0.15]); B(0, 1.45, 3.05, 0.1, 2.9, 0.1, [0.3, 0.22, 0.15]); B(0, 2.92, 0, 0.12, 0.12, 6.3, [0.3, 0.22, 0.15]);
     g.face([P(-2.7, 0.03, -2.8), P(2.7, 0.03, -2.8), P(2.7, 0.03, 2.8), P(-2.7, 0.03, 2.8)], [0.25, 0.27, 0.3], P(0, -1, 0));
-    for (const s of [-1, 1]) for (const zz of [-2.6, 2.6]) { g.beam(P(s * 1.6, 1.45, zz), P(s * 4.1, 0.05, zz), 0.035, [0.75, 0.7, 0.6]); B(s * 4.1, 0.12, zz, 0.08, 0.24, 0.08, [0.3, 0.22, 0.15]); }
+    for (const s of [-1, 1]) for (const zz of [-2.6, 2.6]) { if (s > 0 ? h.lvl >= 2 : h.lvl >= 3) continue; g.beam(P(s * 1.6, 1.45, zz), P(s * 4.1, 0.05, zz), 0.035, [0.75, 0.7, 0.6]); B(s * 4.1, 0.12, zz, 0.08, 0.24, 0.08, [0.3, 0.22, 0.15]); }
     g.beam(P(0, 2.9, 3.05), P(0, 0.05, 5.25), 0.035, [0.75, 0.7, 0.6]);
-    C(-2.45, 0, 0.6, 6); C(2.45, 0, 0.6, 6); C(0, 3, 6, 0.3); C(-2, -3, 2.2, 0.3); C(2, -3, 2.2, 0.3);
+    for (const s of [-1, 1]) { if (s > 0 ? h.lvl >= 2 : h.lvl >= 3) { C(s * 2.45, 0.95, 0.6, 4.1); C(s * 2.45, -2.75, 0.6, 0.5); } else C(s * 2.45, 0, 0.6, 6); } C(0, 3, 6, 0.3); C(-2, -3, 2.2, 0.3); C(2, -3, 2.2, 0.3);
     // dehors : caisse et bûches
     P3.crate(g, ...xf(2.2, 0, -3.9), 0.7, rand, h.ry + 0.3); C(2.2, -3.9, 0.75, 0.75);
     g.beam(xf(-2.4, 0.15, -3.8), xf(-1.6, 0.15, -4.2), 0.26, [0.36, 0.24, 0.15]);
@@ -3653,7 +3723,7 @@ function buildHome(g, em, type, h, col, lights, rand, M) {
   } else if (type === 'cellule') {
     const wc = [0.52, 0.52, 0.5];
     wallsBox(wc, 3, 0.35, [0.3, 0.3, 0.31]); B(0, 3.1, 0, 6.5, 0.25, 6.5, [0.42, 0.42, 0.43]);
-    B(0, 1.0, 2.8, 5.6, 0.05, 0.05, [0.62, 0.2, 0.15]); B(-2.8, 1.0, 0, 0.05, 0.05, 5.6, [0.62, 0.2, 0.15]); B(2.8, 1.0, 0, 0.05, 0.05, 5.6, [0.62, 0.2, 0.15]);
+    B(0, 1.0, 2.8, 5.6, 0.05, 0.05, [0.62, 0.2, 0.15]); for (const sx of [-1, 1]) { if (sx > 0 ? h.lvl >= 2 : h.lvl >= 3) B(sx * 2.8, 1.0, 0.85, 0.05, 0.05, 3.9, [0.62, 0.2, 0.15]); else B(sx * 2.8, 1.0, 0, 0.05, 0.05, 5.6, [0.62, 0.2, 0.15]); }
     for (let x = -0.8; x <= 0.81; x += 0.32) B(x, 1.2, -3.0, 0.06, 2.4, 0.06, [0.22, 0.22, 0.24]);
     B(0, 2.4, -3.0, 1.8, 0.1, 0.1, [0.22, 0.22, 0.24]); B(0, 0.04, -3.0, 1.8, 0.08, 0.1, [0.22, 0.22, 0.24]);
     B(-2.2, 1.5, 1.6, 1.0, 0.1, 2.2, [0.32, 0.32, 0.34]); B(-2.2, 1.6, 1.6, 0.9, 0.12, 2.0, [0.6, 0.58, 0.52]); for (const zz of [0.55, 2.65]) B(-1.75, 0.8, zz, 0.06, 1.6, 0.06, [0.25, 0.25, 0.27]);
@@ -3674,9 +3744,9 @@ function buildHome(g, em, type, h, col, lights, rand, M) {
     // trou dans le toit (ruine) pour certaines maisons
     if (h.i % 3 === 1) B(-1.4, 3.65, -1.6, 1.6, 0.06, 1.2, [0.1, 0.09, 0.08]);
     // fenêtres
-    for (const s of [-1, 1]) { B(s * 3.16, 1.7, 0.6, 0.06, 1.0, 1.1, [0.28, 0.2, 0.14]); BE(s * 3.19, 1.7, 0.6, 0.04, 0.82, 0.92, [1, 0.74, 0.4]); B(s * 3.21, 1.7, 0.6, 0.04, 0.06, 0.98, [0.24, 0.17, 0.12]); }
+    for (const s of [-1, 1]) { if (s > 0 ? h.lvl >= 2 : h.lvl >= 3) continue; B(s * 3.16, 1.7, 0.6, 0.06, 1.0, 1.1, [0.28, 0.2, 0.14]); BE(s * 3.19, 1.7, 0.6, 0.04, 0.82, 0.92, [1, 0.74, 0.4]); B(s * 3.21, 1.7, 0.6, 0.04, 0.06, 0.98, [0.24, 0.17, 0.12]); }
     // lierre et marche
-    if (h.i % 2) { B(-3.18, 1.6, -1.6, 0.1, 3.0, 1.4, [0.2, 0.38, 0.16]); B(3.18, 1.0, 2.0, 0.1, 2.0, 1.3, [0.23, 0.42, 0.18]); B(-1.95, 2.4, -3.18, 1.6, 1.3, 0.1, [0.21, 0.4, 0.17]); }
+    if (h.i % 2) { if (h.lvl < 3) B(-3.18, 1.6, -1.6, 0.1, 3.0, 1.4, [0.2, 0.38, 0.16]); if (h.lvl < 2) B(3.18, 1.0, 2.0, 0.1, 2.0, 1.3, [0.23, 0.42, 0.18]); B(-1.95, 2.4, -3.18, 1.6, 1.3, 0.1, [0.21, 0.4, 0.17]); }
     B(0, 0.08, -3.55, 2.2, 0.16, 0.8, [0.42, 0.4, 0.38]);
     BE(1.25, 2.3, -3.25, 0.16, 0.24, 0.16, [1, 0.75, 0.4]);
   } else {
@@ -3684,7 +3754,7 @@ function buildHome(g, em, type, h, col, lights, rand, M) {
     wallsBox(wc, 3, 0.3, [0.62, 0.68, 0.68]); B(0, 3.1, 0, 6.5, 0.25, 6.5, [0.72, 0.77, 0.77]);
     B(0, 0.6, -3.18, 6.0, 0.4, 0.05, [0.95, 0.75, 0.1]); for (let k = -5; k <= 5; k += 2) B(k * 0.27, 0.6, -3.21, 0.18, 0.4, 0.04, [0.12, 0.12, 0.12]);
     BE(0, 2.95, -3.17, 6, 0.1, 0.05, [0.25, 0.95, 0.8]);
-    BE(-3.17, 1.8, 0.5, 0.05, 1.0, 2.2, [0.55, 0.9, 0.85]); BE(3.17, 1.8, 0.5, 0.05, 1.0, 2.2, [0.55, 0.9, 0.85]);
+    if (h.lvl < 3) BE(-3.17, 1.8, 0.5, 0.05, 1.0, 2.2, [0.55, 0.9, 0.85]); if (h.lvl < 2) BE(3.17, 1.8, 0.5, 0.05, 1.0, 2.2, [0.55, 0.9, 0.85]);
     B(1.8, 0.8, 2.55, 1.8, 0.08, 0.7, [0.6, 0.65, 0.66]); B(1.8, 1.2, 2.82, 1.6, 0.7, 0.06, [0.15, 0.17, 0.18]); BE(1.8, 1.22, 2.78, 1.3, 0.5, 0.02, [0.2, 0.8, 0.95]);
     BE(0, 3.0, 0.5, 1.4, 0.05, 0.3, [0.85, 1, 0.98]);
     B(-0.95, 1.3, -3.25, 0.1, 2.6, 0.1, [0.35, 0.38, 0.4]); B(0.95, 1.3, -3.25, 0.1, 2.6, 0.1, [0.35, 0.38, 0.4]);
@@ -3842,8 +3912,9 @@ function g3Start() {
     try { if (!R3.init(G3.canvas)) { G3.ok = false; return; } } catch (err) { console.error(err); G3.ok = false; toast('La 3D n’est pas disponible sur cet appareil : passage en vue classique.', true); G3.force2d = true; render(); return; }
     g3Bind();
   }
-  const key = (pub.settings.map || 'foret') + ':' + pub.players.length + ':' + G.code;
-  if (key !== G3.wkey) { g3BuildWorld(key); G3.lastKey = ''; }
+  const base = (pub.settings.map || 'foret') + ':' + pub.players.length + ':' + G.code;
+  const key = base + '|' + houseLevels().join('');
+  if (key !== G3.wkey) { const same = G3.wkey.split('|')[0] === base; g3BuildWorld(key); if (!same) G3.lastKey = ''; }
   if (!G3.on) { G3.on = true; window.scrollTo(0, 0); document.body.classList.add('in3d'); $('#v3d').hidden = false; G3.last = performance.now(); G3.raf = requestAnimationFrame(g3Frame); s3Connect(); }
   g3OnData();
 }
@@ -3855,7 +3926,7 @@ function g3Stop() {
 function g3BuildWorld(key) {
   const pub = G.pub; const mapId = pub.settings.map || 'foret';
   R3.free(G3.mesh); R3.free(G3.emMesh); R3.free(G3.watMesh); G3.parts = [];
-  const w = buildWorld3d(mapId, pub.players.length, hashStr(key));
+  const w = buildWorld3d(mapId, pub.players.length, hashStr(key.split('|')[0]), houseLevels());
   G3.world = w; G3.mesh = R3.mesh(w.geo); G3.emMesh = R3.mesh(w.em); G3.watMesh = R3.mesh(w.wat); G3.wkey = key; if (w.L.busCol) w.col.push(w.L.busCol);
   G3.plates = pub.players.map((p, i) => ({ i, pid: p.pid, tex: R3.textTex(p.name, { bg: 'rgba(14,15,17,0.94)', border: '#8a6a3a', size: 70 }) }));
   G3.postTex = pub.players.map(p => R3.textTex(p.name, { bg: 'rgba(230,58,46,0.9)', color: '#fff', size: 66 }));
@@ -3884,7 +3955,7 @@ function g3OnData() {
     else if (v && v.alive === false) { if (first) g3Teleport([G3.world.L.cem[0], G3.world.L.cem[1] - 7]); }
     else if (['poison', 'reveal', 'night'].includes(pub.phase)) { g3Teleport(h.inside, false); G3.me.yaw = Math.atan2(h.door[0] - h.inside[0], h.door[1] - h.inside[1]) + Math.PI; }
     else if (pub.phase === 'day' || first) g3Teleport(h.spot);
-    G3.menu = null; g3Menu();
+    G3.menu = null; g3Menu(); lifePhase();
   }
   if (v && G3.wasAlive && v.alive === false && !v.mj) { G3.wasAlive = false; toast('Tu es éliminé : tu deviens un fantôme. Personne ne te voit plus.'); }
   if (v && v.alive) G3.wasAlive = true;
@@ -3904,7 +3975,7 @@ function g3Bind() {
     if (ev.code === 'Tab' && !typing) { ev.preventDefault(); g3Tablet(!G3.tablet); return; }
     if (typing) { if (ev.code === 'Escape' && G3.chatOpen) g3Chat(false); return; }
     if (!$('#ewheel').hidden && /^Digit[1-6]$/.test(ev.code)) { ev.preventDefault(); const list = pf().eq.emotes || EMOTE_BASE; playEmote(list[+ev.code.slice(5) - 1]); return; }
-    if (!$('#rules').hidden || !$('#voice').hidden || !$('#meta').hidden) return;
+    if (!$('#rules').hidden || !$('#voice').hidden || !$('#meta').hidden || lifeKeyBlock(ev)) return;
     if (!$('#card-modal').hidden) { if (['Escape', 'KeyE', 'Space', 'Enter'].includes(ev.code) && !(G.pub.phase === 'reveal' && G.view && !G.view.ack && ev.code !== 'Escape')) { ev.preventDefault(); closeCard(); } return; }
     if (!$('#report').hidden) { if (['Escape', 'KeyE', 'Space', 'Enter'].includes(ev.code)) { ev.preventDefault(); $('#report').hidden = true; } return; }
     if (G3.menu) { const n = parseInt(ev.key, 10); if (n >= 1 && n <= G3.menu.length) { ev.preventDefault(); g3Do(G3.menu[n - 1]); } if (ev.code === 'Escape') { G3.menu = null; g3Menu(); } if (ev.code === 'KeyE' && G3.menu.length === 1) g3Do(G3.menu[0]); return; }
@@ -3915,6 +3986,7 @@ function g3Bind() {
     if (ev.code === 'KeyV') G3.third = !G3.third;
     if (ev.code === 'KeyG') { ev.preventDefault(); openRules('3d'); }
     if (ev.code === 'KeyB') { ev.preventDefault(); ewheelToggle(); }
+    if (ev.code === 'KeyJ') { ev.preventDefault(); lifeOpen(); }
     if (ev.code === 'KeyM') { ev.preventDefault(); if (VC.on) { VC.micOn = !VC.micOn; toast(VC.micOn ? 'Micro activé.' : 'Micro coupé.'); vcRender(); g3Hud(); } else vcOpen(); }
     if (ev.code === 'KeyR') { const v = G.view; if (G.pub.phase === 'day' && v.canVote && !v.ready) { send({ t: 'ready' }); toast('Tu es prêt à voter.'); } }
   });
@@ -3952,7 +4024,7 @@ function g3Collide(x, z) {
       x = b.x + lx * cs + lz * sn; z = b.z - lx * sn + lz * cs;
     }
   }
-  const R = Math.hypot(x, z); if (R > 86) { x *= 86 / R; z *= 86 / R; }
+  const lim = w.L.edge + 4, R = Math.hypot(x, z); if (R > lim) { x *= lim / R; z *= lim / R; }
   return [x, z];
 }
 /* --- interactions --- */
@@ -3965,11 +4037,13 @@ function g3Targets() {
     if (p.alive) out.push({ kind: 'post', x: h.post[0], z: h.post[1], pid: p.pid });
     else { const gp = g3Grave(i); out.push({ kind: 'grave', x: gp[0], z: gp[1], pid: p.pid }); }
   });
+  if (v && !v.mj) lifeTargets(out);
   return out;
 }
 function g3Grave(i) { const [cx, cz] = G3.world.L.cem; return [cx + ((i % 4) - 1.5) * 2.2, cz + ((Math.floor(i / 4) % 4) - 1.5) * 2.2]; }
 function g3Options(t) {
   const pub = G.pub, v = G.view, ph = pub.phase, opts = []; if (!v || v.mj) return opts;
+  if (t.kind === 'life') return lifeOptions(t);
   const nm = nameOf(pub, t.pid);
   if (t.kind === 'card') opts.push({ label: 'Regarder ta carte', fn: () => openCard(false) });
   if (ph === 'poison' && t.kind === 'card') opts.push({ label: 'Empoisonner quelqu’un (tablette)', fn: () => g3Tablet(true) });
@@ -3987,6 +4061,7 @@ function g3Options(t) {
       if (a.kind === 'mimic' && !a.done && (a.targetsByRole.reanimateur || []).includes(t.pid)) opts.push({ label: 'Imiter le Réanimateur sur ' + nm, msg: { t: 'act', kind: 'mimic', role: 'reanimateur', target: t.pid } });
     }
   }
+  if (t.kind === 'bed' || t.kind === 'card') lifeHomeOptions(t, opts);
   if (t.kind === 'post' && ph === 'vote' && v.canVote && !v.vote && t.pid !== G.pid) opts.push({ label: 'Voter contre ' + nm, msg: { t: 'vote', target: t.pid } });
   return opts;
 }
@@ -4021,10 +4096,10 @@ function g3Hud() {
   if (coarse) { // téléphone : gros bouton Agir en bas à droite, petits boutons au-dessus
     btns.push('<button class="btn red hb-act" data-a="e3">Agir</button>');
     if (phaseBtn) btns.push(phaseBtn);
-    btns.push('<button class="btn ghost small" data-a="ewheel">Emotes</button>', vcHudBtn(true), '<button class="btn ghost small" data-a="c3">Écrire</button>', '<button class="btn ghost small" data-a="t3">Tablette</button>', '<button class="btn ghost small" data-a="rules">Guide</button>', '<button class="btn ghost small" data-a="v2d">2D</button>');
+    btns.push('<button class="btn ghost small" data-a="lf-open">Activités</button>', '<button class="btn ghost small" data-a="ewheel">Emotes</button>', vcHudBtn(true), '<button class="btn ghost small" data-a="c3">Écrire</button>', '<button class="btn ghost small" data-a="t3">Tablette</button>', '<button class="btn ghost small" data-a="rules">Guide</button>', '<button class="btn ghost small" data-a="v2d">2D</button>');
   } else {
     if (phaseBtn) btns.push(phaseBtn);
-    btns.push('<button class="btn ghost small" data-a="ewheel">Emotes <span class="mono">B</span></button>', vcHudBtn(false), '<button class="btn ghost small" data-a="t3">Tablette <span class="mono">Tab</span></button>', '<button class="btn ghost small" data-a="c3">Écrire <span class="mono">T</span></button>', '<button class="btn ghost small" data-a="rules">Guide <span class="mono">G</span></button>', '<button class="btn ghost small" data-a="v2d">Vue classique</button>');
+    btns.push('<button class="btn ghost small" data-a="lf-open">Activités <span class="mono">J</span></button>', '<button class="btn ghost small" data-a="ewheel">Emotes <span class="mono">B</span></button>', vcHudBtn(false), '<button class="btn ghost small" data-a="t3">Tablette <span class="mono">Tab</span></button>', '<button class="btn ghost small" data-a="c3">Écrire <span class="mono">T</span></button>', '<button class="btn ghost small" data-a="rules">Guide <span class="mono">G</span></button>', '<button class="btn ghost small" data-a="v2d">Vue classique</button>');
   }
   setHTML($('#hud-btns'), btns.join(''));
   $('#hud-lock').hidden = G3.locked || g3Coarse() || G3.tablet || !!G3.menu || G3.chatOpen;
@@ -4054,6 +4129,7 @@ function g3Minimap() {
   const pub = G.pub; const L = G3.world.L;
   pub.players.forEach((p, i) => { const h = L.homes[i]; x.fillStyle = p.pid === G.pid ? '#8bd0d4' : p.alive ? '#a0a6ad' : '#4a4f55'; x.fillRect(cx + h.cx * k - 3, cz + h.cz * k - 3, 6, 6); });
   x.fillStyle = '#e63a2e'; x.fillRect(cx + L.cem[0] * k - 2, cz + L.cem[1] * k - 2, 4, 4);
+  if (L.zones) for (const zn of L.zones) { x.fillStyle = { etang: '#4f9ae8', clairiere: '#b28cff', parcours: '#ffd36b', puits: '#3ad99a' }[zn.id]; x.beginPath(); x.arc(cx + zn.cx * k, cz + zn.cz * k, 3.5, 0, Math.PI * 2); x.fill(); }
   if (pub.phase !== 'night') for (const [, o] of G3.others) { x.fillStyle = '#e3dfd5'; x.beginPath(); x.arc(cx + o.x * k, cz + o.z * k, 2, 0, Math.PI * 2); x.fill(); }
   const m = G3.me; x.save(); x.translate(cx + m.x * k, cz + m.z * k); x.rotate(-m.yaw); x.fillStyle = '#ff5b47'; x.beginPath(); x.moveTo(0, -6); x.lineTo(4, 5); x.lineTo(-4, 5); x.closePath(); x.fill(); x.restore();
 }
@@ -4312,7 +4388,7 @@ function g3Frame(t) {
   // performance : si l'appareil peine, on baisse la résolution
   G3.fpsAcc = (G3.fpsAcc || 0) * 0.95 + rdt * 0.05; if (!G3.lowRes && G3.fpsAcc > 0.045 && t > 8000) { G3.lowRes = true; }
   // déplacements
-  const m = G3.me; const busy = G3.tablet || G3.menu || G3.chatOpen || !$('#card-modal').hidden || !$('#report').hidden || !$('#rules').hidden || !$('#voice').hidden || !$('#meta').hidden || !$('#ewheel').hidden;
+  const m = G3.me; const busy = G3.tablet || G3.menu || G3.chatOpen || !$('#card-modal').hidden || !$('#report').hidden || !$('#rules').hidden || !$('#voice').hidden || !$('#meta').hidden || !$('#ewheel').hidden || lifeBusy();
   let fx = 0, fz = 0;
   if (!busy) {
     const k = G3.keys;
@@ -4322,11 +4398,11 @@ function g3Frame(t) {
   const len = Math.hypot(fx, fz); m.moving = len > 0.1;
   const run = G3.keys.ShiftLeft || G3.keys.ShiftRight || (G3.joy && Math.hypot(G3.joy.dx, G3.joy.dy) > 0.95);
   if (len > 0.1) {
-    const sp = (run ? 7 : 4.3) * Math.min(1, len) / len;
+    const sp = (run ? 7 : 4.3) * lifeSpeed() * Math.min(1, len) / len;
     const sx = -Math.sin(m.yaw), sz = -Math.cos(m.yaw), rx = Math.cos(m.yaw), rz = -Math.sin(m.yaw);
     let nx = m.x + (sx * fz + rx * fx) * sp * dt, nz = m.z + (sz * fz + rz * fx) * sp * dt;
     const ghost = v && v.alive === false;
-    if (!ghost) [nx, nz] = g3Collide(nx, nz); else { const R = Math.hypot(nx, nz); if (R > 86) { nx *= 86 / R; nz *= 86 / R; } }
+    if (!ghost) [nx, nz] = g3Collide(nx, nz); else { const lim = w.L.edge + 4, R = Math.hypot(nx, nz); if (R > lim) { nx *= lim / R; nz *= lim / R; } }
     m.x = nx; m.z = nz; m.step = (m.step || 0) + dt * (run ? 13 : 9.5) * Math.min(1, len);
   }
   // ambiance
@@ -4368,6 +4444,7 @@ function g3Frame(t) {
   // chambres décorées et décors d'événement
   pub.players.forEach((p, i) => { const h = w.L.homes[i]; if (!h || Math.hypot(h.cx - m.x, h.cz - m.z) > 32) return; const room = p.pid === G.pid ? pfPublic().room : p.prof && p.prof.room; if (room && Object.keys(room).length) g3RoomDecor(h, room, time);
     if (pub.settings.event === 'halloween') { const [px, pz] = h.W(-1.5, -3.7); R3.draw(R3.cube, M4.chain(M4.t(px, 0.22, pz), M4.ry(h.ry), M4.s(0.5, 0.42, 0.5)), { tint: [0.92, 0.45, 0.08] }); R3.draw(R3.cube, M4.chain(M4.t(px, 0.25, pz), M4.ry(h.ry), M4.t(0, 0, -0.251), M4.s(0.26, 0.12, 0.01)), { tint: [1, 0.8, 0.3], emis: 1 }); } });
+  lifeDraw(time, m, E);
   // ma carte sur ma table, ma seconde maison
   const mi = g3MyIndex(), mh = g3Home(mi);
   if (mh && v && v.role) {
@@ -4410,7 +4487,7 @@ function g3Frame(t) {
   // cible regardée
   const fwdx = -Math.sin(m.yaw), fwdz = -Math.cos(m.yaw); let best = null, bd = 2.6;
   if (v && !v.mj) for (const tg of g3Targets()) { const dx = tg.x - m.x, dz = tg.z - m.z; const d = Math.hypot(dx, dz); if (d > bd) continue; if (d > 0.6 && (dx * fwdx + dz * fwdz) / d < 0.25) continue; best = tg; bd = d; }
-  if ((best && best.kind + best.pid) !== (G3.target && G3.target.kind + G3.target.pid)) { G3.target = best; g3Prompt(); }
+  if ((best && best.kind + best.pid + (best.id || '')) !== (G3.target && G3.target.kind + G3.target.pid + (G3.target.id || ''))) { G3.target = best; g3Prompt(); }
   if (t - G3.mm > 200) { G3.mm = t; g3Minimap(); g3Prompt(); }
 }
 const S3 = { mode: null, code: null, nr: null, lastSend: 0, lastSig: '', timer: 0, bots: {} };
@@ -5105,7 +5182,7 @@ function pfPublic() {
   const P_ = pf(); const eq = P_.eq; const ok = id => owns(id);
   return { title: ok('t:' + eq.title) ? eq.title : '', badge: ok('b:' + eq.badge) ? eq.badge : '', badge2: P_.perks.slot2 && ok('b:' + eq.badge2) ? eq.badge2 : '', frame: ok('f:' + eq.frame) ? eq.frame : 'none', nameFx: ok('n:' + eq.nameFx) ? eq.nameFx : 'none',
     vip: P_.vip ? 1 : 0, lvl: level(), games: P_.stats.games, wins: P_.stats.wins, best: P_.stats.best, streak: P_.stats.streak, since: P_.stats.since, skin: mySkin(), duo: P_.duo.slice(0, 5), duos: P_.duos.slice(0, 5),
-    room: P_.perks.room ? Object.fromEntries(Object.entries(eq.room || {}).filter(([s, f]) => ROOM_SLOTS[s] && FURNITURE[f] && FURNITURE[f][0] === s && owns('fur:' + f))) : {}, emotes: eq.emotes };
+    house: P_.house || 1, room: P_.perks.room ? Object.fromEntries(Object.entries(eq.room || {}).filter(([s, f]) => ROOM_SLOTS[s] && FURNITURE[f] && FURNITURE[f][0] === s && owns('fur:' + f))) : {}, emotes: eq.emotes };
 }
 function cleanProf(x) {
   if (!x || typeof x !== 'object') return null; const s = v => typeof v === 'string' ? v.slice(0, 24) : ''; const n = v => Math.max(0, Math.min(1e7, v | 0));
@@ -5113,7 +5190,7 @@ function cleanProf(x) {
   return { title: TITLES[x.title] ? x.title : '', badge: badgeOk(s(x.badge)), badge2: badgeOk(s(x.badge2)), frame: FRAMES[x.frame] ? x.frame : 'none', nameFx: NAMEFX[x.nameFx] ? x.nameFx : 'none', vip: x.vip ? 1 : 0, lvl: n(x.lvl) || 1,
     games: n(x.games), wins: n(x.wins), best: n(x.best), streak: n(x.streak), since: Math.max(0, Math.min(Date.now(), +x.since || 0)), skin: Array.isArray(x.skin) ? x.skin.slice(0, 9).map(v => Math.max(0, Math.min(255, v | 0))) : null,
     duo: Array.isArray(x.duo) ? x.duo.slice(0, 5).map(s).filter(v => /^\d{1,6}$/.test(v)) : [], duos: Array.isArray(x.duos) ? x.duos.slice(0, 5).map(s).filter(v => /^\d{1,6}$/.test(v)) : [],
-    room: x.room && typeof x.room === 'object' ? Object.fromEntries(Object.entries(x.room).filter(([k, v]) => ROOM_SLOTS[k] && FURNITURE[v] && FURNITURE[v][0] === k)) : {}, emotes: Array.isArray(x.emotes) ? x.emotes.slice(0, 6).filter(e => EMOTES[e]) : [] };
+    house: Math.max(1, Math.min(6, x.house | 0 || 1)), room: x.room && typeof x.room === 'object' ? Object.fromEntries(Object.entries(x.room).filter(([k, v]) => ROOM_SLOTS[k] && FURNITURE[v] && FURNITURE[v][0] === k)) : {}, emotes: Array.isArray(x.emotes) ? x.emotes.slice(0, 6).filter(e => EMOTES[e]) : [] };
 }
 function badgeSpan(b) {
   if (!b) return ''; let g, c, nm;
@@ -5207,7 +5284,7 @@ function wmHTML() {
 }
 
 /* --- fenêtre Profil / Boutique / Casier / Emotes / Chambre / Codes / Archives --- */
-const META_TABS = [['profil', 'Profil'], ['boutique', 'Boutique'], ['casier', 'Casier'], ['emotes', 'Emotes'], ['chambre', 'Chambre'], ['codes', 'Codes'], ['archives', 'Archives']];
+const META_TABS = [['profil', 'Profil'], ['boutique', 'Boutique'], ['casier', 'Casier'], ['emotes', 'Emotes'], ['chambre', 'Maison'], ['codes', 'Codes'], ['archives', 'Archives']];
 function metaOpen(tab, pid) {
   if (typeof G3 !== 'undefined' && document.pointerLockElement) document.exitPointerLock();
   G.metaTab = tab || G.metaTab || 'profil'; G.metaPid = pid || null; if (tab !== 'archives') G.metaPage = null;
@@ -5549,6 +5626,580 @@ async function accLogout() {
   accSet(null); PF = null; LS.set(PF_KEY, null); LS.set('ds_skin', null); pf(); applyTheme(); G.profSig = '';
   toast('Déconnecté. Ta progression reste dans ton compte.'); metaRender(); render();
 }
+
+/* =====================================================================
+   VIE EN 3D : maison qui s'agrandit, lieux à explorer, cueillette, cuisine,
+   pêche, bornes d'arcade, défis du jour, sommeil qui raccourcit la nuit
+   ===================================================================== */
+const HOUSE = [null,
+  ['Chambre', 0, 'Un lit, une table et ta carte. Le début.'],
+  ['Cuisine', 800, 'Une cuisinière pour toutes les recettes et un frigo pour ton garde-manger.'],
+  ['Salle de jeux', 1800, 'Deux bornes d’arcade (Coureur et Serpent) et un billard.'],
+  ['Salon', 3500, 'Canapé, télé avec console, cheminée pour cuisiner et une bibliothèque.'],
+  ['Jardin', 6000, 'Un potager qui te donne des ingrédients à chaque phase et une mare pour pêcher chez toi.'],
+  ['Manoir', 10000, 'Jacuzzi, piano, statues, dorures sur les toits, drapeau. Titre [Châtelain] et badge Manoir.'],
+];
+const ING = { champignon: ['Champignon', '#c98a5a'], baie: ['Baies', '#d23a4a'], herbe: ['Herbes', '#5aa84a'], poisson: ['Poisson', '#6aa8d8'] };
+/* plat : [nom, ingrédients, durée de l'effet en secondes, où le cuisiner (feu = feu de camp, cheminée, poêle ; four = cuisine)] */
+const DISHES = {
+  tartine: ['Pain grillé', {}, 60, 'feu'], soupe: ['Soupe aux champignons', { champignon: 2 }, 120, 'feu'], grille: ['Poisson grillé', { poisson: 1, herbe: 1 }, 150, 'feu'],
+  tarte: ['Tarte aux baies', { baie: 3 }, 150, 'four'], ragout: ['Ragoût du chasseur', { champignon: 1, baie: 1, herbe: 1, poisson: 1 }, 240, 'four'], festin: ['Festin du survivant', { champignon: 2, baie: 2, herbe: 2, poisson: 2 }, 360, 'four'],
+};
+const ZONES = { etang: ['L’étang', 'Pêche depuis le ponton. La nuit, les gros poissons sortent.', '#4f9ae8'], clairiere: ['La clairière', 'Un cercle de pierres levées, des champignons et une pierre qui bénit une fois par jour.', '#b28cff'], parcours: ['Le parcours', 'Une course chronométrée entre 10 balises. Bats ton record.', '#ffd36b'], puits: ['Le vieux puits', 'Jette 20 pièces pour faire un vœu. Le panneau des défis est juste à côté.', '#3ad99a'] };
+const CHALL = {
+  cueillir: ['Cueillir 8 ingrédients', 8], pecher: ['Pêcher 3 poissons', 3], cuisiner: ['Cuisiner 2 plats', 2], manger: ['Manger un plat', 1], parcours: ['Finir le parcours', 1],
+  arcade: ['Faire 15 points au Coureur', 15], serpent: ['Atteindre une longueur de 12 au Serpent', 12], signal: ['Trouver 3 signaux cachés', 3], voeu: ['Faire un vœu au puits', 1], dormir: ['Dormir une nuit entière', 1], explorer: ['Visiter les 4 lieux', 4],
+};
+const LIFE_CAP = 400; // pièces maximum par jour grâce aux activités (hors défis)
+Object.assign(TITLES, { chatelain: 'Châtelain', cuisinier: 'Chef cuisinier', pecheur: 'Pêcheur', explorateur: 'Explorateur', coureur: 'Coureur des bois' });
+Object.assign(BADGES, { manoir: ['⌂', '#d8a92f', 'Manoir'], poele: ['♨', '#ff9b6b', 'Cuisinier'], hamecon: ['⚓', '#6aa8d8', 'Pêcheur'] });
+Object.assign(CODES, {
+  MAISONNETTE: ['Maison : la cuisine offerte', ['house:2']], PANIERGARNI: ['Panier d’ingrédients', ['ing:champignon:3', 'ing:baie:3', 'ing:herbe:3', 'ing:poisson:3']],
+  CHEFETOILE: ['Titre Chef cuisinier et 4 poissons', ['t:cuisinier', 'ing:poisson:4']], BOISPROFOND: ['Titre Explorateur', ['t:explorateur', 'c:200']], PREMIERECOURSE: ['Titre Coureur des bois', ['t:coureur']],
+});
+const _grantBase = grant;
+grant = function (tok, quiet) {
+  if (tok.startsWith('house:')) { const P_ = pf(); const n = +tok.split(':')[1]; if ((P_.house || 1) >= n) { P_.coins += HOUSE[n][1]; return 'Tu as déjà ce niveau : ' + fmtCoins(HOUSE[n][1]) + ' pièces à la place'; } P_.house = n; if (n >= 6) { P_.inv['t:chatelain'] = 1; P_.inv['b:manoir'] = 1; } houseRebuild(); return 'Maison niveau ' + n + ' : ' + HOUSE[n][0]; }
+  if (tok.startsWith('ing:')) { const [, k, n] = tok.split(':'); lifeP().ing[k] = (lifeP().ing[k] || 0) + (+n || 1); return (+n || 1) + ' × ' + ING[k][0]; }
+  return _grantBase(tok, quiet);
+};
+function lifeP() {
+  const P_ = pf(); if (!P_.house) P_.house = 1;
+  if (!P_.life || typeof P_.life !== 'object') P_.life = {};
+  const L = P_.life; for (const k of ['ing', 'dish', 'best', 'stats']) if (!L[k] || typeof L[k] !== 'object') L[k] = {};
+  return L;
+}
+function houseLevels() { const pub = G.pub; if (!pub) return []; return pub.players.map(p => p.pid === G.pid ? (pf().house || 1) : Math.max(1, Math.min(6, (p.prof && p.prof.house) | 0 || 1))); }
+function homeFoot(lv) { return [lv >= 3 ? -9.2 : -4, lv >= 2 ? 9.2 : 4, lv >= 6 ? -6.6 : -5, lv >= 5 ? 14.8 : lv >= 4 ? 9.2 : 4]; }
+function houseRebuild() { G.profSig = ''; if (typeof G3 !== 'undefined' && G3.on) g3Start(); }
+
+/* --------------------------------------------------------------- géométrie : pièces en plus */
+const ANNEX_PAL = { tente: { w: [0.46, 0.34, 0.22], r: [0.3, 0.22, 0.15], f: [0.4, 0.3, 0.2] }, cellule: { w: [0.52, 0.52, 0.5], r: [0.42, 0.42, 0.43], f: [0.3, 0.3, 0.31] }, maison: { w: null, r: [0.32, 0.16, 0.12], f: [0.36, 0.27, 0.2] }, chambre: { w: [0.86, 0.9, 0.9], r: [0.72, 0.77, 0.77], f: [0.62, 0.68, 0.68] } };
+function buildAnnex(g, em, wat, h, type, col, lights, circles, M, rand) {
+  const lv = h.lvl || 1; if (lv < 2) return;
+  const xf = (x, y, z) => { const [wx, wz] = h.W(x, z); return [wx, y, wz]; };
+  const B = (x, y, z, w, hh, d, c, ry = 0) => g.box(x, y, z, w, hh, d, c, ry, xf);
+  const BE = (x, y, z, w, hh, d, c) => em.box(x, y, z, w, hh, d, c, 0, xf, 0);
+  const C = (x, z, w, d) => { const [wx, wz] = h.W(x, z); col.push({ x: wx, z: wz, hw: w / 2, hd: d / 2, ry: h.ry }); };
+  const CL = (x, z, r) => { const [wx, wz] = h.W(x, z); circles.push({ x: wx, z: wz, r }); };
+  const pl = ANNEX_PAL[type] || ANNEX_PAL.maison; const wc = pl.w || [[0.55, 0.36, 0.28], [0.62, 0.56, 0.46], [0.46, 0.42, 0.38], [0.5, 0.48, 0.52]][h.i % 4]; const lo = cmul(wc, 0.75);
+  const HT = 2.8, T = 0.3, tent = type === 'tente', wood = [0.45, 0.32, 0.2], warm = [1, 0.78, 0.45];
+  const segs = (a0, a1, gaps) => { const out = []; let a = a0; for (const [g0, g1] of gaps) { if (g0 > a) out.push([a, g0, 0]); out.push([g0, g1, 1]); a = g1; } if (a1 > a) out.push([a, a1, 0]); return out; };
+  const wallX = (z, x0, x1, gaps = []) => { for (const [a, b, gap] of segs(x0, x1, gaps)) { const m = (a + b) / 2, L_ = b - a; if (gap) { B(m, (2.2 + HT) / 2, z, L_, HT - 2.2, T, wc); B(a, 1.1, z, 0.1, 2.2, T + 0.08, lo); B(b, 1.1, z, 0.1, 2.2, T + 0.08, lo); } else { B(m, HT / 2, z, L_, HT, T, wc); C(m, z, L_, T); } } };
+  const wallZ = (x, z0, z1, gaps = []) => { for (const [a, b, gap] of segs(z0, z1, gaps)) { const m = (a + b) / 2, L_ = b - a; if (gap) { B(x, (2.2 + HT) / 2, m, T, HT - 2.2, L_, wc); B(x, 1.1, a, T + 0.08, 2.2, 0.1, lo); B(x, 1.1, b, T + 0.08, 2.2, 0.1, lo); } else { B(x, HT / 2, m, T, HT, L_, wc); C(x, m, T, L_); } } };
+  const floor = (x0, x1, z0, z1, c, y = 0.035) => g.face([xf(x0, y, z0), xf(x1, y, z0), xf(x1, y, z1), xf(x0, y, z1)], c, xf((x0 + x1) / 2, -1, (z0 + z1) / 2));
+  const roof = (x0, x1, z0, z1) => { B((x0 + x1) / 2, HT + 0.1, (z0 + z1) / 2, x1 - x0 + 0.5, 0.2, z1 - z0 + 0.5, pl.r); if (lv >= 6) { BE((x0 + x1) / 2, HT + 0.24, z0 - 0.22, x1 - x0 + 0.5, 0.07, 0.07, [1, 0.78, 0.3]); BE((x0 + x1) / 2, HT + 0.24, z1 + 0.22, x1 - x0 + 0.5, 0.07, 0.07, [1, 0.78, 0.3]); } };
+  const lamp = (x, z, c = [1, 0.84, 0.6]) => { BE(x, HT - 0.06, z, 0.5, 0.05, 0.5, c); lights.push({ p: xf(x, HT - 0.6, z), c: c.map(v => v * 0.8), r: 7, home: h.i }); };
+  const legs = (x, z, w, d, hgt, c = wood) => { for (const sx of [-1, 1]) for (const sz of [-1, 1]) B(x + sx * (w / 2 - 0.06), hgt / 2, z + sz * (d / 2 - 0.06), 0.07, hgt, 0.07, c); };
+  // --- niveau 2 : cuisine (à droite)
+  wallX(-3, 3, 8.6); wallZ(8.6, -3, 3); wallX(3, 3, 8.6, lv >= 4 ? [[5, 6.4]] : []); if (tent) wallZ(3.12, -3, 3, [[-2.5, -1.1]]);
+  BE(5.8, 1.6, -3.17, 1.2, 0.8, 0.04, warm); BE(8.77, 1.6, 0.2, 0.04, 0.8, 1.2, warm);
+  floor(3, 8.6, -3, 3, pl.f); roof(3, 8.6, -3, 3); lamp(5.8, 0);
+  B(8.1, 0.46, -2.1, 0.85, 0.92, 0.85, [0.2, 0.2, 0.22]); BE(7.95, 0.93, -2.3, 0.22, 0.02, 0.22, [1, 0.35, 0.1]); BE(7.95, 0.93, -1.9, 0.22, 0.02, 0.22, [1, 0.35, 0.1]);
+  B(7.66, 0.4, -2.1, 0.02, 0.45, 0.6, [0.08, 0.08, 0.09]); BE(7.65, 0.4, -2.1, 0.01, 0.3, 0.45, [1, 0.5, 0.15]); B(8.2, 2.25, -2.1, 0.7, 0.5, 0.9, [0.55, 0.55, 0.58]); C(8.1, -2.1, 0.85, 0.85);
+  B(8.1, 0.45, -0.1, 0.9, 0.9, 3.0, [0.55, 0.45, 0.35]); B(8.1, 0.93, -0.1, 0.95, 0.06, 3.05, [0.85, 0.83, 0.78]); B(8.1, 0.965, 0.3, 0.6, 0.02, 0.6, [0.55, 0.65, 0.7]); B(8.4, 1.1, 0.3, 0.05, 0.25, 0.05, [0.7, 0.7, 0.72]); C(8.1, -0.1, 0.9, 3.0);
+  for (let k = 0; k < 3; k++) B(8.25, 1.06, -1.2 + k * 0.22, 0.14, 0.22, 0.14, [[0.8, 0.3, 0.2], [0.85, 0.75, 0.3], [0.3, 0.6, 0.3]][k]);
+  B(8.1, 0.95, 2.2, 0.85, 1.9, 0.8, [0.88, 0.9, 0.92]); B(7.66, 1.2, 1.95, 0.04, 0.5, 0.04, [0.5, 0.5, 0.5]); C(8.1, 2.2, 0.85, 0.8);
+  B(5.4, 0.74, 0.6, 1.4, 0.06, 0.95, wood); legs(5.4, 0.6, 1.4, 0.95, 0.72); C(5.4, 0.6, 1.4, 0.95); B(5.4, 0.8, 0.6, 0.32, 0.07, 0.32, [0.92, 0.88, 0.8]);
+  for (const [dx, dz, c] of [[-0.06, -0.04, [0.85, 0.15, 0.15]], [0.07, 0.05, [0.95, 0.75, 0.2]], [0.05, -0.08, [0.4, 0.75, 0.25]]]) B(5.4 + dx, 0.88, 0.6 + dz, 0.1, 0.1, 0.1, c);
+  for (const zz of [-0.25, 1.45]) { B(5.4, 0.45, zz, 0.4, 0.05, 0.4, wood); B(5.4, 0.22, zz, 0.07, 0.44, 0.07, wood); }
+  if (h.shack && lv >= 2) {} // la seconde maison du Constructeur est déplacée devant (voir buildWorld3d)
+  // --- niveau 3 : salle de jeux (à gauche)
+  if (lv >= 3) {
+    wallX(-3, -8.6, -3); wallZ(-8.6, -3, 3); wallX(3, -8.6, -3, lv >= 4 ? [[-6.4, -5]] : []); if (tent) wallZ(-3.12, -3, 3, [[-2.5, -1.1]]);
+    BE(-5.8, 1.6, -3.17, 1.2, 0.8, 0.04, [0.75, 0.55, 1]); floor(-8.6, -3, -3, 3, cmul(pl.f, 0.7)); roof(-8.6, -3, -3, 3); lamp(-5.8, 0, [0.85, 0.65, 1]);
+    BE(-8.4, 0.06, 0, 0.05, 0.04, 5.6, [1, 0.2, 0.6]); BE(-4.2, 2.1, 2.83, 1.4, 0.25, 0.04, [0.2, 0.9, 1]);
+    for (const [zz, sc] of [[-1.8, [0.3, 0.9, 1]], [-0.6, [0.4, 1, 0.4]]]) { B(-8.05, 0.85, zz, 0.7, 1.7, 0.8, [0.15, 0.1, 0.3]); BE(-7.69, 1.3, zz, 0.02, 0.45, 0.55, sc); B(-7.6, 0.95, zz, 0.25, 0.08, 0.65, [0.9, 0.2, 0.3]); BE(-7.75, 1.65, zz, 0.05, 0.18, 0.62, [1, 0.85, 0.3]); C(-8.05, zz, 0.7, 0.8); }
+    B(-5.4, 0.72, 1.2, 1.3, 0.1, 2.2, [0.12, 0.45, 0.22]); B(-5.4, 0.66, 1.2, 1.45, 0.12, 2.35, [0.35, 0.2, 0.12]); legs(-5.4, 1.2, 1.45, 2.35, 0.62, [0.3, 0.18, 0.1]); C(-5.4, 1.2, 1.45, 2.35);
+    for (const [dx, dz, c] of [[0.1, -0.4, [0.95, 0.95, 0.9]], [-0.2, 0.3, [0.85, 0.15, 0.1]], [0.25, 0.5, [0.95, 0.8, 0.15]], [-0.1, 0.6, [0.1, 0.2, 0.7]]]) B(-5.4 + dx, 0.81, 1.2 + dz, 0.08, 0.08, 0.08, c);
+    B(-4.0, 0.25, -2.0, 0.8, 0.5, 0.8, [0.9, 0.5, 0.1]);
+  }
+  // --- niveau 4 : salon (derrière)
+  if (lv >= 4) {
+    wallZ(-8.6, 3, 8.6); wallZ(8.6, 3, 8.6); wallX(8.6, -8.6, 8.6, lv >= 5 ? [[-0.7, 0.7]] : []); if (tent) wallX(3.15, -3.1, 3.1);
+    BE(-8.77, 1.6, 5.8, 0.04, 0.8, 1.4, warm); BE(8.77, 1.6, 4.0, 0.04, 0.8, 1.0, warm);
+    floor(-8.6, 8.6, 3, 8.6, cmul(pl.f, 1.1)); roof(-8.6, 8.6, 3, 8.6); lamp(-4.5, 5.8); lamp(4.0, 5.8);
+    floor(-6, -3, 5, 7, [0.45, 0.2, 0.15], 0.05);
+    B(-4.5, 0.25, 7.8, 2.4, 0.5, 0.9, [0.5, 0.2, 0.2]); B(-4.5, 0.75, 8.25, 2.4, 0.6, 0.22, [0.45, 0.18, 0.18]); B(-5.75, 0.45, 7.8, 0.2, 0.45, 0.9, [0.45, 0.18, 0.18]); B(-3.25, 0.45, 7.8, 0.2, 0.45, 0.9, [0.45, 0.18, 0.18]); C(-4.5, 7.9, 2.6, 1.0);
+    B(-4.5, 0.32, 6.1, 1.2, 0.06, 0.7, wood); legs(-4.5, 6.1, 1.2, 0.7, 0.3); C(-4.5, 6.1, 1.2, 0.7);
+    B(-4.1, 1.45, 3.2, 1.5, 0.85, 0.06, [0.05, 0.05, 0.06]); BE(-4.1, 1.45, 3.24, 1.38, 0.75, 0.01, [0.3, 0.55, 1]); B(-4.1, 0.3, 3.45, 1.7, 0.6, 0.45, wood); B(-3.7, 0.64, 3.45, 0.35, 0.08, 0.25, [0.1, 0.1, 0.1]); C(-4.1, 3.45, 1.7, 0.45);
+    B(8.3, 0.75, 6.0, 0.6, 1.5, 1.8, [0.5, 0.46, 0.42]); B(8.0, 0.4, 6.0, 0.1, 0.6, 1.0, [0.08, 0.06, 0.05]); BE(7.98, 0.33, 6.0, 0.04, 0.35, 0.8, [1, 0.45, 0.1]); B(8.15, 1.55, 6.0, 0.6, 0.1, 2.0, wood); C(8.3, 6.0, 0.6, 1.8);
+    lights.push({ p: xf(7.6, 0.8, 6.0), c: [1.1, 0.55, 0.2], r: 6, fire: true, home: h.i });
+    B(4.0, 1.1, 8.25, 2.2, 2.2, 0.4, wood); C(4.0, 8.25, 2.2, 0.4);
+    for (let row = 0; row < 3; row++) for (let k = 0; k < 7; k++) B(3.1 + k * 0.3, 0.45 + row * 0.62, 8.05, 0.22, 0.4 + ((k * 7 + row) % 3) * 0.05, 0.06, [[0.6, 0.15, 0.15], [0.15, 0.3, 0.6], [0.2, 0.5, 0.25], [0.7, 0.55, 0.2], [0.4, 0.2, 0.5]][(k + row * 2) % 5]);
+    B(-8.1, 0.25, 3.6, 0.4, 0.5, 0.4, [0.5, 0.3, 0.2]); B(-8.1, 0.8, 3.6, 0.6, 0.7, 0.6, [0.2, 0.5, 0.2]);
+  }
+  // --- niveau 5 : jardin (derrière le salon)
+  if (lv >= 5) {
+    floor(-7, 7, 8.75, 14.4, [0.28, 0.45, 0.2], 0.03);
+    const fx = (z, x0, x1, gaps = []) => { for (const [a, b, gap] of segs(x0, x1, gaps)) { if (gap) continue; const m = (a + b) / 2; B(m, 0.75, z, b - a, 0.08, 0.08, [0.85, 0.82, 0.75]); B(m, 0.4, z, b - a, 0.08, 0.08, [0.85, 0.82, 0.75]); for (let x = a; x <= b + 0.01; x += 1.2) B(x, 0.45, z, 0.1, 0.9, 0.1, [0.9, 0.88, 0.8]); C(m, z, b - a, 0.15); } };
+    const fz = (x, z0, z1) => { const m = (z0 + z1) / 2; B(x, 0.75, m, 0.08, 0.08, z1 - z0, [0.85, 0.82, 0.75]); B(x, 0.4, m, 0.08, 0.08, z1 - z0, [0.85, 0.82, 0.75]); for (let z = z0; z <= z1 + 0.01; z += 1.2) B(x, 0.45, z, 0.1, 0.9, 0.1, [0.9, 0.88, 0.8]); C(x, m, 0.15, z1 - z0); };
+    fx(14.4, -7, 7, [[-0.8, 0.8]]); fz(-7, 8.75, 14.4); fz(7, 8.75, 14.4);
+    for (const zz of [10, 11.3, 12.6]) { B(-3.8, 0.1, zz, 3.2, 0.2, 0.7, [0.3, 0.2, 0.12]); for (let k = 0; k < 6; k++) B(-5.1 + k * 0.52, 0.32, zz, 0.22, 0.26, 0.22, [[0.3, 0.6, 0.2], [0.95, 0.5, 0.1], [0.85, 0.15, 0.12]][(k + Math.round(zz)) % 3]); }
+    { const pts = [], c0 = xf(3.8, 0.05, 11.6); for (let j = 0; j < 14; j++) { const a = j / 14 * Math.PI * 2; pts.push(xf(3.8 + Math.cos(a) * 1.6, 0.05, 11.6 + Math.sin(a) * 1.3)); } for (let j = 0; j < 14; j++) wat.face([c0, pts[j], pts[(j + 1) % 14]], [0.16, 0.3, 0.34], xf(3.8, -1, 11.6)); for (let j = 0; j < 10; j++) { const a = j / 10 * Math.PI * 2; B(3.8 + Math.cos(a) * 1.75, 0.12, 11.6 + Math.sin(a) * 1.45, 0.4, 0.24, 0.35, [0.5, 0.5, 0.48], a); } CL(3.8, 11.6, 1.5); }
+    { const [ox, , oz] = xf(5.9, 0, 13.5); P3.oak(g, ox, oz, 5.5, rand); circles.push({ x: ox, z: oz, r: 0.5 }); }
+    B(-5.8, 0.42, 13.85, 1.4, 0.08, 0.45, wood); legs(-5.8, 13.85, 1.4, 0.45, 0.4);
+    for (const sx of [-1, 1]) { B(sx * 6.5, 0.6, 9.2, 0.1, 1.2, 0.1, [0.2, 0.2, 0.22]); BE(sx * 6.5, 1.25, 9.2, 0.22, 0.22, 0.22, warm); }
+    lights.push({ p: xf(0, 2, 11.5), c: [0.9, 0.75, 0.5], r: 9, home: h.i });
+  }
+  // --- niveau 6 : manoir
+  if (lv >= 6) {
+    for (const sx of [-1, 1]) { B(sx * 1.9, 0.4, -4.6, 0.7, 0.8, 0.7, [0.62, 0.62, 0.64]); B(sx * 1.9, 1.1, -4.6, 0.42, 0.65, 0.5, [0.66, 0.66, 0.7]); B(sx * 1.9, 1.5, -4.75, 0.3, 0.3, 0.45, [0.66, 0.66, 0.7]); for (const e2 of [-1, 1]) B(sx * 1.9 + e2 * 0.08, 1.72, -4.7, 0.06, 0.14, 0.06, [0.66, 0.66, 0.7]); C(sx * 1.9, -4.6, 0.7, 0.7); }
+    B(6.2, 0.3, -4.8, 2.0, 0.6, 2.0, [0.85, 0.85, 0.88]); wat.face([xf(5.35, 0.62, -5.65), xf(7.05, 0.62, -5.65), xf(7.05, 0.62, -3.95), xf(5.35, 0.62, -3.95)], [0.2, 0.55, 0.7], xf(6.2, -1, -4.8)); BE(6.2, 0.625, -4.8, 1.0, 0.005, 1.0, [0.4, 0.85, 1]); C(6.2, -4.8, 2.0, 2.0);
+    lights.push({ p: xf(6.2, 1.2, -4.8), c: [0.4, 0.75, 1], r: 5, home: h.i });
+    B(7.8, 4.3, 8.0, 0.08, 2.8, 0.08, [0.3, 0.3, 0.32]); B(8.35, 5.3, 8.0, 1.0, 0.6, 0.03, [0.75, 0.1, 0.12]); BE(7.8, 5.75, 8.0, 0.14, 0.14, 0.14, [1, 0.8, 0.3]);
+    B(1.6, 0.55, 7.95, 1.5, 1.1, 0.6, [0.06, 0.06, 0.07]); B(1.6, 0.78, 7.55, 1.3, 0.04, 0.22, [0.95, 0.95, 0.92]); for (let k = 0; k < 8; k++) B(1.05 + k * 0.16, 0.81, 7.5, 0.05, 0.03, 0.12, [0.05, 0.05, 0.05]); C(1.6, 7.9, 1.5, 0.6);
+    for (const sx of [-1, 1]) { B(sx * 1.2, 1.0, -5.8, 0.1, 2.0, 0.1, [0.2, 0.2, 0.22]); BE(sx * 1.2, 2.1, -5.8, 0.26, 0.3, 0.26, [1, 0.8, 0.35]); }
+  }
+}
+
+/* --------------------------------------------------------------- géométrie : les 4 lieux */
+function zoneRaceCPs(zn) { const out = []; for (let k = 0; k < 10; k++) { const th = (k + 0.5) / 10 * Math.PI * 2, rad = k % 2 ? 6.5 : 12; out.push(zn.W(Math.sin(th) * rad, -Math.cos(th) * rad)); } return out; }
+function buildZone(g, em, wat, zn, mapId, col, lights, circles, M, rand) {
+  const xf = (x, y, z) => { const [wx, wz] = zn.W(x, z); return [wx, y, wz]; };
+  const B = (x, y, z, w, hh, d, c, ry = 0) => g.box(x, y, z, w, hh, d, c, ry, xf);
+  const BE = (x, y, z, w, hh, d, c) => em.box(x, y, z, w, hh, d, c, 0, xf, 0);
+  const CL = (x, z, r) => { const [wx, wz] = zn.W(x, z); circles.push({ x: wx, z: wz, r }); };
+  const wood = [0.45, 0.32, 0.2], dark = [0.2, 0.2, 0.22], warm = [1, 0.8, 0.45];
+  const post = (x, z, c = warm) => { B(x, 1.0, z, 0.12, 2.0, 0.12, dark); BE(x, 2.08, z, 0.26, 0.3, 0.26, c); CL(x, z, 0.15); lights.push({ p: xf(x, 2.0, z), c: c.map(v => v * 0.85), r: 9 }); };
+  const bench = (x, z, ry = 0) => { B(x, 0.42, z, 1.5, 0.08, 0.45, wood, ry); B(x, 0.2, z, 1.3, 0.4, 0.08, cmul(wood, 0.8), ry); };
+  const disc = (geo, cx, cz, r, ry2, y, c, n = 20) => { const c0 = xf(cx, y, cz), pts = []; for (let j = 0; j < n; j++) { const a = j / n * Math.PI * 2; const k = 0.9 + 0.12 * Math.sin(j * 1.7); pts.push(xf(cx + Math.cos(a) * r * k, y, cz + Math.sin(a) * ry2 * k)); } for (let j = 0; j < n; j++) geo.face([c0, pts[j], pts[(j + 1) % n]], c, xf(cx, -1, cz)); };
+  if (zn.id === 'etang') {
+    disc(g, 0, 1, 6.4, 5.4, 0.02, M.ground.map(v => v * 0.6), 24); disc(wat, 0, 1, 5.3, 4.3, 0.05, [0.16, 0.3, 0.34], 24);
+    CL(0, 1.3, 3.9); CL(-2.6, 1, 2.4); CL(2.6, 1, 2.4); CL(0, 3.6, 2.6);
+    B(0, 0.22, -3.7, 1.2, 0.1, 2.4, wood); for (const sx of [-0.5, 0.5]) for (const zz of [-4.8, -2.6]) B(sx, 0.1, zz, 0.12, 0.4, 0.12, cmul(wood, 0.7));
+    for (let k = 0; k < 16; k++) { const a = rand() * Math.PI * 2, r = 5.4 + rand() * 0.7; const x = Math.cos(a) * r, z = 1 + Math.sin(a) * r * 0.82; if (z < -3 && Math.abs(x) < 1.5) continue; B(x, 0.5, z, 0.06, 1.0, 0.06, [0.35, 0.45, 0.2]); B(x, 1.05, z, 0.09, 0.22, 0.09, [0.42, 0.26, 0.15]); }
+    for (let k = 0; k < 4; k++) B(-1.6 + k * 1.1, 0.06, 1.5 + (k % 2) * 1.2, 0.6, 0.02, 0.5, [0.25, 0.5, 0.25]);
+    post(2.3, -5.8); bench(-2.6, -6.4); B(-1.2, 0.9, -6.9, 0.1, 1.8, 0.1, wood); B(-1.2, 1.55, -6.9, 1.0, 0.5, 0.06, [0.55, 0.4, 0.25]);
+  } else if (zn.id === 'clairiere') {
+    disc(g, 0, 0, 7.2, 7.2, 0.025, [0.22, 0.32, 0.2], 24);
+    for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2 + 0.2; const x = Math.cos(a) * 6.3, z = Math.sin(a) * 6.3; B(x, 1.1, z, 0.8, 2.2, 0.55, [0.5, 0.5, 0.52], -a); CL(x, z, 0.5); }
+    B(0, 0.35, 0, 1.4, 0.7, 1.0, [0.45, 0.45, 0.47]); BE(0, 0.71, 0, 1.0, 0.02, 0.6, [0.65, 0.45, 1]); CL(0, 0, 0.75); lights.push({ p: xf(0, 1.4, 0), c: [0.55, 0.4, 0.95], r: 8 });
+    for (const [x, z, s] of [[-4.6, 2.2, 1], [4.3, 3.0, 1.2], [1.4, -4.6, 0.9], [-3.2, -3.6, 0.8]]) { const [wx, , wz] = xf(x, 0, z); g.cyl(wx, 0, wz, 0.22 * s, 1.5 * s, 8, [0.9, 0.88, 0.8]); g.cyl(wx, 1.5 * s, wz, 1.0 * s, 0.4 * s, 10, [0.72, 0.16, 0.12], 0.3 * s); for (let j = 0; j < 4; j++) B(x + Math.cos(j * 1.6) * 0.55 * s, 1.72 * s, z + Math.sin(j * 1.6) * 0.55 * s, 0.14, 0.05, 0.14, [0.95, 0.92, 0.85]); circles.push({ x: wx, z: wz, r: 0.3 * s }); }
+    for (let k = 0; k < 18; k++) { const a = rand() * Math.PI * 2, r = 3.5 + rand() * 3; const [wx, , wz] = xf(Math.cos(a) * r, 0, Math.sin(a) * r); em.cyl(wx, 0, wz, 0.05, 0.16, 6, [0.4, 0.95, 0.9]); em.cyl(wx, 0.16, wz, 0.13, 0.06, 6, [0.4, 0.95, 0.9], 0.04); }
+  } else if (zn.id === 'parcours') {
+    for (const sx of [-1.8, 1.8]) { B(sx, 1.6, -13, 0.3, 3.2, 0.3, [0.35, 0.25, 0.15]); CL(sx, -13, 0.25); }
+    B(0, 3.1, -13, 3.9, 0.5, 0.12, [0.75, 0.1, 0.12]); BE(0, 3.1, -13.07, 3.0, 0.22, 0.02, [1, 0.85, 0.4]); lights.push({ p: xf(0, 2.6, -13.6), c: [1, 0.75, 0.4], r: 8 });
+    const cps = zoneRaceCPs(zn).map(([x, z]) => { const dx = x - zn.cx, dz = z - zn.cz, cs = Math.cos(zn.ry), sn = Math.sin(zn.ry); return [dx * cs - dz * sn, dx * sn + dz * cs]; });
+    for (let k = 0; k < cps.length; k++) { const [x0, z0] = cps[k], [x1, z1] = cps[(k + 1) % cps.length]; const mx = (x0 + x1) / 2, mz = (z0 + z1) / 2; if (k % 3 === 1) B(mx, 0.14, mz, 1.2, 0.28, 0.28, wood, Math.atan2(x1 - x0, z1 - z0) + Math.PI / 2); }
+    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; B(Math.cos(a) * 14, 1.3, Math.sin(a) * 14, 0.06, 2.6, 0.06, dark); B(Math.cos(a) * 14 + 0.3, 2.35, Math.sin(a) * 14, 0.6, 0.4, 0.02, [[0.85, 0.15, 0.12], [0.95, 0.8, 0.15], [0.2, 0.5, 0.85]][k % 3]); }
+  } else if (zn.id === 'puits') {
+    disc(g, 0, 0, 5.6, 5.6, 0.025, M.plaza.map(v => v * 0.95), 20);
+    { const [wx, , wz] = xf(0, 0, 0); g.cyl(wx, 0, wz, 1.0, 0.9, 12, [0.5, 0.48, 0.45]); g.cyl(wx, 0.9, wz, 1.05, 0.1, 12, [0.42, 0.4, 0.38]); }
+    disc(wat, 0, 0, 0.78, 0.78, 0.6, [0.05, 0.1, 0.12], 12); CL(0, 0, 1.15);
+    for (const sx of [-0.85, 0.85]) B(sx, 1.4, 0, 0.12, 1.8, 0.12, wood); B(0, 2.3, 0, 2.3, 0.12, 1.5, [0.4, 0.2, 0.15]); B(0, 1.75, 0, 1.6, 0.08, 0.08, cmul(wood, 0.8)); B(0.3, 1.3, 0, 0.25, 0.25, 0.25, [0.42, 0.3, 0.18]);
+    B(3.2, 0.8, -1.0, 0.1, 1.6, 0.1, wood); B(4.6, 0.8, -1.0, 0.1, 1.6, 0.1, wood); B(3.9, 1.5, -1.0, 1.7, 1.0, 0.08, [0.5, 0.36, 0.22]); CL(3.9, -1.0, 0.85);
+    for (const [px, py, c] of [[3.55, 1.65, [0.95, 0.92, 0.82]], [4.2, 1.55, [0.95, 0.85, 0.6]], [3.75, 1.3, [0.9, 0.9, 0.85]]]) B(px, py, -1.06, 0.42, 0.32, 0.02, c);
+    post(-2.6, -2.2); bench(-3.6, 1.6, Math.PI / 2); bench(2.4, 3.4);
+    for (let k = 0; k < 14; k++) { const a = k / 14 * Math.PI * 2; B(Math.cos(a) * 2.4, 0.12, Math.sin(a) * 2.4, 0.16, 0.24, 0.16, [[0.95, 0.35, 0.5], [0.95, 0.85, 0.25], [0.6, 0.45, 0.95]][k % 3]); }
+  }
+}
+
+/* --------------------------------------------------------------- état en jeu (non sauvegardé) */
+const LF = { open: false, view: 'defis', game: null, race: null, pick: { key: '', set: new Set() }, sig: { code: '', pts: [], found: new Set(), done: false }, buff: null, sleep: false, phaseKey: '', guide: null, used: {}, audio: null, juke: null, msg: '' };
+function lifePhaseKey() { const p = G.pub; return p ? (G.code || '') + ':' + p.phase + ':' + p.round : ''; }
+function lifeSpeed() { return LF.buff && Date.now() < LF.buff.until ? LF.buff.mul : 1; }
+function lifeBusy() { return LF.open || LF.sleep; }
+function lifeMyHome() { const i = g3MyIndex(); return g3Home(i); }
+function lifeEarn(n, why) {
+  const L = lifeP(), d = today(); if (L.cd !== d) { L.cd = d; L.cn = 0; }
+  const k = Math.max(0, Math.min(n, LIFE_CAP - (L.cn || 0))); if (k <= 0) { toast((why ? why + ' — ' : '') + 'plafond de ' + LIFE_CAP + ' pièces d’activités atteint pour aujourd’hui.'); return 0; }
+  L.cn = (L.cn || 0) + k; const P_ = pf(); P_.coins += k; P_.earned += k; if (typeof coinFx === 'function') coinFx(k); pfSave(); toast((why ? why + ' : ' : '') + '+' + k + ' pièces'); return k;
+}
+function lifeDaily() {
+  const L = lifeP(), d = today();
+  if (!L.ch || L.ch.day !== d) { const r = mulberry(hashStr('defis' + d)); const ids = Object.keys(CHALL); const pickd = []; while (pickd.length < 3) { const id = ids[Math.floor(r() * ids.length)]; if (!pickd.includes(id)) pickd.push(id); } L.ch = { day: d, list: pickd.map(id => ({ id, n: 0, done: 0 })) }; }
+  return L.ch;
+}
+function lifeProg(id, n = 1, max = false) {
+  const ch = lifeDaily(); const c = ch.list.find(x => x.id === id); const L = lifeP();
+  L.stats[id] = max ? Math.max(L.stats[id] || 0, n) : (L.stats[id] || 0) + n;
+  if (L.stats.pecher >= 10 && !owns('t:pecheur')) { pf().inv['t:pecheur'] = 1; pf().inv['b:hamecon'] = 1; toast('Nouveau titre : [Pêcheur] et badge Hameçon !'); }
+  if (L.stats.cuisiner >= 10 && !owns('t:cuisinier')) { pf().inv['t:cuisinier'] = 1; pf().inv['b:poele'] = 1; toast('Nouveau titre : [Chef cuisinier] et badge Cuisinier !'); }
+  if (c && !c.done) { c.n = max ? Math.max(c.n, n) : c.n + n; if (c.n >= CHALL[id][1]) { c.done = 1; const P_ = pf(); P_.coins += 80; P_.earned += 80; grant('xp:40'); toast('Défi réussi : ' + CHALL[id][0] + ' ! +80 pièces, +40 XP'); if (typeof coinFx === 'function') coinFx(80); } }
+  pfSave(); if (LF.open && !LF.game) lifeRender();
+}
+
+/* --------------------------------------------------------------- cibles à regarder en 3D */
+function lifeTargets(out) {
+  const w = G3.world, pub = G.pub; if (!w || !w.L.zones) return;
+  const m = G3.me; const T = (id, p, extra) => out.push(Object.assign({ kind: 'life', id, x: p[0], z: p[1], pid: '' }, extra || {}));
+  const near = (p, d = 60) => Math.hypot(p[0] - m.x, p[1] - m.z) < d;
+  for (const zn of w.L.zones) {
+    if (!near([zn.cx, zn.cz], 30)) continue;
+    if (zn.id === 'etang') T('fish', zn.W(0, -5.2));
+    if (zn.id === 'clairiere') T('stone', zn.W(0, 0));
+    if (zn.id === 'parcours') T('race', zn.W(0, -14.2));
+    if (zn.id === 'puits') { T('well', zn.W(0, -1.8)); T('board', zn.W(3.9, -1.9)); }
+  }
+  { const fr = pub.settings.map === 'labo' ? 3.05 : 1.85; const d = Math.hypot(m.x, m.z) || 1; T('campfire', [m.x / d * fr, m.z / d * fr]); }
+  lifeEnsureSig();
+  const pk = lifePicks();
+  for (const s of w.L.spots || []) if (!pk.has(s.id) && near([s.x, s.z], 6)) T('spot', [s.x, s.z], { spot: s });
+  LF.sig.pts.forEach((p, k) => { if (!LF.sig.found.has(k) && near(p, 6)) T('sig', p, { k }); });
+  pub.players.forEach((p, i) => {
+    const h = w.L.homes[i]; if (!h || !near([h.cx, h.cz], 16)) return; const lv = h.lvl || 1; const own = p.pid === G.pid;
+    if (own) { const room = pfPublic().room || {}; if (room.mur && FUR_ACT[room.mur]) T('fur', h.W(0, 2.1), { fur: room.mur }); }
+    if (lv >= 2) { T('stove', h.W(7.0, -2.1)); T('fridge', h.W(7.0, 2.2)); }
+    if (lv >= 3) { T('arcade', h.W(-7.0, -1.8)); T('arcade2', h.W(-7.0, -0.6)); T('billard', h.W(-4.3, 1.2)); }
+    if (lv >= 4) { T('tv', h.W(-4.1, 4.7)); T('fireplace', h.W(7.1, 6.0)); T('books', h.W(4.0, 7.2)); }
+    if (lv >= 5) { T('potager', h.W(-1.5, 11.3), { home: i, own }); T('pond2', h.W(1.9, 11.6)); }
+    if (lv >= 6) { T('jacuzzi', h.W(6.2, -6.2)); T('piano', h.W(1.6, 6.8)); }
+  });
+}
+function lifePicks() { const k = lifePhaseKey(); if (LF.pick.key !== k) LF.pick = { key: k, set: new Set() }; return LF.pick.set; }
+function lifeEnsureSig() {
+  const w = G3.world; if (!w || !G.code || LF.sig.code === G.code + w.L.edge) return;
+  const r = mulberry(hashStr(G.code + ':signaux')); const pts = [];
+  for (let t = 0; pts.length < 5 && t < 2000; t++) { const a = r() * Math.PI * 2, rr = 16 + r() * (w.L.edge - 22); const x = Math.cos(a) * rr, z = Math.sin(a) * rr; if (w.free && !w.free(x, z, 1)) continue; if (pts.some(p => Math.hypot(p[0] - x, p[1] - z) < 20)) continue; pts.push([x, z]); }
+  LF.sig = { code: G.code + w.L.edge, pts, found: new Set(), done: false };
+}
+const FUR_ACT = {
+  arcade: ['Jouer à la borne d’arcade', () => lifeGame('runner')], ecran: ['Jouer sur l’écran géant', () => lifeGame('snake')],
+  jukebox: ['Allumer ou couper le juke-box', () => lifeJuke()], radio: ['Allumer ou couper la radio', () => lifeJuke()], radioport: ['Allumer ou couper la radio', () => lifeJuke()],
+  guitare: ['Gratter la guitare', () => lifeTune([0, 4, 7, 12, 7, 4], 0.22, 'triangle')], telescope: ['Regarder les étoiles', () => lifeOnce('tele', 'Une étoile filante ! Tu fais un vœu', 30, 'Tu as déjà vu ton étoile filante aujourd’hui.')],
+  miroir: ['Te regarder dans le miroir', () => metaOpen('casier')], biblio: ['Lire un livre', () => lifeRead()], etagere: ['Lire un livre', () => lifeRead()], livre: ['Ouvrir le grimoire', () => lifeRead()],
+  frigo: ['Ouvrir le frigo', () => lifeOpen('cuisine')], poele: ['Cuisiner sur le poêle', () => lifeCook('feu')], cheminee: ['Cuisiner dans la cheminée', () => lifeCook('feu')],
+  sacfrappe: ['Frapper le sac', () => toast(pick(['Paf ! Paf ! Ça défoule.', 'Un crochet du droit. Le sac n’a rien vu venir.', 'Tu t’entraînes pour le prochain vote.']))],
+  cristal: ['Consulter la boule de cristal', () => toast('La boule dit : « ' + pick(['Méfie-toi de celui qui parle le moins.', 'Quelqu’un ment ce soir. Peut-être toi.', 'Le Signal ne s’éteindra pas cette nuit.', 'Une porte s’ouvrira, mais pas la tienne.', 'Le prochain vote sera serré.']) + ' »')],
+  echiquier: ['Jouer aux échecs contre toi-même', () => toast(pick(['Match nul. Évidemment.', 'Tu gagnes. Et tu perds.', 'Échec et mat en 4 coups. Bravo… toi.']))],
+  aquarium: ['Nourrir les poissons', () => toast('Les poissons se jettent sur les miettes.')], tasse: ['Boire un café', () => lifeSnack('Café', 45)], gateau: ['Manger une part de gâteau', () => lifeSnack('Gâteau', 90)],
+};
+function lifeHomeOptions(t, opts) {
+  const pub = G.pub, v = G.view; if (!v || t.pid !== G.pid) return;
+  if (t.kind === 'bed') {
+    if (pub.phase === 'night' && v.alive && !LF.sleep) { const left = (v.acts || []).some(a => !a.done && a.kind !== 'conta' && a.targets && a.targets.length); opts.push({ label: left ? 'Aller dormir (tu n’as pas encore agi !)' : 'Aller dormir', fn: () => lifeSleep(true) }); }
+    if (pub.phase === 'day' && v.canVote && !v.ready) opts.push({ label: 'Faire la sieste (prêt à voter)', fn: () => { send({ t: 'ready' }); toast('Petite sieste… tu es prêt à voter.'); } });
+  }
+  if (t.kind === 'card') { const room = pfPublic().room || {}; for (const s of ['coin', 'table']) if (room[s] && FUR_ACT[room[s]]) opts.push({ label: FUR_ACT[room[s]][0], fn: FUR_ACT[room[s]][1] }); }
+}
+function lifeOptions(t) {
+  const o = (label, fn) => [{ label, fn }]; const labo = G.pub.settings.map === 'labo';
+  switch (t.id) {
+    case 'fish': return o('Pêcher', () => lifeFish(false));
+    case 'pond2': return o('Pêcher dans la mare', () => lifeFish(true));
+    case 'stone': return o('Toucher la pierre ancienne', () => lifeOnce('stone', 'La pierre s’illumine. Bénédiction du jour', 50, 'La pierre reste froide. Reviens demain.'));
+    case 'race': return LF.race ? o('Abandonner la course', () => { LF.race = null; toast('Course abandonnée.'); }) : o('Lancer le parcours', () => lifeRace());
+    case 'well': return o('Faire un vœu (20 pièces)', () => lifeWish());
+    case 'board': return o('Lire les défis du jour', () => lifeOpen('defis'));
+    case 'campfire': return o(labo ? 'Réchauffer un plat au réacteur' : 'Cuisiner sur le feu de camp', () => lifeCook('feu'));
+    case 'spot': return o('Cueillir : ' + ING[t.spot.kind][0], () => lifePick(t.spot));
+    case 'sig': return o('Récupérer le signal caché', () => lifeSig(t.k));
+    case 'stove': return o('Cuisiner', () => lifeCook('four'));
+    case 'fridge': return o('Ouvrir le frigo', () => lifeOpen('cuisine'));
+    case 'arcade': return o('Jouer au Coureur', () => lifeGame('runner'));
+    case 'arcade2': case 'tv': return o('Jouer au Serpent', () => lifeGame('snake'));
+    case 'billard': return o('Jouer au billard', () => { const r = Math.random(); if (r < 0.12) lifeEarn(15, 'Coup parfait au billard'); else toast(pick(['Tu rentres deux boules d’un coup.', 'La blanche file dans le trou. Raté.', 'Joli effet rétro !', 'Bande, bande, et… presque.'])); });
+    case 'fireplace': return o('Cuisiner dans la cheminée', () => lifeCook('feu'));
+    case 'books': return o('Lire un livre', () => lifeRead());
+    case 'potager': return o(t.own ? 'Récolter le potager' : 'Ce potager n’est pas à toi', t.own ? () => lifeGarden(t.home) : () => toast('Ce potager n’est pas à toi.', true));
+    case 'jacuzzi': return o('Se détendre dans le jacuzzi', () => { LF.buff = { until: Date.now() + 120000, mul: 1.15, name: 'Détendu' }; toast('Tu te détends… Effet « Détendu » : un peu plus rapide pendant 2 min.'); });
+    case 'piano': return o('Jouer du piano', () => lifeTune([0, 2, 4, 5, 7, 9, 11, 12, 7, 4, 0], 0.18, 'sine'));
+    case 'fur': return FUR_ACT[t.fur] ? o(FUR_ACT[t.fur][0], FUR_ACT[t.fur][1]) : [];
+  }
+  return [];
+}
+
+/* --------------------------------------------------------------- actions */
+function lifePick(s) {
+  lifePicks().add(s.id); const L = lifeP(); const n = Math.random() < 0.15 ? 2 : 1; L.ing[s.kind] = (L.ing[s.kind] || 0) + n;
+  toast('+' + n + ' ' + ING[s.kind][0].toLowerCase() + ' (tu en as ' + L.ing[s.kind] + ')'); lifeBeep(660); lifeProg('cueillir', n);
+}
+function lifeSig(k) {
+  LF.sig.found.add(k); lifeBeep(880); lifeProg('signal', 1); const n = LF.sig.found.size;
+  if (n >= LF.sig.pts.length && !LF.sig.done) { LF.sig.done = true; lifeEarn(120, 'Les 5 signaux cachés retrouvés'); } else toast('Signal caché ' + n + '/' + LF.sig.pts.length + ' récupéré. Les autres sont quelque part sur la carte.');
+}
+function lifeGarden(i) {
+  const key = lifePhaseKey() + ':pot'; if (LF.used[key]) return toast('Le potager repousse. Reviens à la prochaine phase.');
+  LF.used[key] = 1; const L = lifeP(); const got = []; const n = (pf().house || 1) >= 6 ? 3 : 2;
+  for (let k = 0; k < n; k++) { const ing = pick(['champignon', 'baie', 'herbe']); L.ing[ing] = (L.ing[ing] || 0) + 1; got.push(ING[ing][0].toLowerCase()); }
+  toast('Récolte : ' + got.join(', ') + '.'); lifeProg('cueillir', n);
+}
+function lifeOnce(id, msg, coins, already) { const L = lifeP(); L.once = L.once || {}; if (L.once[id] === today()) return toast(already); L.once[id] = today(); pfSave(); lifeEarn(coins, msg); }
+function lifeSnack(name, secs) { const key = lifePhaseKey() + ':snack'; if (LF.used[key]) return toast('Tu as déjà pris un en-cas cette phase.'); LF.used[key] = 1; LF.buff = { until: Date.now() + secs * 1000, mul: 1.15, name }; toast(name + ' : un peu plus rapide pendant ' + secs + ' s.'); }
+function lifeWish() {
+  const P_ = pf(); if (P_.coins < 20) return toast('Il faut 20 pièces pour faire un vœu.', true);
+  P_.coins -= 20; P_.spent += 20; lifeProg('voeu', 1); const r = Math.random(); lifeBeep(520);
+  if (r < 0.35) { pfSave(); return toast('Ta pièce tombe dans le noir… Le puits reste silencieux.'); }
+  if (r < 0.65) { P_.coins += 40; pfSave(); return toast('Le puits te rend 40 pièces !'); }
+  if (r < 0.8) { const L = lifeP(); const a = pick(Object.keys(ING)), b = pick(Object.keys(ING)); L.ing[a] = (L.ing[a] || 0) + 1; L.ing[b] = (L.ing[b] || 0) + 1; pfSave(); return toast('Un seau remonte avec ' + ING[a][0].toLowerCase() + ' et ' + ING[b][0].toLowerCase() + '.'); }
+  if (r < 0.9) { P_.coins += 100; pfSave(); return toast('Vœu exaucé : +100 pièces !'); }
+  if (r < 0.97) { const msg = grant('box'); pfSave(); return toast('Un coffre remonte du puits ! ' + msg); }
+  P_.coins += 300; pfSave(); toast('JACKPOT ! Le puits déborde : +300 pièces !');
+}
+const LORE = ['Carnet de bord, jour 12 : la radio a capté un signal à 3 h 07. Personne n’a dormi.', 'Règle n°1 de la Zone 7 : on ne sort jamais seul la nuit. Règle n°2 : voir règle n°1.', 'Le Scientifique a laissé une note : « Le Mordu ne mord jamais deux fois de suite la même porte. » Ou peut-être que si.', 'Il paraît que le vieux puits exauce un vœu sur dix. Les autres pièces, il les garde.', 'Les pierres de la clairière étaient là avant la Zone. Avant tout le monde.', 'Recette de grand-mère : deux champignons, un feu, et surtout pas de baies violettes.', 'On raconte qu’à l’étang, la nuit, on peut pêcher autre chose que des poissons.', '« Le Dernier Signal », chapitre 1 : il restait douze survivants. Il en resterait moins à l’aube.'];
+function lifeRead() { lifeShow('<h2>Un livre</h2><p class="lf-quote">« ' + e(pick(LORE)) + ' »</p><button class="btn ghost small" data-a="lf-read">Autre page</button>'); }
+/* --- course */
+function lifeRace() {
+  const zn = G3.world.L.zones.find(z => z.id === 'parcours'); LF.race = { cps: zoneRaceCPs(zn), start: zn.W(0, -13), k: 0, t0: performance.now() };
+  toast('C’est parti ! Passe par les 10 balises dorées dans l’ordre, puis reviens sous l’arche.'); lifeBeep(440); lifeBeep(660, 0.15);
+}
+function lifeRaceTick(m) {
+  const R_ = LF.race; if (!R_) return; const el = (performance.now() - R_.t0) / 1000;
+  if (el > 180) { LF.race = null; toast('Course trop longue : abandonnée.'); return; }
+  const tgt = R_.k < R_.cps.length ? R_.cps[R_.k] : R_.start;
+  if (Math.hypot(m.x - tgt[0], m.z - tgt[1]) < 1.9) {
+    R_.k++; lifeBeep(R_.k > R_.cps.length ? 990 : 700 + R_.k * 20);
+    if (R_.k > R_.cps.length) {
+      LF.race = null; const L = lifeP(); const best = L.best.parcours; const nb = !best || el < best; if (nb) L.best.parcours = +el.toFixed(2);
+      const med = el < 22 ? ['Or', 40] : el < 30 ? ['Argent', 25] : el < 45 ? ['Bronze', 15] : null;
+      toast('Arrivée en ' + el.toFixed(1) + ' s' + (nb ? ' — nouveau record !' : ' (record : ' + best.toFixed(1) + ' s)') + (med ? ' · Médaille ' + med[0] : ''));
+      lifeProg('parcours', 1); if (med) lifeEarn(med[1], 'Médaille ' + med[0]); pfSave();
+    }
+  }
+}
+/* --- dessin en 3D (objets qui changent) */
+function lifeDraw(time, m, E) {
+  const w = G3.world; if (!w || !w.L.zones) return;
+  const cube = (x, y, z, sx, sy, sz, tint, ex) => R3.draw(R3.cube, M4.chain(M4.t(x, y, z), M4.s(sx, sy, sz)), Object.assign({ tint }, ex || {}));
+  const glow = E.night > 0.5 ? 0.35 : 0.08;
+  const pk = lifePicks();
+  for (const s of w.L.spots || []) {
+    if (pk.has(s.id) || Math.abs(s.x - m.x) > 45 || Math.abs(s.z - m.z) > 45) continue;
+    if (s.kind === 'champignon') { cube(s.x, 0.15, s.z, 0.12, 0.3, 0.12, [0.92, 0.9, 0.82], { emis: glow }); cube(s.x, 0.33, s.z, 0.38, 0.14, 0.38, [0.78, 0.22, 0.15], { emis: glow }); }
+    else if (s.kind === 'baie') { cube(s.x, 0.3, s.z, 0.62, 0.55, 0.62, [0.18, 0.38, 0.16]); for (let j = 0; j < 4; j++) cube(s.x + Math.cos(j * 1.7) * 0.3, 0.38 + (j % 2) * 0.14, s.z + Math.sin(j * 1.7) * 0.3, 0.11, 0.11, 0.11, [0.85, 0.1, 0.2], { emis: 0.3 + glow }); }
+    else { for (const dx of [-0.08, 0.08]) cube(s.x + dx, 0.25, s.z, 0.06, 0.5, 0.06, [0.4, 0.75, 0.3]); cube(s.x, 0.52, s.z, 0.14, 0.08, 0.14, [1, 0.9, 0.3], { emis: 0.3 + glow }); }
+  }
+  LF.sig.pts.forEach((p, k) => { if (LF.sig.found.has(k) || Math.hypot(p[0] - m.x, p[1] - m.z) > 50) return; cube(p[0], 0.18, p[1], 0.32, 0.36, 0.26, [0.3, 0.32, 0.3]); cube(p[0], 0.8, p[1], 0.05, 1.3, 0.05, [0.55, 0.55, 0.58]); cube(p[0], 1.48, p[1], 0.12, 0.12, 0.12, [1, 0.15, 0.1], { emis: Math.sin(time * 6 + k) > 0 ? 1 : 0.2 }); });
+  // balises du parcours
+  const zn = w.L.zones.find(z => z.id === 'parcours');
+  if (zn && Math.hypot(zn.cx - m.x, zn.cz - m.z) < 60) {
+    const cps = zoneRaceCPs(zn); const R_ = LF.race;
+    cps.forEach(([x, z], k) => { const cur = R_ && R_.k === k, done = R_ && R_.k > k; cube(x, 0.9, z, 0.14, 1.8, 0.14, [0.3, 0.3, 0.32]); cube(x, 1.95, z, 0.42, 0.42, 0.42, cur ? [1, 0.8, 0.2] : done ? [0.3, 0.9, 0.4] : [0.45, 0.45, 0.5], { emis: cur ? 0.7 + 0.3 * Math.sin(time * 8) : done ? 0.6 : 0.15 }); });
+    if (R_) { const tgt = R_.k < cps.length ? cps[R_.k] : R_.start; R3.blend('add'); g3Billboard(R3.glow, tgt[0], 2.2, tgt[1], 2.2, 2.2, 0.8, [1, 0.8, 0.3]); R3.blend(false); }
+  }
+  lifeRaceTick(m);
+  // repère lumineux vers un lieu choisi
+  if (LF.guide) { const z2 = w.L.zones.find(z => z.id === LF.guide); if (z2) { if (Math.hypot(z2.cx - m.x, z2.cz - m.z) < z2.r) { toast('Tu es arrivé : ' + ZONES[z2.id][0] + '.'); LF.guide = null; } else { R3.blend('add'); for (let k = 0; k < 6; k++) g3Billboard(R3.glow, z2.cx, 2 + k * 3, z2.cz, 3, 3, 0.55, ZONES[z2.id][2] ? hexAny(ZONES[z2.id][2]) : [1, 1, 1]); R3.blend(false); } } }
+}
+
+/* --------------------------------------------------------------- sommeil */
+function lifeSleep(on) {
+  const pub = G.pub, v = G.view; if (on && !(pub && pub.phase === 'night' && v && v.alive)) return;
+  LF.sleep = on; send({ t: 'sleep', on }).catch?.(() => {});
+  if (typeof G3 !== 'undefined' && G3.on) { const h = lifeMyHome(); if (on) { if (h) { const [bx, bz] = h.W(-1.9, 0.0); G3.me.x = bx; G3.me.z = bz; } G3.me.em = 'sommeil'; G3.me.et = Date.now() + G.offset; if (document.pointerLockElement) document.exitPointerLock(); } else { G3.me.em = null; if (h) { G3.me.x = h.inside[0]; G3.me.z = h.inside[1]; } } S3.lastSig = ''; }
+  if (on) { LF.slept = lifePhaseKey(); lifeBeep(330); }
+  lifeTick();
+}
+function lifePhase() {
+  const k = lifePhaseKey(); if (k === LF.phaseKey) return; const prev = LF.phaseKey; LF.phaseKey = k;
+  if (LF.sleep) { LF.sleep = false; if (typeof G3 !== 'undefined') G3.me.em = null; if (LF.slept === prev && /:night:/.test(prev)) { toast('Bien dormi ! L’aube se lève.'); lifeProg('dormir', 1); } }
+  if (LF.race && G.pub && G.pub.phase === 'vote') { LF.race = null; toast('Le vote commence : course interrompue.'); }
+  LF.used = {};
+}
+/* --------------------------------------------------------------- interface : fenêtre Activités */
+function lifeEl() {
+  if (!$('#life')) {
+    document.body.insertAdjacentHTML('beforeend', '<div class="modal" id="life" hidden><div class="life-in" id="life-in" role="dialog" aria-modal="true" aria-label="Activités"></div></div><div id="life-sleep" hidden></div><button class="btn frost lf-sleepbtn" id="life-sleepbtn" data-a="lf-sleep" hidden>Aller dormir</button>');
+    $('#life').addEventListener('click', ev => { if (ev.target.id === 'life') lifeClose(); });
+  }
+  return $('#life');
+}
+function lifeOpen(view) { lifeEl(); LF.open = true; if (view) LF.view = view; LF.game = null; if (document.pointerLockElement) document.exitPointerLock(); $('#life').hidden = false; lifeRender(); }
+function lifeClose() { if (LF.game && LF.game.stop) LF.game.stop(); LF.game = null; LF.open = false; const el = $('#life'); if (el) el.hidden = true; }
+function lifeShow(html) { lifeEl(); LF.open = true; $('#life').hidden = false; if (document.pointerLockElement) document.exitPointerLock(); $('#life-in').innerHTML = '<button class="modal-x" data-a="lf-close" aria-label="Fermer">×</button>' + html; }
+const LF_TABS = [['defis', 'Défis'], ['cuisine', 'Cuisine'], ['lieux', 'Lieux'], ['maison', 'Maison']];
+function lifeRender() {
+  if (!LF.open || LF.game) return; const L = lifeP(), P_ = pf(), V = LF.view;
+  let h = '<h2>Activités</h2><div class="rtabs" role="tablist">' + LF_TABS.map(([k, l]) => '<button role="tab" data-a="lf-tab" data-t="' + k + '" aria-selected="' + (k === V) + '">' + l + '</button>').join('') + '</div>';
+  if (V === 'defis') {
+    const ch = lifeDaily();
+    h += '<p>Trois défis par jour, les mêmes pour tout le monde. Chacun rapporte <b>80 pièces</b> et 40 XP.</p><div class="lf-grid">' + ch.list.map(c => { const [nm, goal] = CHALL[c.id]; const pct = Math.min(100, Math.round(c.n / goal * 100)); return '<div class="lf-card' + (c.done ? ' ok' : '') + '"><b>' + e(nm) + '</b><div class="lf-bar"><i style="width:' + pct + '%"></i></div><small>' + (c.done ? 'Réussi ✓' : Math.min(c.n, goal) + ' / ' + goal) + '</small></div>'; }).join('') + '</div>';
+    h += '<h3>Quoi faire pendant les temps morts ?</h3><ul class="lf-list"><li><b>Cueillir</b> champignons, baies et herbes dans les bois (ils repoussent à chaque phase).</li><li><b>Pêcher</b> à l’étang, <b>cuisiner</b> sur le feu de camp ou dans ta cuisine, puis <b>manger</b> pour courir plus vite.</li><li><b>Chercher les 5 signaux cachés</b> de la partie (petites antennes à lumière rouge).</li><li><b>Battre ton record</b> au parcours, jouer aux bornes d’arcade, faire un vœu au puits.</li><li>La nuit, quand tu as fini, <b>va dormir</b> dans ton lit : si tout le monde dort, l’aube arrive plus vite.</li></ul>';
+    const sig = LF.sig.pts.length ? LF.sig.found.size + ' / ' + LF.sig.pts.length : '—'; const cn = L.cd === today() ? L.cn || 0 : 0;
+    h += '<p class="dim">Signaux trouvés dans cette partie : <b>' + sig + '</b> · Pièces d’activités aujourd’hui : <b>' + cn + ' / ' + LIFE_CAP + '</b> · Record du parcours : <b>' + (L.best.parcours ? L.best.parcours.toFixed(1) + ' s' : '—') + '</b> · Coureur : <b>' + (L.best.runner || 0) + '</b> · Serpent : <b>' + (L.best.snake || 0) + '</b></p>';
+  }
+  if (V === 'cuisine') {
+    h += '<h3>Garde-manger</h3><div class="lf-ing">' + Object.entries(ING).map(([k, [nm, c]]) => '<span style="--c:' + c + '"><i></i>' + e(nm) + ' × ' + (L.ing[k] || 0) + '</span>').join('') + '</div>';
+    const dishes = Object.entries(L.dish).filter(([, n]) => n > 0);
+    h += '<h3>Tes plats</h3>' + (dishes.length ? '<div class="lf-grid">' + dishes.map(([k, n]) => '<div class="lf-card"><b>' + e(DISHES[k][0]) + ' × ' + n + '</b><small>Plus rapide pendant ' + Math.round(DISHES[k][2] / 60 * 10) / 10 + ' min</small><button class="btn red small" data-a="lf-eat" data-d="' + k + '">Manger</button></div>').join('') + '</div>' : '<p class="dim">Aucun plat. Cuisine sur le feu de camp, dans ta cheminée, ou dans ta cuisine (maison niveau 2).</p>');
+    if (LF.buff && Date.now() < LF.buff.until) h += '<p class="tip">Effet « ' + e(LF.buff.name) + ' » : encore ' + Math.ceil((LF.buff.until - Date.now()) / 1000) + ' s.</p>';
+    h += '<h3>Recettes</h3><div class="lf-grid">' + Object.entries(DISHES).map(([k, [nm, need, , where]]) => '<div class="lf-card"><b>' + e(nm) + '</b><small>' + (Object.keys(need).length ? Object.entries(need).map(([i, n]) => n + ' ' + ING[i][0].toLowerCase()).join(', ') : 'Rien, juste du pain') + '</small><small>' + (where === 'four' ? 'Dans une cuisine' : 'Feu de camp, cheminée, poêle ou cuisine') + '</small></div>').join('') + '</div>';
+  }
+  if (V === 'lieux') {
+    h += '<p>Quatre lieux à explorer autour du village. Ils sont sur la mini-carte (points de couleur). Choisis-en un : une colonne de lumière t’y guide.</p><div class="lf-grid">' + Object.entries(ZONES).map(([k, [nm, desc, c]]) => '<div class="lf-card" style="border-left:3px solid ' + c + '"><b>' + e(nm) + '</b><small>' + e(desc) + '</small>' + (G3.on ? '<button class="btn ghost small" data-a="lf-guide" data-z="' + k + '">' + (LF.guide === k ? 'Guidage actif' : 'Me guider') + '</button>' : '') + '</div>').join('') + '</div>';
+    const vis = L.vis && L.vis.day === today() ? L.vis.ids.length : 0; h += '<p class="dim">Lieux visités aujourd’hui : ' + vis + ' / 4.</p>';
+  }
+  if (V === 'maison') h += houseHTML();
+  $('#life-in').innerHTML = '<button class="modal-x" data-a="lf-close" aria-label="Fermer">×</button>' + h;
+}
+function houseHTML() {
+  const P_ = pf(), lv = P_.house || 1;
+  let h = '<p class="dim">Ton logement grandit : chaque niveau ajoute une pièce que tout le monde voit en 3D. Les travaux sont immédiats.</p><div class="lf-house">';
+  for (let k = 1; k <= 6; k++) { const [nm, price, desc] = HOUSE[k]; const st = k <= lv ? 'on' : k === lv + 1 ? 'next' : ''; h += '<div class="lv ' + st + '"><b class="mono">' + k + '</b><div class="grow"><b>' + e(nm) + '</b><br><small>' + e(desc) + '</small></div>' + (k <= lv ? '<span class="tag frost">Construit</span>' : k === lv + 1 ? '<button class="btn red small" data-a="lf-house"' + (P_.coins < price ? ' disabled' : '') + '>◉ ' + fmtCoins(price) + '</button>' : '<span class="dim mono">◉ ' + fmtCoins(price) + '</span>') + '</div>'; }
+  return h + '</div>';
+}
+const _roomHTML = roomHTML;
+roomHTML = function () { return '<h3>Ta maison <small>niveau ' + (pf().house || 1) + ' / 6</small></h3>' + houseHTML() + '<h3>Déco de la chambre</h3>' + _roomHTML(); };
+function lifeHouseUp() {
+  const P_ = pf(), lv = P_.house || 1; if (lv >= 6) return; const [nm, price] = HOUSE[lv + 1];
+  if (P_.coins < price) return toast('Il te manque ' + fmtCoins(price - P_.coins) + ' pièces.', true);
+  P_.coins -= price; P_.spent += price; P_.house = lv + 1; if (lv + 1 >= 6) { P_.inv['t:chatelain'] = 1; P_.inv['b:manoir'] = 1; } pfSave();
+  toast('Travaux terminés : ' + nm + ' ! Ta maison est au niveau ' + (lv + 1) + '.'); if (typeof coinFx === 'function') coinFx(0); houseRebuild(); lifeRender(); if (!$('#meta').hidden) metaRender();
+}
+/* --- cuisine */
+function lifeCook(where) {
+  const L = lifeP(); const list = Object.entries(DISHES).filter(([, d]) => where === 'four' || d[3] === 'feu');
+  const can = need => Object.entries(need).every(([i, n]) => (L.ing[i] || 0) >= n);
+  lifeShow('<h2>' + (where === 'four' ? 'Cuisine' : 'Au coin du feu') + '</h2><p>Choisis une recette. Pendant la cuisson, appuie au bon moment trois fois (Espace, clic ou tape).</p><div class="lf-ing">' + Object.entries(ING).map(([k, [nm, c]]) => '<span style="--c:' + c + '"><i></i>' + e(nm) + ' × ' + (L.ing[k] || 0) + '</span>').join('') + '</div><div class="lf-grid">'
+    + list.map(([k, [nm, need, dur]]) => '<div class="lf-card"><b>' + e(nm) + '</b><small>' + (Object.keys(need).length ? Object.entries(need).map(([i, n]) => n + ' ' + ING[i][0].toLowerCase()).join(', ') : 'Rien, juste du pain') + ' · effet ' + Math.round(dur / 6) / 10 + ' min</small><button class="btn red small" data-a="lf-cook" data-d="' + k + '"' + (can(need) ? '' : ' disabled') + '>Cuisiner</button></div>').join('') + '</div>'
+    + (where !== 'four' ? '<p class="dim">Tarte, ragoût et festin demandent une vraie cuisine (maison niveau 2).</p>' : ''));
+}
+function lifeCookStart(k) {
+  const L = lifeP(), [nm, need] = DISHES[k]; if (!Object.entries(need).every(([i, n]) => (L.ing[i] || 0) >= n)) return;
+  for (const [i, n] of Object.entries(need)) L.ing[i] -= n; pfSave();
+  let round = 0, hits = 0, t0 = performance.now(), raf = 0, zone = 0, wz = 0, sp = 0; const box = () => $('#lf-meter');
+  const next = () => { zone = 0.15 + Math.random() * 0.6; wz = 0.2 - round * 0.04; sp = 1.1 + round * 0.45; t0 = performance.now(); const z = box() && box().querySelector('.zone'); if (z) { z.style.left = zone * 100 + '%'; z.style.width = wz * 100 + '%'; } };
+  const pos = () => { const t = (performance.now() - t0) / 1000 * sp; return 0.5 - 0.5 * Math.cos(t * Math.PI); };
+  const loop = () => { const n = box() && box().querySelector('.needle'); if (!n) return; n.style.left = 'calc(' + pos() * 100 + '% - 2px)'; raf = requestAnimationFrame(loop); };
+  const press = () => { const p = pos(); const ok = p >= zone && p <= zone + wz; if (ok) hits++; lifeBeep(ok ? 760 : 200); const st = $('#lf-cookst'); if (st) st.textContent = (ok ? 'Parfait !' : 'Raté…') + ' (' + (round + 1) + '/3)'; round++; if (round >= 3) return finish(); next(); };
+  const finish = () => { cancelAnimationFrame(raf); LF.game = null;
+    if (!hits) { toast('Brûlé ! ' + nm + ' est raté. Les ingrédients sont perdus.', true); lifeCook(DISHES[k][3] === 'four' ? 'four' : 'feu'); return; }
+    L.dish[k] = (L.dish[k] || 0) + 1; pfSave(); lifeProg('cuisiner', 1);
+    lifeShow('<h2>' + e(nm) + '</h2><p class="lf-stars">' + '★'.repeat(hits) + '☆'.repeat(3 - hits) + '</p><p>Plat ajouté à ton garde-manger.</p><div class="row"><button class="btn red" data-a="lf-eat" data-d="' + k + '">Manger maintenant</button><button class="btn ghost" data-a="lf-tab" data-t="cuisine">Garde-manger</button></div>');
+    if (hits === 3) lifeEarn(10, 'Cuisson parfaite'); };
+  lifeShow('<h2>' + e(nm) + '</h2><p id="lf-cookst">Appuie quand l’aiguille est dans la zone verte (1/3).</p><div class="lf-meter" id="lf-meter" data-a="lf-press"><span class="zone"></span><span class="needle"></span></div><button class="btn red" data-a="lf-press">Maintenant !</button>');
+  LF.game = { key: ev => { if (ev.code === 'Space' || ev.code === 'Enter' || ev.code === 'KeyE') { ev.preventDefault(); press(); } }, press, stop: () => cancelAnimationFrame(raf) };
+  next(); loop();
+}
+function lifeEat(k) {
+  const L = lifeP(); if (!(L.dish[k] > 0)) return; L.dish[k]--; const [nm, , dur] = DISHES[k];
+  LF.buff = { until: Date.now() + dur * 1000, mul: 1.3, name: 'Rassasié' }; pfSave(); lifeProg('manger', 1);
+  toast('Miam : ' + nm + ' ! Tu cours 30 % plus vite pendant ' + (dur >= 120 ? Math.round(dur / 60) + ' min' : dur + ' s') + '.'); lifeBeep(600);
+  if (k === 'festin') lifeEarn(40, 'Festin'); lifeClose();
+}
+/* --- pêche */
+function lifeFish(home) {
+  const night = G.pub && G.pub.phase === 'night';
+  let st = 'wait', t = 0, bite = 0, raf = 0; const say = (s) => { const el = $('#lf-fishst'); if (el) el.innerHTML = s; };
+  const cast = () => { st = 'wait'; bite = performance.now() + 1500 + Math.random() * 3500; say('Le bouchon flotte… attends que ça morde.'); const b = $('#lf-bob'); if (b) b.className = 'lf-bob'; };
+  const loop = () => { const now_ = performance.now(); if (st === 'wait' && now_ >= bite) { st = 'bite'; t = now_; say('<b>ÇA MORD ! Ferre vite !</b>'); const b = $('#lf-bob'); if (b) b.className = 'lf-bob bite'; lifeBeep(900, 0.08); } if (st === 'bite' && now_ - t > (g3Coarse() ? 1100 : 850)) { st = 'miss'; say('Trop tard, il s’est décroché. <button class="btn ghost small" data-a="lf-press">Relancer</button>'); } raf = requestAnimationFrame(loop); };
+  const press = () => {
+    if (st === 'miss' || st === 'done') return cast();
+    if (st === 'wait') { st = 'miss'; say('Trop tôt ! Le poisson a eu peur. <button class="btn ghost small" data-a="lf-press">Relancer</button>'); return; }
+    st = 'done'; const L = lifeP(); const r = Math.random(); let msg;
+    if (r < (home ? 0.05 : 0.08)) msg = 'Une vieille botte… Raté.';
+    else if (r < 0.15 && !home) { lifeEarn(60, 'Un coffre englouti'); msg = 'Un coffre englouti !'; }
+    else if (r < (night ? 0.3 : 0.22)) { L.ing.poisson = (L.ing.poisson || 0) + 2; lifeProg('pecher', 2); msg = 'Un <b>gros poisson doré</b> ! Il compte double.'; lifeEarn(20, 'Poisson doré'); }
+    else { L.ing.poisson = (L.ing.poisson || 0) + 1; lifeProg('pecher', 1); msg = 'Un poisson ! (tu en as ' + L.ing.poisson + ')'; }
+    pfSave(); lifeBeep(660); say(msg + ' <button class="btn ghost small" data-a="lf-press">Relancer</button>');
+  };
+  lifeShow('<h2>Pêche</h2><p>Appuie (Espace, clic ou tape) quand ça mord. ' + (night ? 'La nuit, les gros poissons sont plus nombreux.' : '') + '</p><div class="lf-pond" data-a="lf-press"><span id="lf-bob" class="lf-bob"></span></div><p id="lf-fishst" role="status"></p><button class="btn red" data-a="lf-press">Ferrer !</button>');
+  LF.game = { key: ev => { if (ev.code === 'Space' || ev.code === 'Enter' || ev.code === 'KeyE') { ev.preventDefault(); press(); } }, press, stop: () => cancelAnimationFrame(raf) };
+  cast(); loop();
+}
+/* --- jeux d'arcade */
+function lifeGame(kind) {
+  lifeShow('<h2>' + (kind === 'runner' ? 'Coureur du Signal' : 'Serpent') + '</h2><p>' + (kind === 'runner' ? 'Saute par-dessus les caisses (Espace, clic ou tape). Ne saute pas sous les drones.' : 'Flèches, ZQSD ou glisse le doigt. Mange les signaux, évite les murs et ta queue.') + '</p><div class="lf-game"><canvas id="lf-cv" data-a="lf-press"></canvas>' + (kind === 'snake' ? '<div class="lf-pad"><button class="btn ghost small" data-a="lf-dir" data-d="u">↑</button><button class="btn ghost small" data-a="lf-dir" data-d="l">←</button><button class="btn ghost small" data-a="lf-dir" data-d="d">↓</button><button class="btn ghost small" data-a="lf-dir" data-d="r">→</button></div>' : '') + '<p id="lf-gst" role="status"></p></div>');
+  const cv = $('#lf-cv'); const done = score => {
+    const L = lifeP(); const k2 = kind === 'runner' ? 'runner' : 'snake'; const nb = score > (L.best[k2] || 0); if (nb) L.best[k2] = score; pfSave();
+    lifeProg(kind === 'runner' ? 'arcade' : 'serpent', score, true);
+    const st = $('#lf-gst'); if (st) st.innerHTML = 'Score : <b>' + score + '</b>' + (nb ? ' — nouveau record !' : ' (record : ' + L.best[k2] + ')') + ' <button class="btn red small" data-a="lf-again" data-g="' + kind + '">Rejouer</button>';
+    const coins = Math.min(30, kind === 'runner' ? score : Math.floor(score / 2)); if (coins >= 3) lifeEarn(coins, 'Arcade');
+  };
+  LF.game = kind === 'runner' ? gameRunner(cv, done) : gameSnake(cv, done);
+}
+function gameRunner(cv, done) {
+  const x = cv.getContext('2d'), W = 640, H = 220; cv.width = W; cv.height = H;
+  let y = 0, vy = 0, obs = [], t = 0, score = 0, alive = true, spawn = 1, last = performance.now(), raf = 0;
+  const G0 = H - 30, PX = 70;
+  const jump = () => { if (alive && y <= 0.01) { vy = 560; lifeBeep(520, 0.05); } };
+  const draw = () => {
+    const gr = x.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#0b1020'); gr.addColorStop(1, '#1b1420'); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    x.fillStyle = 'rgba(255,255,255,.5)'; for (let k = 0; k < 30; k++) x.fillRect((k * 97 - t * 20) % W + (k * 97 - t * 20 < 0 ? W : 0), (k * 53) % 120, 2, 2);
+    x.fillStyle = '#2a2f36'; x.fillRect(0, G0, W, 30); x.fillStyle = '#3a414a'; for (let k = 0; k < 20; k++) x.fillRect(((k * 40 - t * 260) % W + W) % W, G0 + 8, 18, 3);
+    x.fillStyle = '#e63a2e'; x.fillRect(PX, G0 - 28 - y, 22, 28); x.fillStyle = '#fff'; x.fillRect(PX + 14, G0 - 22 - y, 4, 4);
+    for (const o of obs) { if (o.fly) { x.fillStyle = '#8bd0d4'; x.fillRect(o.x, G0 - 78, o.w, 14); x.fillStyle = '#ff5b47'; x.fillRect(o.x + o.w / 2 - 2, G0 - 64, 4, 4); } else { x.fillStyle = '#8a6a3a'; x.fillRect(o.x, G0 - o.h, o.w, o.h); x.strokeStyle = '#5a4020'; x.strokeRect(o.x + 1, G0 - o.h + 1, o.w - 2, o.h - 2); } }
+    x.fillStyle = '#e3dfd5'; x.font = '600 18px monospace'; x.fillText('SCORE ' + score, 16, 26); if (!alive) { x.font = '900 34px sans-serif'; x.fillText('PERDU', W / 2 - 60, H / 2); }
+  };
+  const step = now_ => {
+    const dt = Math.min(0.05, (now_ - last) / 1000); last = now_; t += dt; const sp = 260 + t * 9;
+    vy -= 1600 * dt; y = Math.max(0, y + vy * dt); if (y === 0 && vy < 0) vy = 0;
+    spawn -= dt; if (spawn <= 0) { const fly = t > 10 && Math.random() < 0.25; obs.push({ x: W + 20, w: fly ? 36 : 18 + Math.random() * 14, h: fly ? 0 : 24 + Math.random() * 22, fly }); spawn = Math.max(0.55, 0.85 + Math.random() * 0.8 - t * 0.01); }
+    for (const o of obs) { o.x -= sp * dt; if (!o.pass && o.x + o.w < PX) { o.pass = 1; score++; } }
+    obs = obs.filter(o => o.x > -50);
+    const top = G0 - 28 - y, bot = G0 - y;
+    for (const o of obs) { const oy0 = o.fly ? G0 - 78 : G0 - o.h, oy1 = o.fly ? G0 - 64 : G0; if (PX + 20 > o.x && PX + 2 < o.x + o.w && bot > oy0 + 2 && top < oy1 - 2) alive = false; }
+    draw(); if (alive) raf = requestAnimationFrame(step); else { lifeBeep(160, 0.3); done(score); }
+  };
+  const ptr = ev => { ev.preventDefault(); jump(); }; cv.addEventListener('pointerdown', ptr);
+  raf = requestAnimationFrame(step);
+  return { key: ev => { if (['Space', 'ArrowUp', 'KeyW', 'KeyZ', 'Enter'].includes(ev.code)) { ev.preventDefault(); jump(); } }, press: () => {}, stop: () => { alive = false; cancelAnimationFrame(raf); } };
+}
+function gameSnake(cv, done) {
+  const x = cv.getContext('2d'), C = 24, NX = 24, NY = 14; cv.width = NX * C; cv.height = NY * C;
+  let sn = [[6, 7], [5, 7], [4, 7]], dir = [1, 0], q = [], food = null, alive = true, tm = 0, speed = 130; let sx = 0, sy = 0;
+  const place = () => { do { food = [Math.floor(Math.random() * NX), Math.floor(Math.random() * NY)]; } while (sn.some(([a, b]) => a === food[0] && b === food[1])); };
+  const turn = (dx, dy) => { const last = q.length ? q[q.length - 1] : dir; if (last[0] === -dx && last[1] === -dy) return; if (q.length < 3) q.push([dx, dy]); };
+  const draw = () => {
+    x.fillStyle = '#07080a'; x.fillRect(0, 0, cv.width, cv.height); x.strokeStyle = 'rgba(255,255,255,.04)'; for (let i = 0; i <= NX; i++) { x.beginPath(); x.moveTo(i * C, 0); x.lineTo(i * C, NY * C); x.stroke(); }
+    x.fillStyle = '#ff5b47'; x.fillRect(food[0] * C + 5, food[1] * C + 5, C - 10, C - 10);
+    sn.forEach(([a, b], i) => { x.fillStyle = i ? '#3ad96a' : '#8bd0d4'; x.fillRect(a * C + 2, b * C + 2, C - 4, C - 4); });
+    x.fillStyle = '#e3dfd5'; x.font = '600 16px monospace'; x.fillText('LONGUEUR ' + sn.length, 10, 20); if (!alive) { x.font = '900 34px sans-serif'; x.fillText('PERDU', cv.width / 2 - 60, cv.height / 2); }
+  };
+  const tick = () => {
+    if (!alive) return; if (q.length) dir = q.shift(); const hd = [sn[0][0] + dir[0], sn[0][1] + dir[1]];
+    if (hd[0] < 0 || hd[1] < 0 || hd[0] >= NX || hd[1] >= NY || sn.some(([a, b]) => a === hd[0] && b === hd[1])) { alive = false; draw(); lifeBeep(160, 0.3); done(sn.length); return; }
+    sn.unshift(hd); if (hd[0] === food[0] && hd[1] === food[1]) { place(); lifeBeep(780, 0.05); speed = Math.max(70, speed - 3); } else sn.pop();
+    draw(); tm = setTimeout(tick, speed);
+  };
+  cv.addEventListener('pointerdown', ev => { sx = ev.clientX; sy = ev.clientY; });
+  cv.addEventListener('pointerup', ev => { const dx = ev.clientX - sx, dy = ev.clientY - sy; if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return; if (Math.abs(dx) > Math.abs(dy)) turn(Math.sign(dx), 0); else turn(0, Math.sign(dy)); });
+  place(); draw(); tm = setTimeout(tick, 400);
+  const K = { ArrowUp: [0, -1], KeyW: [0, -1], KeyZ: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], KeyQ: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };
+  return { key: ev => { const d = K[ev.code]; if (d) { ev.preventDefault(); turn(d[0], d[1]); } }, dir: d => { const m = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] }[d]; if (m) turn(m[0], m[1]); }, press: () => {}, stop: () => { alive = false; clearTimeout(tm); } };
+}
+/* --- sons */
+function lifeAC() { try { if (!LF.audio) LF.audio = new (window.AudioContext || window.webkitAudioContext)(); if (LF.audio.state === 'suspended') LF.audio.resume(); return LF.audio; } catch { return null; } }
+function lifeBeep(f, d = 0.1, type = 'square', when = 0) { const ac = lifeAC(); if (!ac) return; const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; const t = ac.currentTime + when; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + d + 0.02); }
+function lifeTune(steps, gap, type) { steps.forEach((s, i) => lifeBeep(262 * Math.pow(2, s / 12), gap * 1.6, type, i * gap)); }
+function lifeJuke() {
+  if (LF.juke) { clearInterval(LF.juke); LF.juke = null; return toast('Musique coupée.'); }
+  const mel = [[0, 4, 7, 4], [5, 9, 12, 9], [7, 11, 14, 11], [0, 4, 7, 12]]; let k = 0;
+  const play = () => { lifeTune(mel[k % 4], 0.25, 'triangle'); lifeBeep(131 * Math.pow(2, mel[k % 4][0] / 12), 0.9, 'sine'); k++; };
+  play(); LF.juke = setInterval(play, 1000); toast('Le juke-box s’allume. Reviens ici pour le couper.');
+}
+/* --- boucle légère : HUD, visites, sommeil en vue classique */
+function lifeTick() {
+  const pub = G.pub, v = G.view; lifeEl(); lifePhase();
+  const inGame = pub && G.code && pub.settings && pub.settings.mode === '3d' && !['lobby', 'end'].includes(pub.phase);
+  if (!inGame) { if (LF.juke) { clearInterval(LF.juke); LF.juke = null; } LF.race = null; LF.sleep = false; }
+  // HUD
+  const hud = $('#life-hud') || ($('#v3d') && ($('#v3d').insertAdjacentHTML('beforeend', '<div id="life-hud" aria-live="polite"></div>'), $('#life-hud')));
+  if (hud) { const parts = []; if (LF.race) parts.push('Parcours ' + ((performance.now() - LF.race.t0) / 1000).toFixed(1) + ' s · balise ' + Math.min(LF.race.k + 1, 11) + '/11'); if (LF.buff && Date.now() < LF.buff.until) parts.push(LF.buff.name + ' ' + Math.ceil((LF.buff.until - Date.now()) / 1000) + ' s'); if (LF.juke) parts.push('♪ juke-box'); setHTML(hud, parts.map(p => '<span>' + e(p) + '</span>').join('')); }
+  // visites des lieux
+  if (inGame && typeof G3 !== 'undefined' && G3.on && G3.world && G3.world.L.zones) { const L = lifeP(); const d = today(); if (!L.vis || L.vis.day !== d) L.vis = { day: d, ids: [] }; for (const zn of G3.world.L.zones) if (!L.vis.ids.includes(zn.id) && Math.hypot(G3.me.x - zn.cx, G3.me.z - zn.cz) < zn.r + 2) { L.vis.ids.push(zn.id); toast('Lieu découvert : ' + ZONES[zn.id][0] + ' — ' + ZONES[zn.id][1]); lifeProg('explorer', L.vis.ids.length, true); } }
+  // sommeil
+  const ov = $('#life-sleep'); const canSleep = inGame && pub.phase === 'night' && v && v.alive && !v.mj;
+  if (!canSleep && LF.sleep) LF.sleep = false;
+  if (ov) { ov.hidden = !LF.sleep; if (LF.sleep) { const s = pub.sleep || [0, 0]; setHTML(ov, '<div><div class="z">Z z z</div><p>Tu dors… <b>' + s[0] + ' / ' + s[1] + '</b> joueurs endormis.</p><p class="dim">Quand tout le monde dort, l’aube arrive plus vite. Tu peux te réveiller quand tu veux.</p><button class="btn ghost" data-a="lf-wake">Se réveiller</button></div>'); } }
+  const sb = $('#life-sleepbtn'); if (sb) sb.hidden = !(canSleep && !LF.sleep && !(typeof G3 !== 'undefined' && G3.on));
+}
+setInterval(lifeTick, 500);
+function lifeKeyBlock(ev) {
+  if (LF.sleep) { if (ev.code === 'Escape' || ev.code === 'Space') { ev.preventDefault(); lifeSleep(false); } return true; }
+  if (!LF.open) return false;
+  if (ev.code === 'Escape' || ev.code === 'KeyJ' && !LF.game) { ev.preventDefault(); lifeClose(); return true; }
+  if (LF.game && LF.game.key) LF.game.key(ev);
+  return true;
+}
+document.addEventListener('keydown', ev => { if (typeof G3 !== 'undefined' && G3.on) return; if (LF.open || LF.sleep) lifeKeyBlock(ev); });
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a^="lf-"]'); if (!el || el.disabled) return; const a = el.dataset.a;
+  if (a === 'lf-open') lifeOpen();
+  if (a === 'lf-close') lifeClose();
+  if (a === 'lf-tab') { LF.view = el.dataset.t; if (LF.game && LF.game.stop) LF.game.stop(); LF.game = null; lifeOpen(); }
+  if (a === 'lf-house') lifeHouseUp();
+  if (a === 'lf-eat') lifeEat(el.dataset.d);
+  if (a === 'lf-cook') lifeCookStart(el.dataset.d);
+  if (a === 'lf-press' && LF.game && LF.game.press) LF.game.press();
+  if (a === 'lf-dir' && LF.game && LF.game.dir) LF.game.dir(el.dataset.d);
+  if (a === 'lf-again') { if (LF.game && LF.game.stop) LF.game.stop(); lifeGame(el.dataset.g); }
+  if (a === 'lf-guide') { LF.guide = LF.guide === el.dataset.z ? null : el.dataset.z; lifeClose(); if (LF.guide) toast('Suis la colonne de lumière : ' + ZONES[LF.guide][0] + '.'); }
+  if (a === 'lf-read') lifeRead();
+  if (a === 'lf-sleep') lifeSleep(true);
+  if (a === 'lf-wake') lifeSleep(false);
+});
 
 /* =====================================================================
    CHAT VOCAL (WebRTC, de joueur à joueur ; le serveur ne fait que présenter les joueurs)
