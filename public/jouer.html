@@ -3595,10 +3595,12 @@ function buildWorld3d(mapId, n, seed, levels) {
   const L = layout3d(n); const col = [], lights = [], circles = [], emit = [];
   L.homes.forEach((h, i) => { h.lvl = Math.max(1, Math.min(6, (levels && levels[i]) | 0 || 1)); if (h.lvl >= 2) h.shack = h.W(-5.5, -8); });
   const R = L.R;
+  const reserved = [];
   const free = (x, z, pad = 2) => {
     const r = Math.hypot(x, z); if (r < 12) return false;
     for (const h of L.homes) { if (Math.hypot(x - h.cx, z - h.cz) < 6 + pad) return false; const ang = Math.atan2(z, x); let d = Math.abs(((ang - h.a) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI); if (r < R + 6 && d * r < 3.6 + pad) return false; }
     if (Math.hypot(x - L.cem[0], z - L.cem[1]) < 10) return false;
+    for (const q of reserved) if (Math.hypot(x - q.x, z - q.z) < q.r + pad) return false;
     for (const h of L.homes) if (h.lvl > 1) { const f = homeFoot(h.lvl); const dx = x - h.cx, dz = z - h.cz, cs = Math.cos(h.ry), sn = Math.sin(h.ry); const lx = dx * cs - dz * sn, lz = dx * sn + dz * cs; if (lx > f[0] - pad && lx < f[1] + pad && lz > f[2] - pad && lz < f[3] + pad) return false; }
     for (const zn of L.zones) if (Math.hypot(x - zn.cx, z - zn.cz) < zn.r + pad) return false;
     return true;
@@ -3652,8 +3654,12 @@ function buildWorld3d(mapId, n, seed, levels) {
     lights.push({ p: [cx, 2.2, cz], c: [0.35, 0.45, 0.75], r: 10 });
   }
   // décor propre à chaque carte
+  // grands éléments du décor : déplacés s'ils tombent sur une maison, un lieu ou le cimetière
+  const okAt = (x, z, r) => { if (Math.hypot(x, z) + r > L.edge - 3) return false; for (let k = 0; k <= 16; k++) { const a = k / 16 * Math.PI * 2, rr = k ? r : 0; if (!free(x + Math.cos(a) * rr, z + Math.sin(a) * rr, 1)) return false; } return true; };
+  const place = (x0, z0, r) => { let at = [x0, z0]; if (!okAt(x0, z0, r)) { const cand = []; for (let k = 0; k < 72; k++) for (let d = 16; d < L.edge - r - 3; d += 2) { const a = k / 72 * Math.PI * 2; cand.push([Math.cos(a) * d, Math.sin(a) * d]); } cand.sort((p1, p2) => Math.hypot(p1[0] - x0, p1[1] - z0) - Math.hypot(p2[0] - x0, p2[1] - z0)); const f = cand.find(([x, z]) => okAt(x, z, r)); if (f) at = f; } reserved.push({ x: at[0], z: at[1], r }); return at; };
+  const LM = {}; for (const [id, x0, z0, r] of (LANDMARKS3D[mapId] || [])) LM[id] = place(x0, z0, r);
   const deco = DECO3D[mapId] || DECO3D.foret;
-  deco({ g, em, wat, rand, free, circles, col, lights, L, M, emit });
+  deco({ g, em, wat, rand, free, circles, col, lights, L, M, emit, LM });
   // herbe
   const tufts = mapId === 'foret' ? 2600 : mapId === 'ville' ? 900 : mapId === 'prison' ? 350 : 0;
   for (let i = 0; i < tufts; i++) { const a = rand() * Math.PI * 2, r = 11.5 + Math.sqrt(rand()) * 76; const x = Math.cos(a) * r, z = Math.sin(a) * r; if (!free(x, z, -1.5)) continue; P3.tuft(g, x, z, rand, M.grass); }
@@ -3665,7 +3671,7 @@ function buildWorld3d(mapId, n, seed, levels) {
   for (let tries = 0; spots.length < 34 && tries < 3000; tries++) { const a = rand() * Math.PI * 2, r = L.R + 18 + rand() * (E - L.R - 24); const x = Math.cos(a) * r, z = Math.sin(a) * r; if (!free(x, z, 0.5)) continue; const k = rand(); spots.push({ id: 's' + spots.length, kind: k < 0.36 ? 'baie' : k < 0.7 ? 'herbe' : 'champignon', x, z }); }
   L.spots = spots;
   for (let i = 0, nE = Math.round(130 * E / 82); i < nE; i++) { const a = i / nE * Math.PI * 2; const r = E + rand() * 7; edgeProp(mapId, g, em, Math.cos(a) * r, Math.sin(a) * r, rand); }
-  return { geo: g, em, wat, col, lights, circles, L, M, emit, shade, free };
+  return { geo: g, em, wat, col, lights, circles, L, M, emit, shade, free, LM };
 }
 function edgeProp(mapId, g, em, x, z, rand) {
   if (mapId === 'foret') { P3.pine(g, x, z, 15 + rand() * 12, rand, 0.8); if (rand() < 0.5) P3.bush(g, x * 0.96, z * 0.96, rand); }
@@ -3774,8 +3780,9 @@ function buildHome(g, em, type, h, col, lights, rand, M) {
   const lp = xf(1.2, 1.5, 1.6);
   lights.push({ p: lp, c: [0.95, 0.66, 0.34], r: 6.5, home: h.i });
 }
+const LANDMARKS3D = { foret: [['lake', -52, -30, 16], ['tower', 55, 40, 4], ['bus', 40, -48, 6]], prison: [['court', 34, 30, 11], ['block', -58, 22, 11]], ville: [['scaf', 48, -45.5, 6], ['sign', -30, 60, 4]], labo: [['pool', 40, -40, 9], ['dome', -50, 35, 11]] };
 const DECO3D = {
-  foret({ g, em, wat, rand, free, circles, col, L, M, emit }) {
+  foret({ g, em, wat, rand, free, circles, col, L, M, emit , LM}) {
     const sh = M.ground.map(v => v * 0.55);
     for (let i = 0; i < 300; i++) {
       const a = rand() * Math.PI * 2, r = 13 + rand() * 66; const x = Math.cos(a) * r, z = Math.sin(a) * r;
@@ -3788,7 +3795,7 @@ const DECO3D = {
       else { const ry = rand() * 3; g.beam([x - Math.cos(ry) * 2, 0.3, z - Math.sin(ry) * 2], [x + Math.cos(ry) * 2, 0.3, z + Math.sin(ry) * 2], 0.55, [0.33, 0.23, 0.15]); circles.push({ x, z, r: 1 }); }
     }
     // lac, roseaux et ponton
-    const lx = -52, lz = -30;
+    const [lx, lz] = LM.lake;
     const pts = []; for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2; pts.push([lx + Math.cos(a) * 15 * (0.9 + rand() * 0.15), 0.05, lz + Math.sin(a) * 9.5 * (0.9 + rand() * 0.15)]); }
     for (let i = 0; i < 20; i++) wat.face([[lx, 0.05, lz], pts[i], pts[(i + 1) % 20]], [0.16, 0.3, 0.34], [lx, -1, lz]);
     for (let i = 0; i < 20; i++) { const p = pts[i]; g.box(p[0], 0.06, p[2], 2.5, 0.12, 1.4, [0.32, 0.29, 0.2], Math.atan2(p[0] - lx, p[2] - lz)); for (let k = 0; k < 3; k++) P3.tuft(g, p[0] + (rand() - 0.5) * 2, p[2] + (rand() - 0.5) * 2, rand, [0.4, 0.45, 0.2]); }
@@ -3797,17 +3804,17 @@ const DECO3D = {
     g.box(lx + 7, 0.32, lz - 1.6, 2.6, 0.5, 0.9, [0.4, 0.28, 0.18], 0.3);
     circles.push({ x: lx, z: lz, r: 8.5 });
     // mirador en bois
-    const tx = 55, tz = 40; for (const sx of [-1.5, 1.5]) for (const sz of [-1.5, 1.5]) g.box(tx + sx, 3, tz + sz, 0.3, 6, 0.3, [0.4, 0.28, 0.18]);
+    const [tx, tz] = LM.tower; for (const sx of [-1.5, 1.5]) for (const sz of [-1.5, 1.5]) g.box(tx + sx, 3, tz + sz, 0.3, 6, 0.3, [0.4, 0.28, 0.18]);
     for (const s of [-1.5, 1.5]) { g.beam([tx - 1.5, 0.5, tz + s], [tx + 1.5, 5.5, tz + s], 0.12, [0.36, 0.25, 0.16]); g.beam([tx + s, 0.5, tz - 1.5], [tx + s, 5.5, tz + 1.5], 0.12, [0.36, 0.25, 0.16]); }
     g.box(tx, 6.1, tz, 4, 0.25, 4, [0.45, 0.32, 0.2]); for (const s of [-1, 1]) { g.box(tx + s * 1.9, 6.7, tz, 0.1, 1.0, 4, [0.4, 0.28, 0.18]); g.box(tx, 6.7, tz + s * 1.9, 4, 1.0, 0.1, [0.4, 0.28, 0.18]); }
     g.cyl(tx, 7.2, tz, 3.2, 1.6, 4, [0.3, 0.22, 0.15], 0.1);
     circles.push({ x: tx, z: tz, r: 2.6 });
     // vieux bus abandonné
-    g.box(40, 1.5, -48, 9, 2.6, 2.6, [0.62, 0.48, 0.14], 0.8); g.box(40, 2.3, -48, 8.4, 0.8, 2.64, [0.15, 0.17, 0.18], 0.8); g.box(40, 2.9, -48, 8, 0.5, 2.4, [0.24, 0.42, 0.18], 0.8);
-    col.push({ x: 40, z: -48, hw: 4.5, hd: 1.3, ry: 0.8 });
+    const [bx, bz] = LM.bus; g.box(bx, 1.5, bz, 9, 2.6, 2.6, [0.62, 0.48, 0.14], 0.8); g.box(bx, 2.3, bz, 8.4, 0.8, 2.64, [0.15, 0.17, 0.18], 0.8); g.box(bx, 2.9, bz, 8, 0.5, 2.4, [0.24, 0.42, 0.18], 0.8);
+    col.push({ x: bx, z: bz, hw: 4.5, hd: 1.3, ry: 0.8 });
     emit.push({ kind: 'fireflies', p: [0, 0, 0], r: 70 });
   },
-  prison({ g, em, rand, free, circles, col, lights, L, M, emit }) {
+  prison({ g, em, rand, free, circles, col, lights, L, M, emit , LM}) {
     for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + Math.PI / 4; const x = Math.cos(a) * 66, z = Math.sin(a) * 66;
       for (const sx of [-1.6, 1.6]) for (const sz of [-1.6, 1.6]) g.box(x + sx, 4.5, z + sz, 0.4, 9, 0.4, [0.4, 0.4, 0.42]);
       for (const s of [-1.6, 1.6]) { g.beam([x - 1.6, 1, z + s], [x + 1.6, 8, z + s], 0.14, [0.36, 0.36, 0.38]); g.beam([x + s, 1, z - 1.6], [x + s, 8, z + 1.6], 0.14, [0.36, 0.36, 0.38]); }
@@ -3815,7 +3822,7 @@ const DECO3D = {
       g.cyl(x, 10.5, z, 3.3, 1.4, 4, [0.3, 0.3, 0.32], 0.1); em.box(x - Math.cos(a) * 1.9, 9.9, z - Math.sin(a) * 1.9, 0.6, 0.4, 0.6, [1, 0.95, 0.75]);
       lights.push({ p: [x * 0.9, 9, z * 0.9], c: [0.95, 0.95, 0.8], r: 28 }); circles.push({ x, z, r: 2.6 }); g.shadow(x, z, 3.2, M.ground.map(v => v * 0.6)); }
     // terrain de basket peint dans la cour
-    const cx = 34, cz = 30, lc = [0.75, 0.72, 0.6];
+    const [cx, cz] = LM.court, lc = [0.75, 0.72, 0.6];
     g.face([[cx - 9, 0.02, cz - 5], [cx + 9, 0.02, cz - 5], [cx + 9, 0.02, cz + 5], [cx - 9, 0.02, cz + 5]], [0.42, 0.3, 0.26], [cx, -1, cz]);
     for (const s of [-1, 1]) { g.box(cx, 0.03, cz + s * 5, 18, 0.01, 0.12, lc); g.box(cx + s * 9, 0.03, cz, 0.12, 0.01, 10, lc); g.box(cx + s * 9.5, 1.6, cz, 0.15, 3.2, 0.15, [0.3, 0.3, 0.32]); g.box(cx + s * 9.2, 3.0, cz, 0.08, 1.0, 1.6, [0.85, 0.85, 0.85]); }
     g.box(cx, 0.03, cz, 0.12, 0.01, 10, lc);
@@ -3828,12 +3835,12 @@ const DECO3D = {
         for (const yy of [0.5, 1.2, 1.9, 2.4]) g.box(x, yy, z, 6.4, 0.03, 0.03, [0.55, 0.55, 0.55], ry);
         for (let j = 0; j < 12; j++) g.box(x + Math.cos(ry) * (j / 11 - 0.5) * 6, 2.55, z - Math.sin(ry) * (j / 11 - 0.5) * 6, 0.18, 0.18, 0.18, [0.5, 0.5, 0.5], j); } }
     // bloc principal
-    g.box(-58, 5, 22, 18, 10, 12, [0.44, 0.44, 0.45]); col.push({ x: -58, z: 22, hw: 9, hd: 6, ry: 0 });
-    g.box(-58, 10.2, 22, 18.4, 0.4, 12.4, [0.34, 0.34, 0.35]);
-    for (let i = 0; i < 6; i++) for (let j = 0; j < 2; j++) { g.box(-58 + (i - 2.5) * 2.8, 3.5 + j * 3.5, 15.97, 1.3, 1.5, 0.05, [0.2, 0.2, 0.22]); if ((i + j) % 2) em.box(-58 + (i - 2.5) * 2.8, 3.5 + j * 3.5, 15.94, 1.1, 1.3, 0.05, [0.9, 0.85, 0.6]); }
+    const [kx, kz] = LM.block; g.box(kx, 5, kz, 18, 10, 12, [0.44, 0.44, 0.45]); col.push({ x: kx, z: kz, hw: 9, hd: 6, ry: 0 });
+    g.box(kx, 10.2, kz, 18.4, 0.4, 12.4, [0.34, 0.34, 0.35]);
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 2; j++) { g.box(kx + (i - 2.5) * 2.8, 3.5 + j * 3.5, kz - 6.03, 1.3, 1.5, 0.05, [0.2, 0.2, 0.22]); if ((i + j) % 2) em.box(kx + (i - 2.5) * 2.8, 3.5 + j * 3.5, kz - 6.06, 1.1, 1.3, 0.05, [0.9, 0.85, 0.6]); }
     emit.push({ kind: 'dust', r: 40 });
   },
-  ville({ g, em, wat, rand, free, circles, col, lights, L, M, emit }) {
+  ville({ g, em, wat, rand, free, circles, col, lights, L, M, emit , LM}) {
     for (let i = 0; i < 30; i++) { const a = rand() * Math.PI * 2, r = 54 + rand() * 20; const x = Math.cos(a) * r, z = Math.sin(a) * r; if (!free(x, z, 6)) continue;
       const h = 10 + rand() * 26, w = 7 + rand() * 6, d = 7 + rand() * 6, ry = rand() * 3; const bc = [0.36 + rand() * 0.1, 0.32 + rand() * 0.04, 0.29];
       g.box(x, h / 2, z, w, h, d, bc, ry); col.push({ x, z, hw: w / 2, hd: d / 2, ry });
@@ -3850,14 +3857,14 @@ const DECO3D = {
       else if (k < 0.85) { g.shadow(x, z, 2, M.ground.map(v => v * 0.55)); P3.deadTree(g, x, z, 5 + rand() * 3, rand); circles.push({ x, z, r: 0.35 }); }
       else { const pts = []; const s = 1.5 + rand() * 2.5; for (let j = 0; j < 10; j++) { const aa = j / 10 * Math.PI * 2; pts.push([x + Math.cos(aa) * s * (0.8 + rand() * 0.3), 0.04, z + Math.sin(aa) * s * 0.7]); } for (let j = 0; j < 10; j++) wat.face([[x, 0.04, z], pts[j], pts[(j + 1) % 10]], [0.12, 0.13, 0.15], [x, -1, z]); } }
     // échafaudage rouillé et panneau
-    for (let j = 0; j < 4; j++) for (const s of [-2, 2]) g.box(48 + s, 4, -50 + j * 3, 0.2, 8, 0.2, [0.5, 0.25, 0.15]);
-    for (let y = 2; y < 8; y += 2.5) g.box(48, y, -45.5, 4.4, 0.15, 9.5, [0.5, 0.27, 0.16]);
-    for (let j = 0; j < 3; j++) g.beam([46, 0.2 + j * 2.5, -50], [50, 2.6 + j * 2.5, -41], 0.1, [0.45, 0.24, 0.14]);
-    col.push({ x: 48, z: -45.5, hw: 2.2, hd: 4.8, ry: 0 });
-    g.box(-30, 4, 60, 0.3, 8, 0.3, [0.3, 0.3, 0.32]); g.box(-30, 8.5, 60, 7, 3, 0.25, [0.62, 0.55, 0.42], 0.4); em.box(-30, 8.5, 60, 6, 0.3, 0.3, [1, 0.3, 0.2], 0.4);
+    const [sx0, sz0] = LM.scaf; for (let j = 0; j < 4; j++) for (const s of [-2, 2]) g.box(sx0 + s, 4, sz0 - 4.5 + j * 3, 0.2, 8, 0.2, [0.5, 0.25, 0.15]);
+    for (let y = 2; y < 8; y += 2.5) g.box(sx0, y, sz0, 4.4, 0.15, 9.5, [0.5, 0.27, 0.16]);
+    for (let j = 0; j < 3; j++) g.beam([sx0 - 2, 0.2 + j * 2.5, sz0 - 4.5], [sx0 + 2, 2.6 + j * 2.5, sz0 + 4.5], 0.1, [0.45, 0.24, 0.14]);
+    col.push({ x: sx0, z: sz0, hw: 2.2, hd: 4.8, ry: 0 });
+    const [gx0, gz0] = LM.sign; g.box(gx0, 4, gz0, 0.3, 8, 0.3, [0.3, 0.3, 0.32]); g.box(gx0, 8.5, gz0, 7, 3, 0.25, [0.62, 0.55, 0.42], 0.4); em.box(gx0, 8.5, gz0, 6, 0.3, 0.3, [1, 0.3, 0.2], 0.4);
     emit.push({ kind: 'dust', r: 40 });
   },
-  labo({ g, em, wat, rand, free, circles, col, lights, L, M, emit }) {
+  labo({ g, em, wat, rand, free, circles, col, lights, L, M, emit , LM}) {
     // quadrillage du sol
     for (let k = -96; k <= 96; k += 8) { g.box(k, 0.012, 0, 0.06, 0.01, 192, M.ground.map(v => v * 0.85), 0, null, 0); g.box(0, 0.012, k, 192, 0.01, 0.06, M.ground.map(v => v * 0.85), 0, null, 0); }
     for (let i = 0; i < 52; i++) { const a = rand() * Math.PI * 2, r = 14 + rand() * 58; const x = Math.cos(a) * r, z = Math.sin(a) * r; if (!free(x, z, 3)) continue;
@@ -3867,10 +3874,10 @@ const DECO3D = {
       else if (k < 0.85) { const ry = rand() * 3; g.box(x, 2.6, z, 9, 0.4, 0.4, [0.55, 0.6, 0.6], ry); g.box(x, 1.3, z, 0.4, 2.6, 0.4, [0.55, 0.6, 0.6], ry); g.box(x, 2.6, z, 9, 0.12, 0.42, [0.95, 0.75, 0.1], ry, null, 0); circles.push({ x, z, r: 0.3 }); }
       else { for (let j = 0; j < 3; j++) P3.barrel(g, x + (j - 1) * 0.95, z + (rand() - 0.5) * 0.4, [0.85, 0.7, 0.12]); circles.push({ x, z, r: 1.4 }); } }
     // bassin de refroidissement
-    const px = 40, pz = -40; g.box(px, 0.3, pz, 14.6, 0.6, 9.6, [0.55, 0.6, 0.6]); wat.face([[px - 7, 0.62, pz - 4.5], [px + 7, 0.62, pz - 4.5], [px + 7, 0.62, pz + 4.5], [px - 7, 0.62, pz + 4.5]], [0.15, 0.5, 0.4], [px, -1, pz]);
+    const [px, pz] = LM.pool; g.box(px, 0.3, pz, 14.6, 0.6, 9.6, [0.55, 0.6, 0.6]); wat.face([[px - 7, 0.62, pz - 4.5], [px + 7, 0.62, pz - 4.5], [px + 7, 0.62, pz + 4.5], [px - 7, 0.62, pz + 4.5]], [0.15, 0.5, 0.4], [px, -1, pz]);
     col.push({ x: px, z: pz, hw: 7.3, hd: 4.8, ry: 0 }); lights.push({ p: [px, 1.5, pz], c: [0.2, 0.9, 0.6], r: 12 });
     // dôme
-    g.cyl(-50, 0, 35, 10, 7, 18, [0.82, 0.86, 0.86], 4); g.cyl(-50, 7, 35, 4, 1, 18, [0.7, 0.75, 0.76], 2.5); em.cyl(-50, 3.5, 35, 10.05, 0.3, 18, [0.25, 0.95, 0.8], 10.05); circles.push({ x: -50, z: 35, r: 10 });
+    const [dx0, dz0] = LM.dome; g.cyl(dx0, 0, dz0, 10, 7, 18, [0.82, 0.86, 0.86], 4); g.cyl(dx0, 7, dz0, 4, 1, 18, [0.7, 0.75, 0.76], 2.5); em.cyl(dx0, 3.5, dz0, 10.05, 0.3, 18, [0.25, 0.95, 0.8], 10.05); circles.push({ x: dx0, z: dz0, r: 10 });
     emit.push({ kind: 'motes', r: 40 });
   },
 };
