@@ -137,6 +137,8 @@ Ce que permet l'onglet Admin :
 - **Classement** : retirer un joueur ou tout remettre à zéro.
 - **Journal** : tout ce que l'admin a fait, et qui a utilisé tes codes limités.
 - **Fiche joueur** (onglet Joueurs) : fixer ses pièces, son XP et son niveau de maison, retirer un objet, rendre un code de nouveau utilisable, remettre ses statistiques à zéro.
+- **Développeur** : sur le compte admin tout est gratuit (toutes les boutiques, la maison, la roue), tout est débloqué automatiquement, n'importe quel code peut être réutilisé même hors de sa période, bonus du jour, roue et succès sont illimités, le panneau de triche est ouvert. Boutons : 9 999 999 pièces, niveau 100, garde-manger plein, 10 coffres, gains ×2, modifier son propre profil, se donner n'importe quelle récompense, exporter et importer tous les réglages du site.
+- **Parties en direct** : voir les parties en cours, les rejoindre, leur envoyer un message, les fermer.
 
 Sans Upstash, les réglages et les codes admin sont effacés à chaque redémarrage de Render, comme les comptes. Avec Upstash, tout est gardé.
 

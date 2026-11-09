@@ -762,6 +762,8 @@ body.thfx-glitch #app { animation: glitchapp 7s steps(1) infinite; } @keyframes 
 #adm-pop { z-index: 95; }
 .fiche { border-color: var(--frost); }
 textarea.input { resize: vertical; font-family: inherit; }
+.adm-box.dev { border-color: #ffd36b; background: rgba(255,211,107,.06); }
+.row.wrap { flex-wrap: wrap; }
 /* annonce du site */
 #site-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 12px; padding: max(8px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); background: var(--bc, #e63a2e); color: #fff; font: 600 15px/1.3 var(--f-body); text-align: center; box-shadow: 0 4px 18px rgba(0,0,0,.35); }
 #site-banner[hidden] { display: none !important; }
@@ -6118,6 +6120,29 @@ const addEv = (id, ev, code) => { EVENTS[id] = ev; if (!CODES[code]) CODES[code]
   W('Phobos|Deimos|Io|Europe|Ganymede|Callisto|Titan|Encelade|Mimas|Rhea|Japet|Triton|Charon|Miranda|Oberon|Titania').forEach((n, i) => add('LUNE' + n, 'Une lune lointaine : ' + n + '.', n === 'Titan' || n === 'Europe' ? 3 : 1, i + 16000));
 }
 
+/* --- codes : sorts, rois, artistes, épées, loups célèbres, jeux de société, consoles, lettres grecques --- */
+{
+  const TH = ['galaxy', 'aurora', 'celestial', 'eclipse', 'universe', 'darkmatter', 'nightking', 'kingdom', 'dreamland', 'rainbow', 'blackgold', 'lunar', 'crimson', 'ice', 'cyber', 'neon', 'toxic', 'purplesky', 'fire', 'moon'];
+  const FR = ['diamond', 'infinity', 'legendary', 'imperial', 'eternal', 'royal', 'moon', 'neon', 'fire', 'gold', 'golda', 'ghost'];
+  const NF = ['rainbow', 'diamond', 'gold', 'glitch', 'ghost', 'fire', 'ice', 'neon', 'violet', 'blood'];
+  const CO = COLLECTIONS.map(c => c[0]); const EM = Object.keys(EMOTES);
+  const pI = (arr, i) => arr[((i % arr.length) + arr.length) % arr.length];
+  const R = (tier, i) => tier === 1 ? ['c:' + (120 + (i * 37) % 200), 'xp:' + (30 + (i * 13) % 50)] : tier === 2 ? ['c:' + (300 + (i * 53) % 300), 'e:' + pI(EM, i * 7), 'xp:100'] : tier === 3 ? ['c:' + (800 + (i * 71) % 700), 'col:' + pI(CO, i * 5), 'th:' + pI(TH, i * 3), 'xp:300'] : ['c:' + (3000 + (i * 97) % 2000), 'col:' + pI(CO, i * 11), 'th:' + pI(TH, i * 7), 'f:' + pI(FR, i), 'n:' + pI(NF, i), 'box', 'box', 'xp:800', 'fx-rain'];
+  const add = (code, desc, tier, i) => { code = code.toUpperCase().normalize('NFD').replace(/[^A-Z0-9]/g, ''); if (code.length >= 2 && !CODES[code]) CODES[code] = [desc, R(tier, i)]; };
+  const G = (prefix, label, list, rare, epic, base) => list.split('|').forEach((n, i) => add(prefix + n, label + ' : ' + n + '.', rare.includes(n) ? 4 : epic.includes(n) ? 3 : i % 5 === 0 ? 2 : 1, base + i));
+  G('SORT', 'Sortilège', 'Wingardium Leviosa|Accio|Expecto Patronum|Stupefix|Petrificus Totalus|Riddikulus|Nox|Reparo|Obliviate|Silencio|Sectumsempra|Avada Kedavra|Incendio|Aguamenti|Protego|Confundo|Impedimenta|Diffindo|Levicorpus|Morsmordre|Finite Incantatem|Rictusempra|Episkey|Tarantallegra|Lumos Maxima', ['Expecto Patronum'], ['Protego', 'Obliviate'], 17000);
+  G('ROI', 'Roi de France', 'Clovis|Charlemagne|Hugues Capet|Philippe Auguste|Saint Louis|Philippe le Bel|Charles VII|Louis XI|Francois Ier|Henri IV|Louis XIII|Louis XIV|Louis XV|Louis XVI|Napoleon|Louis-Philippe|Charles Martel|Pepin le Bref|Dagobert|Jeanne d Arc', ['Louis XIV', 'Napoleon'], ['Charlemagne', 'Jeanne d Arc'], 17100);
+  G('EMPEREUR', 'Empereur romain', 'Auguste|Tibere|Caligula|Claude|Neron|Vespasien|Titus|Trajan|Hadrien|Marc Aurele|Commode|Constantin|Diocletien|Septime Severe|Jules Cesar', ['Jules Cesar'], ['Marc Aurele'], 17200);
+  G('PEINTRE', 'Peintre', 'Leonard de Vinci|Michel-Ange|Raphael|Rembrandt|Vermeer|Van Gogh|Monet|Renoir|Cezanne|Gauguin|Picasso|Matisse|Dali|Magritte|Frida Kahlo|Klimt|Munch|Hokusai|Basquiat|Banksy|Warhol|Caravage|Botticelli|Delacroix|Courbet', ['Leonard de Vinci'], ['Van Gogh', 'Picasso', 'Munch'], 17300);
+  G('COMPOSITEUR', 'Compositeur', 'Mozart|Beethoven|Bach|Chopin|Vivaldi|Debussy|Ravel|Satie|Tchaikovski|Wagner|Verdi|Puccini|Bizet|Berlioz|Schubert|Haendel|Liszt|Hans Zimmer|John Williams|Joe Hisaishi', ['Mozart'], ['Beethoven', 'Hans Zimmer'], 17400);
+  G('EPEE', 'Arme légendaire', 'Excalibur|Durandal|Joyeuse|Masamune|Muramasa|Kusanagi|Master Sword|Buster Sword|Andúril|Dard|Glamdring|Mjolnir|Gungnir|Aegis|Trident|Lame du chaos|Keyblade|Frostmourne|Zangetsu|Sabre laser', ['Mjolnir', 'Master Sword', 'Keyblade'], ['Excalibur', 'Durandal', 'Frostmourne', 'Sabre laser'], 17500);
+  G('LOUPCELEBRE', 'Loup célèbre', 'Akela|Croc-Blanc|Balto|Ghost|Nymeria|Summer|Lady|Grey Wind|Sif|Amaterasu|Fenrir|Grand Mechant Loup|Ysengrin|Wolfie|Remus Lupin|Jacob Black|Scott McCall|Loup de Gubbio|Lupa|Wolf Link', ['Fenrir', 'Sif', 'Amaterasu', 'Wolf Link'], ['Akela', 'Croc-Blanc', 'Ghost', 'Ysengrin'], 17600);
+  G('JEU', 'Jeu de société', 'Loup-Garou|Monopoly|Cluedo|Risk|Scrabble|Uno|Dobble|Catan|Carcassonne|Dixit|Codenames|Time Bomb|Dune Imperium|Les Aventuriers du Rail|Puissance 4|Echecs|Dames|Go|Mahjong|Poker|Tarot|Belote|Skyjo|Jungle Speed|Mille Bornes', ['Loup-Garou'], ['Echecs', 'Codenames', 'Time Bomb'], 17700);
+  G('CONSOLE', 'Console', 'NES|Super Nintendo|Nintendo 64|GameCube|Wii|Wii U|Switch|Switch 2|Game Boy|Game Boy Advance|DS|3DS|PlayStation|PS2|PS3|PS4|PS5|PSP|Vita|Xbox|Xbox 360|Xbox One|Xbox Series|Mega Drive|Dreamcast|Atari 2600|Steam Deck|PC Gamer', ['Switch 2', 'PS5'], ['PS2', 'Game Boy', 'Dreamcast'], 17800);
+  G('GREC', 'Lettre grecque', 'Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega', ['Omega'], ['Alpha', 'Lambda', 'Sigma'], 17900);
+  G('MONSTRE', 'Créature', 'Loup-garou|Vampire|Zombie|Momie|Fantome|Spectre|Goule|Liche|Kraken|Hydre|Basilic|Chimere|Minotaure|Cyclope|Harpie|Sirene|Troll|Ogre|Gobelin|Dragon|Wyverne|Manticore|Leviathan|Behemoth|Djinn', ['Leviathan', 'Dragon'], ['Loup-garou', 'Kraken', 'Liche', 'Behemoth'], 18000);
+}
+
 /* =====================================================================
    VIE EN 3D : maison qui s'agrandit, lieux à explorer, cueillette, cuisine,
    pêche, bornes d'arcade, défis du jour, sommeil qui raccourcit la nuit
@@ -6747,7 +6772,7 @@ document.addEventListener('submit', async ev => {
   if (!SITE.cfg.codes.includes(h) && !CODES[code]) await siteLoad(); // un code tout juste créé par l'admin
   if (!SITE.cfg.codes.includes(h)) { const r = redeem(code); G.codeMsg = r.msg; toast(r.msg, !r.ok); if (r.page && pf().pages[r.page]) { G.metaTab = 'archives'; G.metaPage = r.page; } metaRender(); if (r.cheat) G.metaTab = 'codes'; return; }
   const P_ = pf(); const say = (msg, bad) => { G.codeMsg = msg; toast(msg, bad); metaRender(); };
-  if (P_.codes[code]) return say('Tu as déjà utilisé ce code.', true);
+  if (P_.codes[code] && !devMode()) return say('Tu as déjà utilisé ce code.', true);
   try {
     const st = accState(); const r = await fetch('api/redeem', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code, user: st && st.token ? st.name : '' }) });
     const j = await r.json().catch(() => ({})); if (!r.ok) return say(j.error || 'Code indisponible.', true);
@@ -7143,6 +7168,107 @@ document.addEventListener('submit', ev => {
   }
   if (k === 'contenu') { const bots = $('#adm-bots').value.split(/[\n,]/).map(x => x.trim()).filter(Boolean); if (bots.length && bots.length < 4) return toast('Il faut au moins 4 noms de bots.', true); admRun('cfgset', { cfg: { lede: $('#adm-lede').value, bots, login: [0, 1, 2, 3, 4, 5, 6].map(i => ADM.rb['login' + i] || []) } }, 'Contenu enregistré.'); }
   if (k === 'fiche') ficheSend(['setc:' + (+$('#adm-fc').value || 0), 'setxp:' + (+$('#adm-fx').value || 0), 'sethouse:' + $('#adm-fh').value]);
+}, true);
+
+/* =====================================================================
+   MODE DÉVELOPPEUR : pour l'admin, tout est gratuit, tout est débloqué, aucune limite
+   ===================================================================== */
+function devMode() { try { return isAdmin(); } catch { return false; } }
+// tout est gratuit (boutiques, frais, maison, roue)
+const _finalPriceBase = finalPrice; finalPrice = (id, cp) => devMode() ? 0 : _finalPriceBase(id, cp);
+const _priceOfAdm = priceOf; priceOf = id => devMode() ? 0 : _priceOfAdm(id);
+function devUnlockAll(silent) {
+  const P_ = pf(); let n = 0; const give = id => { if (!P_.inv[id]) { P_.inv[id] = 1; n++; } };
+  Object.keys(TITLES).forEach(k => give('t:' + k)); Object.keys(BADGES).forEach(k => give('b:' + k));
+  Object.keys(EMOTES).forEach(k => { if (!EMOTE_BASE.includes(k)) give('e:' + k); });
+  Object.keys(THEMES).forEach(k => { if (k !== 'base') give('th:' + k); }); Object.keys(FRAMES).forEach(k => { if (k !== 'none') give('f:' + k); }); Object.keys(NAMEFX).forEach(k => { if (k !== 'none') give('n:' + k); });
+  Object.keys(FURNITURE).forEach(k => give('fur:' + k));
+  HATS.forEach((x, i) => { if (i >= HAT_FREE) give('h:' + i); }); ACCS.forEach((x, i) => { if (i >= ACC_FREE) give('a:' + i); }); BACKS.forEach((x, i) => { if (i >= BACK_FREE) give('bk:' + i); }); FXS.forEach((x, i) => { if (i >= FX_FREE) give('fx:' + i); }); STYLES.forEach((x, i) => { if (i >= STYLE_FREE) give('st:' + i); });
+  for (const c of COLLECTIONS) { const before = Object.keys(P_.inv).length; try { grant('col:' + c[0], true); } catch {} n += Object.keys(P_.inv).length - before; }
+  give('key:room'); Object.keys(SHOPS).forEach(k => { P_.shops[k] = 1; }); Object.keys(PAGES).forEach(k => { P_.pages[k] = 1; });
+  P_.perks.room = 1; P_.vip = 1; P_.cheat = 1; if ((P_.house || 1) < 6) { P_.house = 6; if (typeof houseRebuild === 'function') houseRebuild(); }
+  pfSave(); if (!silent || n) toast(n ? 'Mode développeur : ' + n + ' objets débloqués. Tout est à toi.' : 'Tu as déjà absolument tout.');
+}
+const _siteApplyAdm = siteApply;
+siteApply = function () { _siteApplyAdm(); if (devMode()) { for (let k = 2; k <= 6; k++) HOUSE[k][1] = 0; WHEEL_PRICE = 0; LIFE_CAP = 1e9; if (!SITE.devDone) { SITE.devDone = true; devUnlockAll(true); } } };
+/* codes : l'admin peut réutiliser n'importe quel code, n'importe quand */
+const _redeemBase = redeem;
+redeem = function (raw) {
+  if (!devMode()) return _redeemBase(raw);
+  const P_ = pf(); const code = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); const def = CODES[code];
+  if (!def || code === 'CKE26' || /^BESTFRIEND/.test(code)) return _redeemBase(raw);
+  const evTok = def[1].find(r => r.startsWith('event:')); const saved = P_.codes[code]; delete P_.codes[code];
+  let r;
+  if (evTok) { const ev = EVENTS[evTok.slice(6)]; const w = ev.when; ev.when = () => true; try { r = _redeemBase(raw); } finally { ev.when = w; } }
+  else r = _redeemBase(raw);
+  if (!r.ok && saved) P_.codes[code] = saved;
+  if (r.ok) r.msg = '[admin] ' + r.msg;
+  return r;
+};
+// bonus du jour illimités pour l'admin
+const _loginCan = loginCanClaim; loginCanClaim = () => devMode() || _loginCan();
+const _achClaim = achClaim; achClaim = id => { if (devMode()) { const P_ = bonusState(); const a = ACH.find(x => x[0] === id); if (a && !P_.ach[id]) { P_.ach[id] = Date.now(); const got = a[4].map(t => grant(t, true)).filter(Boolean); pfSave(); toast('Succès « ' + a[1] + ' » : ' + got.join(', ')); metaRender(); } return; } _achClaim(id); };
+const _wheelGo = wheelGo; wheelGo = paid => { if (devMode()) { const P_ = pf(); P_.wheel = ''; } _wheelGo(false); };
+const _bonusHTML = bonusHTML; bonusHTML = () => (devMode() ? '<p class="tip">Mode développeur : connexion du jour, roue et succès sont illimités pour toi.</p>' : '') + _bonusHTML().replace(/data-a="bonus-ach"/g, 'data-a="bonus-ach"');
+// en mode dev, tous les succès sont réclamables
+const _achTests = ACH.map(a => a[3]); ACH.forEach((a, i) => { a[3] = (P, L) => devMode() || _achTests[i](P, L); });
+
+/* --- onglets admin : Développeur et Parties en direct --- */
+function adminDevHTML() {
+  const T = ADM.tab; let h = '';
+  if (T === 'dev') {
+    const P_ = pf();
+    h += '<div class="adm-box dev"><b>Mode développeur : actif</b><p class="dim">Sur ce compte, toutes les boutiques sont gratuites (sans frais), les agrandissements de maison aussi, la roue et les bonus du jour sont illimités, et tu peux réutiliser n’importe quel code, même déjà utilisé ou hors de sa période. Le panneau de triche est débloqué.</p>'
+      + '<div class="row wrap"><button class="btn red small" data-a="dev-unlock">Tout débloquer</button><button class="btn ghost small" data-a="dev-coins">Pièces : 9 999 999</button><button class="btn ghost small" data-a="dev-xp">Niveau 100</button><button class="btn ghost small" data-a="dev-pantry">Remplir le garde-manger</button><button class="btn ghost small" data-a="dev-boxes">Ouvrir 10 coffres</button><button class="btn ghost small" data-a="dev-dbl">Gains ×2 (99 parties)</button></div></div>';
+    h += '<form class="adm-form" data-adm="devme"><b>Mon profil</b><div class="adm-grid"><div class="field"><label for="dev-c">Pièces</label><input class="input" id="dev-c" type="number" min="0" value="' + P_.coins + '"></div><div class="field"><label for="dev-x">XP</label><input class="input" id="dev-x" type="number" min="0" value="' + P_.xp + '"></div><div class="field"><label for="dev-h">Maison</label><select class="input" id="dev-h">' + [1, 2, 3, 4, 5, 6].map(n => '<option' + (n === (P_.house || 1) ? ' selected' : '') + '>' + n + '</option>').join('') + '</select></div><div class="field"><label for="dev-g">Parties jouées</label><input class="input" id="dev-g" type="number" min="0" value="' + P_.stats.games + '"></div><div class="field"><label for="dev-w">Victoires</label><input class="input" id="dev-w" type="number" min="0" value="' + P_.stats.wins + '"></div></div><button class="btn red small">Appliquer à mon profil</button></form>';
+    h += '<div class="adm-box"><b>Me donner n’importe quoi</b>' + rbHTML('self', 'Récompenses') + '<button class="btn red small" data-a="dev-self">Recevoir</button></div>';
+    h += '<div class="adm-box"><b>Sauvegarde des réglages du site</b><p class="dim">Exporte tous tes codes perso, réglages, prix et cadeaux, pour les garder ou les remettre plus tard.</p><div class="row"><button class="btn ghost small" data-a="dev-export">Exporter</button><button class="btn ghost small" data-a="dev-import">Importer ce texte</button></div><textarea class="input mono" id="dev-json" rows="6" placeholder="Le texte exporté apparaît ici. Colle un export ici puis « Importer ».">' + e(ADM.exportTxt || '') + '</textarea></div>';
+    h += '<div class="adm-box"><b>Effacer mon profil</b><p class="dim">Repart de zéro sur ce compte (le mode développeur reste actif).</p>' + (ADM.del === 'me' ? '<button class="btn red small" data-a="dev-wipe">Confirmer l’effacement</button>' : '<button class="btn ghost small" data-a="dev-wipe?">Effacer mon profil</button>') + '</div>';
+  }
+  if (T === 'parties') {
+    if (!ADM.games && !ADM.busy) admReq('games').then(r => { ADM.games = r; metaRender(); }).catch(err => toast(err.message, true));
+    h += '<div class="row"><button class="btn ghost small" data-a="dev-games">Actualiser</button><span class="dim">Toutes les parties en mémoire sur le serveur.</span></div>';
+    if (!ADM.games) h += '<p class="dim">Chargement…</p>';
+    else if (!ADM.games.length) h += '<p class="dim">Aucune partie en cours.</p>';
+    else h += '<div class="adm-list">' + ADM.games.map(g => '<div class="adm-item"><div class="grow"><b class="mono">' + e(g.code) + '</b> <span class="tag">' + e(g.phase) + (g.round ? ' · manche ' + g.round : '') + '</span> <span class="dim">' + (g.mode === '3d' ? '3D' : 'classique') + (g.map ? ' · ' + e(g.map) : '') + '</span><div class="adm-sub">' + g.players.map(p => '<span' + (p.alive ? '' : ' style="opacity:.5"') + '>' + e(p.name) + (p.bot ? ' 🤖' : '') + '</span>').join('') + '</div><div class="adm-meta">' + g.players.length + ' joueurs · activité le ' + fmtDT(g.t) + '</div>'
+      + (ADM.gmsg === g.code ? '<form class="row" data-adm="gmsg" data-c="' + e(g.code) + '"><input class="input grow" id="dev-gm" maxlength="300" placeholder="Message pour cette partie" required><button class="btn red small">Envoyer</button></form>' : '') + '</div>'
+      + '<div class="adm-acts"><button class="btn ghost small" data-a="dev-join" data-c="' + e(g.code) + '">Rejoindre</button><button class="btn ghost small" data-a="dev-gmsg" data-c="' + e(g.code) + '">Message</button>' + (ADM.del === 'g' + g.code ? '<button class="btn red small" data-a="dev-close" data-c="' + e(g.code) + '">Confirmer</button>' : '<button class="btn ghost small" data-a="dev-close?" data-c="' + e(g.code) + '">Fermer la partie</button>') + '</div></div>').join('') + '</div>';
+  }
+  return h;
+}
+ADM.rb.self = [];
+const _adminHTMLBase = adminHTML;
+adminHTML = function () {
+  let h = _adminHTMLBase();
+  if (!isAdmin() || !ADM.cfg) return h;
+  h = h.replace('<button role="tab" data-a="adm-tab" data-t="codes"', '<button role="tab" data-a="adm-tab" data-t="dev" aria-selected="' + (ADM.tab === 'dev') + '">Développeur</button><button role="tab" data-a="adm-tab" data-t="parties" aria-selected="' + (ADM.tab === 'parties') + '">Parties en direct</button><button role="tab" data-a="adm-tab" data-t="codes"');
+  const extra = adminDevHTML(); return extra ? h.replace(/<\/div>$/, extra + '</div>') : h;
+};
+// le message d'une partie précise ne s'affiche que chez ses joueurs
+const _adminPopup = adminPopup; adminPopup = m => { if (m && m.code && m.code !== G.code) return; if (m && m.close && G.code === m.code) { try { LS.set('ds_host_' + m.code, null); leaveLocal(); } catch {} } _adminPopup(m); };
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a^="dev-"]'); if (!el || !devMode()) return; const a = el.dataset.a; const P_ = pf();
+  if (a === 'dev-unlock') { devUnlockAll(false); metaRender(); }
+  if (a === 'dev-coins') { P_.coins = 9999999; pfSave(); toast('9 999 999 pièces.'); metaRender(); }
+  if (a === 'dev-xp') { for (let g = 0; g < 100000 && level() < 100; g++) P_.xp += 2000; pfSave(); toast('Niveau ' + level() + '.'); metaRender(); }
+  if (a === 'dev-pantry') { const L = lifeP(); for (const k of Object.keys(ING)) L.ing[k] = (L.ing[k] || 0) + 99; for (const k of Object.keys(DISHES)) L.dish[k] = (L.dish[k] || 0) + 9; pfSave(); toast('Garde-manger rempli : 99 de chaque ingrédient et 9 de chaque plat.'); }
+  if (a === 'dev-boxes') { const got = []; for (let i = 0; i < 10; i++) got.push(grant('box', true)); pfSave(); toast('Coffres : ' + got.filter(Boolean).join(', ')); metaRender(); }
+  if (a === 'dev-dbl') { P_.perks.dbl = 99; pfSave(); toast('Gains doublés pour 99 parties.'); }
+  if (a === 'dev-self') { if (!ADM.rb.self.length) return toast('Ajoute au moins une récompense.', true); siteGive(ADM.rb.self, 'Pour le développeur'); ADM.rb.self = []; metaRender(); }
+  if (a === 'dev-export') admReq('cfgexport').then(r => { ADM.exportTxt = JSON.stringify(r, null, 1); metaRender(); toast('Réglages exportés : copie le texte.'); }).catch(err => toast(err.message, true));
+  if (a === 'dev-import') { let v; try { v = JSON.parse($('#dev-json').value); } catch { return toast('Ce texte n’est pas un export valide.', true); } admRun('cfgimport', { cfg: v }, 'Réglages importés.'); }
+  if (a === 'dev-wipe?') { ADM.del = 'me'; metaRender(); }
+  if (a === 'dev-wipe') { ADM.del = null; PF = null; LS.set(PF_KEY, null); pf(); SITE.devDone = false; pf().acc = accState().name; pf().name = accState().name; pfSave(); applyTheme(); siteApply(); toast('Profil effacé.'); metaRender(); }
+  if (a === 'dev-games') { ADM.games = null; metaRender(); }
+  if (a === 'dev-gmsg') { ADM.gmsg = ADM.gmsg === el.dataset.c ? null : el.dataset.c; metaRender(); }
+  if (a === 'dev-close?') { ADM.del = 'g' + el.dataset.c; metaRender(); }
+  if (a === 'dev-close') { ADM.del = null; admReq('gameclose', { code: el.dataset.c }).then(() => { toast('Partie ' + el.dataset.c + ' fermée.'); ADM.games = null; metaRender(); }).catch(err => toast(err.message, true)); }
+  if (a === 'dev-join') { $('#meta').hidden = true; const inp = $('#in-code'); if (inp) { inp.value = el.dataset.c; toast('Code ' + el.dataset.c + ' prêt : clique sur « Rejoindre ».'); inp.focus(); } }
+});
+document.addEventListener('submit', ev => {
+  const f = ev.target; if (!f.dataset || !['devme', 'gmsg'].includes(f.dataset.adm)) return; ev.preventDefault(); ev.stopImmediatePropagation(); if (!devMode()) return;
+  if (f.dataset.adm === 'devme') { const P_ = pf(); P_.coins = Math.max(0, +$('#dev-c').value || 0); P_.xp = Math.max(0, +$('#dev-x').value || 0); P_.stats.games = Math.max(0, +$('#dev-g').value || 0); P_.stats.wins = Math.min(P_.stats.games, Math.max(0, +$('#dev-w').value || 0)); const h = +$('#dev-h').value; if (h !== P_.house) { P_.house = h; if (typeof houseRebuild === 'function') houseRebuild(); } pfSave(); toast('Profil mis à jour.'); metaRender(); }
+  if (f.dataset.adm === 'gmsg') admReq('gamemsg', { code: f.dataset.c, msg: $('#dev-gm').value }).then(() => { toast('Message envoyé à la partie ' + f.dataset.c + '.'); ADM.gmsg = null; metaRender(); }).catch(err => toast(err.message, true));
 }, true);
 
 /* =====================================================================

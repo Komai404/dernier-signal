@@ -193,28 +193,7 @@ async function allAccounts(q) {
   return vals.map((v, i) => { let a; try { a = JSON.parse(v); } catch { return null; } if (!a) return null; const p = a.prof || {}; const st = p.stats || {};
     return { k: keys[i], name: a.name, coins: p.coins || 0, xp: p.xp || 0, games: st.games || 0, wins: st.wins || 0, codes: Object.keys(p.codes || {}).length, house: p.house || 1, created: a.created || 0, upd: a.upd || 0, banned: !!a.banned, admin: isAdminK(keys[i]), gifts: (a.gifts || []).length }; }).filter(Boolean);
 }
-async function admin(req, res) {
-  let b; try { b = await readBody(req); } catch { return json(res, 400, { code: 'invalid_argument' }); }
-  const k = accKey(b.user); if (!isAdminK(k)) return json(res, 403, { code: 'not_admin', error: 'Réservé à l’administrateur.' });
-  const me = await accGet(k); if (!me || !okToken(me, b.token)) return json(res, 403, { code: 'bad_token', error: 'Session admin expirée : reconnecte-toi.' });
-  const ok = r => json(res, 200, { result: r === undefined ? Object.assign(publicCfg(), { codes: CFG.codes, log: CFG.log }) : r });
-  if (b.op !== 'cfg' && b.op !== 'players' && b.op !== 'stats' && b.op !== 'player' && b.op !== 'lb') admLog(b.op + (b.code ? ' ' + String(b.code).slice(0, 40) : '') + (b.name ? ' → ' + String(b.name).slice(0, 20) : '') + (b.msg ? ' : ' + String(b.msg).slice(0, 80) : ''));
-  const code = typeof b.code === 'string' ? b.code.toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
-  try {
-    switch (b.op) {
-      case 'cfg': return ok();
-      case 'codeset': {
-        if (!CODE_RX.test(code)) return json(res, 400, { code: 'invalid_argument', error: 'Nom du code : 2 à 40 lettres ou chiffres.' });
-        const r = cleanToks(b.r); if (!r.length) return json(res, 400, { code: 'invalid_argument', error: 'Ajoute au moins une récompense.' });
-        const old = CFG.codes[code] || {}; const from = num(b.from, 0, 9e15, 0), to = num(b.to, 0, 9e15, 0);
-        if (b.rename && b.rename !== code && CFG.codes[b.rename]) delete CFG.codes[b.rename];
-        CFG.codes[code] = { d: cleanStr(b.d, 200) || 'Code spécial', r, from, to, max: Math.round(num(b.max, 0, 1e7, 0)), uses: b.resetUses ? 0 : old.uses || 0, on: b.on !== false, at: old.at || Date.now() };
-        delete CFG.off[code]; await cfgSave(); return ok();
-      }
-      case 'codedel': delete CFG.codes[code]; await cfgSave(); return ok();
-      case 'codeoff': if (!CODE_RX.test(code)) return json(res, 400, { code: 'invalid_argument' }); if (b.off) CFG.off[code] = 1; else delete CFG.off[code]; await cfgSave(); return ok();
-      case 'cfgset': {
-        const v = b.cfg || {};
+function cfgApply(v) {
         if ('banner' in v) CFG.banner = v.banner && cleanStr(v.banner.text, 200) ? { text: cleanStr(v.banner.text, 200), color: /^#[0-9a-f]{6}$/i.test(v.banner.color) ? v.banner.color : '#e63a2e', id: Date.now() } : null;
         if ('motd' in v) CFG.motd = cleanStr(v.motd, 300);
         if ('coinMul' in v) CFG.coinMul = num(v.coinMul, 0.5, 10, 1);
@@ -233,8 +212,28 @@ async function admin(req, res) {
         if ('houses' in v) CFG.houses = Array.isArray(v.houses) ? v.houses.slice(0, 7).map(x => x === '' || x == null ? null : Math.round(num(x, 0, 1e7, 0))) : [];
         if ('wheel' in v && v.wheel && typeof v.wheel === 'object') CFG.wheel = { price: Math.round(num(v.wheel.price, 0, 1e6, 150)), jackpot: Math.round(num(v.wheel.jackpot, 0, 1e7, 3000)) };
         if ('lifeCap' in v) CFG.lifeCap = Math.round(num(v.lifeCap, 0, 1e7, 0));
-        await cfgSave(); return ok();
+}
+async function admin(req, res) {
+  let b; try { b = await readBody(req); } catch { return json(res, 400, { code: 'invalid_argument' }); }
+  const k = accKey(b.user); if (!isAdminK(k)) return json(res, 403, { code: 'not_admin', error: 'Réservé à l’administrateur.' });
+  const me = await accGet(k); if (!me || !okToken(me, b.token)) return json(res, 403, { code: 'bad_token', error: 'Session admin expirée : reconnecte-toi.' });
+  const ok = r => json(res, 200, { result: r === undefined ? Object.assign(publicCfg(), { codes: CFG.codes, log: CFG.log }) : r });
+  if (!['cfg', 'players', 'stats', 'player', 'lb', 'games', 'cfgexport'].includes(b.op)) admLog(b.op + (b.code ? ' ' + String(b.code).slice(0, 40) : '') + (b.name ? ' → ' + String(b.name).slice(0, 20) : '') + (b.msg ? ' : ' + String(b.msg).slice(0, 80) : ''));
+  const code = typeof b.code === 'string' ? b.code.toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
+  try {
+    switch (b.op) {
+      case 'cfg': return ok();
+      case 'codeset': {
+        if (!CODE_RX.test(code)) return json(res, 400, { code: 'invalid_argument', error: 'Nom du code : 2 à 40 lettres ou chiffres.' });
+        const r = cleanToks(b.r); if (!r.length) return json(res, 400, { code: 'invalid_argument', error: 'Ajoute au moins une récompense.' });
+        const old = CFG.codes[code] || {}; const from = num(b.from, 0, 9e15, 0), to = num(b.to, 0, 9e15, 0);
+        if (b.rename && b.rename !== code && CFG.codes[b.rename]) delete CFG.codes[b.rename];
+        CFG.codes[code] = { d: cleanStr(b.d, 200) || 'Code spécial', r, from, to, max: Math.round(num(b.max, 0, 1e7, 0)), uses: b.resetUses ? 0 : old.uses || 0, on: b.on !== false, at: old.at || Date.now() };
+        delete CFG.off[code]; await cfgSave(); return ok();
       }
+      case 'codedel': delete CFG.codes[code]; await cfgSave(); return ok();
+      case 'codeoff': if (!CODE_RX.test(code)) return json(res, 400, { code: 'invalid_argument' }); if (b.off) CFG.off[code] = 1; else delete CFG.off[code]; await cfgSave(); return ok();
+      case 'cfgset': { cfgApply(b.cfg || {}); await cfgSave(); return ok(); }
       case 'giftall': { const r = cleanToks(b.r); if (!r.length) return json(res, 400, { code: 'invalid_argument', error: 'Ajoute au moins une récompense.' }); CFG.gifts = [{ id: crypto.randomBytes(6).toString('base64url'), msg: cleanStr(b.msg, 200) || 'Un cadeau de l’équipe du jeu !', r, until: num(b.until, 0, 9e15, 0), at: Date.now() }, ...CFG.gifts].slice(0, 40); await cfgSave(); return ok(); }
       case 'giftdel': CFG.gifts = CFG.gifts.filter(g => g.id !== b.id); await cfgSave(); return ok();
       case 'players': return ok(await allAccounts(cleanStr(b.q, 16)));
@@ -252,6 +251,15 @@ async function admin(req, res) {
       case 'lbreset': board = {}; dirty = true; return ok(null);
       case 'player': { const tk = accKey(b.name); const t = tk && await accGet(tk); if (!t) return json(res, 404, { code: 'unknown_account', error: 'Joueur introuvable.' }); const p = t.prof || {};
         return ok({ name: t.name, banned: !!t.banned, created: t.created, upd: t.upd, gifts: t.gifts || [], coins: p.coins || 0, xp: p.xp || 0, house: p.house || 1, stats: p.stats || {}, inv: Object.keys(p.inv || {}), codes: Object.keys(p.codes || {}), eq: p.eq || {}, login: p.login || null, ach: Object.keys(p.ach || {}) }); }
+      case 'games': { const out = []; for (const [k2, v] of store) { const sp = k2.split('/'); if (sp.length !== 2 || sp[0] !== 'ds') continue; const d = v.d || {}; out.push({ code: sp[1], phase: d.phase || '?', round: d.round || 0, mode: d.settings && d.settings.mode, map: d.settings && d.settings.map, players: (d.players || []).map(p => ({ name: p.name, bot: !!p.bot, alive: p.alive !== false })), t: v.t }); } return ok(out.sort((a, c) => c.t - a.t).slice(0, 100)); }
+      case 'gameclose': { const gc = String(b.code || ''); if (!SEG.test(gc)) return json(res, 400, { code: 'invalid_argument' }); for (const c of conns.values()) emit(c, 'admin', { msg: 'Cette partie a été fermée par l’administrateur.', style: 'alerte', code: gc, close: true }); const base = 'ds/' + gc; for (const k2 of [...store.keys()]) if (k2 === base || k2.startsWith(base + '/')) { store.delete(k2); notify(k2); } delete owners[gc]; dirty = true; return ok(null); }
+      case 'gamemsg': { const msg = cleanStr(b.msg, 300); if (!msg) return json(res, 400, { code: 'invalid_argument', error: 'Écris un message.' }); for (const c of conns.values()) emit(c, 'admin', { msg, style: 'info', code: String(b.code || '') }); return ok(null); }
+      case 'cfgexport': return ok(JSON.parse(JSON.stringify(CFG)));
+      case 'cfgimport': { const v = b.cfg; if (!v || typeof v !== 'object') return json(res, 400, { code: 'invalid_argument', error: 'Fichier de réglages invalide.' });
+        if (v.codes && typeof v.codes === 'object') { const C2 = {}; for (const [c, x] of Object.entries(v.codes).slice(0, 5000)) { if (!CODE_RX.test(c) || !x || typeof x !== 'object') continue; const r = cleanToks(x.r); if (!r.length) continue; C2[c] = { d: cleanStr(x.d, 200) || 'Code spécial', r, from: num(x.from, 0, 9e15, 0), to: num(x.to, 0, 9e15, 0), max: Math.round(num(x.max, 0, 1e7, 0)), uses: Math.round(num(x.uses, 0, 1e7, 0)), on: x.on !== false, at: num(x.at, 0, 9e15, Date.now()), batch: typeof x.batch === 'string' ? x.batch.slice(0, 20) : undefined }; } CFG.codes = C2; }
+        if (v.off && typeof v.off === 'object') { CFG.off = {}; for (const c of Object.keys(v.off).slice(0, 10000)) if (CODE_RX.test(c)) CFG.off[c] = 1; }
+        if (Array.isArray(v.gifts)) CFG.gifts = v.gifts.slice(0, 40).map(g => ({ id: cleanStr(g.id, 20) || crypto.randomBytes(6).toString('base64url'), msg: cleanStr(g.msg, 200), r: cleanToks(g.r), until: num(g.until, 0, 9e15, 0), at: num(g.at, 0, 9e15, Date.now()) })).filter(g => g.r.length);
+        cfgApply(Object.assign({}, v, { banner: v.banner || null })); await cfgSave(); return ok(); }
       case 'logclear': CFG.log = []; await cfgSave(); return ok();
       case 'stats': { const n = UP_URL ? (await upstash(['KEYS', 'acc:*'])).length : Object.keys(accLocal).length; return ok({ players: n, online: conns.size, games: Object.keys(owners).length, codes: Object.keys(CFG.codes).length, off: Object.keys(CFG.off).length, persistent: !!UP_URL }); }
     }
