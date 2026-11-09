@@ -5754,6 +5754,158 @@ const addEv = (id, ev, code) => { EVENTS[id] = ev; if (!CODES[code]) CODES[code]
   for (let h = 0; h < 24; h++) addEv('h' + h, { name: h + ' h', when: d => d.getHours() === h, period: 'entre ' + h + ' h et ' + (h + 1) % 24 + ' h', rewards: ['c:60', 'xp:20'] }, 'HEURE' + String(h).padStart(2, '0'));
 }
 
+/* --- codes du monde entier : langues, références, fréquences radio, zodiaques, fêtes du monde --- */
+{
+  const TH = ['galaxy', 'aurora', 'celestial', 'eclipse', 'universe', 'darkmatter', 'nightking', 'kingdom', 'dreamland', 'rainbow', 'blackgold', 'lunar', 'crimson', 'ice', 'cyber', 'neon', 'toxic', 'purplesky', 'fire', 'moon'];
+  const FR = ['diamond', 'infinity', 'legendary', 'imperial', 'eternal', 'royal', 'moon', 'neon', 'fire', 'gold', 'golda', 'ghost'];
+  const NF = ['rainbow', 'diamond', 'gold', 'glitch', 'ghost', 'fire', 'ice', 'neon', 'violet', 'blood'];
+  const CO = ['crimson', 'bloodline', 'inferno', 'frozen', 'iceking', 'winter', 'summer', 'aqua', 'cyber', 'galaxy', 'cosmic', 'starlight', 'ghost', 'phantom', 'shadow', 'gold', 'silver', 'royal', 'imperial', 'ancient', 'wolf', 'alpha', 'mooncurse', 'night', 'hunter', 'toxic', 'neon', 'purple', 'diamond', 'mythic', 'dream', 'pixel'];
+  const EM = Object.keys(EMOTES); const FURS = Object.keys(FURNITURE);
+  const pickI = (arr, i) => arr[((i % arr.length) + arr.length) % arr.length];
+  /* récompenses selon la rareté : 1 courant, 2 rare, 3 épique, 4 légendaire */
+  const R = (tier, i, extra = []) => {
+    const r = [...extra];
+    if (tier === 1) r.push('c:' + (100 + (i * 37) % 200), 'xp:' + (30 + (i * 13) % 50));
+    if (tier === 2) r.push('c:' + (300 + (i * 53) % 300), 'e:' + pickI(EM, i * 7), 'xp:100');
+    if (tier === 3) r.push('c:' + (800 + (i * 71) % 700), 'col:' + pickI(CO, i * 5), 'th:' + pickI(TH, i * 3), 'xp:300');
+    if (tier === 4) r.push('c:' + (3000 + (i * 97) % 2000), 'col:' + pickI(CO, i * 11), 'th:' + pickI(TH, i * 7), 'f:' + pickI(FR, i), 'n:' + pickI(NF, i), 'box', 'box', 'xp:800', 'fx-rain');
+    return r;
+  };
+  const add = (code, desc, rewards) => { code = code.toUpperCase().normalize('NFD').replace(/[^A-Z0-9]/g, ''); if (code.length < 2 || CODES[code]) return false; CODES[code] = [desc, rewards]; return true; };
+
+  /* 1) 30 langues : le nom de la langue, bonjour, merci, le pays (4 codes chacune) */
+  const LANGS = [
+    // [code pays, couleur, nom du titre, langue (dans la langue), bonjour, merci, pays, nom français de la langue]
+    ['FR', '#4f6bff', 'Francophone', 'FRANCAIS', 'BONJOUR', 'MERCI', 'FRANCE', 'français'],
+    ['ES', '#ffb84f', 'Hispanophone', 'ESPANOL', 'HOLA', 'GRACIAS', 'ESPANA', 'espagnol'],
+    ['DE', '#ffd36b', 'Germanophone', 'DEUTSCH', 'HALLO', 'DANKE', 'DEUTSCHLAND', 'allemand'],
+    ['IT', '#3ad96a', 'Italophone', 'ITALIANO', 'CIAO', 'GRAZIE', 'ITALIA', 'italien'],
+    ['GB', '#e63a2e', 'Anglophone', 'ENGLISH', 'HELLO', 'THANKYOU', 'ENGLAND', 'anglais'],
+    ['PT', '#3ad99a', 'Lusophone', 'PORTUGUES', 'OLA', 'OBRIGADO', 'PORTUGAL', 'portugais'],
+    ['BR', '#3ad96a', 'Brésilien', 'BRASILEIRO', 'OIBRASIL', 'VALEU', 'BRASIL', 'brésilien'],
+    ['NL', '#ff9b4f', 'Néerlandophone', 'NEDERLANDS', 'HALLOTJES', 'DANKJEWEL', 'NEDERLAND', 'néerlandais'],
+    ['SE', '#4f9ae8', 'Suédois', 'SVENSKA', 'HEJ', 'TACK', 'SVERIGE', 'suédois'],
+    ['NO', '#e63a2e', 'Norvégien', 'NORSK', 'HEIHEI', 'TAKK', 'NORGE', 'norvégien'],
+    ['DK', '#e63a2e', 'Danois', 'DANSK', 'GODDAG', 'TUSINDTAK', 'DANMARK', 'danois'],
+    ['FI', '#8fb0ff', 'Finnois', 'SUOMI', 'MOI', 'KIITOS', 'SUOMENTASAVALTA', 'finnois'],
+    ['PL', '#e63a2e', 'Polonais', 'POLSKI', 'CZESC', 'DZIEKUJE', 'POLSKA', 'polonais'],
+    ['CZ', '#4f6bff', 'Tchèque', 'CESTINA', 'AHOJ', 'DEKUJI', 'CESKO', 'tchèque'],
+    ['GR', '#4f9ae8', 'Hellène', 'ELLINIKA', 'GEIASOU', 'EFCHARISTO', 'ELLADA', 'grec'],
+    ['TR', '#e63a2e', 'Turcophone', 'TURKCE', 'MERHABA', 'TESEKKURLER', 'TURKIYE', 'turc'],
+    ['RU', '#8fb0ff', 'Russophone', 'RUSSKIY', 'PRIVET', 'SPASIBO', 'ROSSIYA', 'russe'],
+    ['UA', '#ffd36b', 'Ukrainien', 'UKRAINSKA', 'PRYVIT', 'DYAKUYU', 'UKRAINA', 'ukrainien'],
+    ['RO', '#ffd36b', 'Roumain', 'ROMANA', 'SALUT', 'MULTUMESC', 'ROMANIA', 'roumain'],
+    ['HU', '#3ad96a', 'Hongrois', 'MAGYAR', 'SZIA', 'KOSZONOM', 'MAGYARORSZAG', 'hongrois'],
+    ['AR', '#3ad99a', 'Arabophone', 'ARABIYA', 'MARHABA', 'SHUKRAN', 'ALARAB', 'arabe'],
+    ['MA', '#e63a2e', 'Marocain', 'DARIJA', 'SALAMALIKOUM', 'BSSAHA', 'MAGHRIB', 'darija'],
+    ['IL', '#4f9ae8', 'Hébraïsant', 'IVRIT', 'SHALOM', 'TODA', 'ISRAEL', 'hébreu'],
+    ['IN', '#ff9b4f', 'Hindiphone', 'HINDI', 'NAMASTE', 'DHANYAVAAD', 'BHARAT', 'hindi'],
+    ['CN', '#e63a2e', 'Sinophone', 'ZHONGWEN', 'NIHAO', 'XIEXIE', 'ZHONGGUO', 'chinois'],
+    ['JP', '#ff7aa8', 'Nippophone', 'NIHONGO', 'KONNICHIWA', 'ARIGATO', 'NIPPON', 'japonais'],
+    ['KR', '#4f6bff', 'Coréanophone', 'HANGUGEO', 'ANNYEONG', 'KAMSAHAMNIDA', 'HANGUK', 'coréen'],
+    ['VN', '#e63a2e', 'Vietnamien', 'TIENGVIET', 'XINCHAO', 'CAMON', 'VIETNAM', 'vietnamien'],
+    ['TH', '#4f6bff', 'Thaïlandais', 'PHASATHAI', 'SAWASDEE', 'KHOBKHUN', 'THAILAND', 'thaï'],
+    ['ID', '#e63a2e', 'Indonésien', 'BAHASA', 'HALOHALO', 'TERIMAKASIH', 'INDONESIA', 'indonésien'],
+    ['KE', '#3ad96a', 'Swahiliphone', 'KISWAHILI', 'JAMBO', 'ASANTE', 'TANZANIA', 'swahili'],
+    ['PH', '#4f9ae8', 'Philippin', 'TAGALOG', 'KUMUSTA', 'SALAMAT', 'PILIPINAS', 'tagalog'],
+    ['IE', '#3ad96a', 'Gaélique', 'GAEILGE', 'DIADUIT', 'GORAIBHMAITH', 'EIRE', 'irlandais'],
+    ['EO', '#3ad96a', 'Espérantiste', 'ESPERANTO', 'SALUTON', 'DANKON', 'ESPERANTUJO', 'espéranto'],
+    ['BZH', '#e3dfd5', 'Breton', 'BREZHONEG', 'DEMATEOC', 'TRUGAREZ', 'BREIZH', 'breton'],
+    ['CAT', '#ffd36b', 'Catalan', 'CATALA', 'BONDIA', 'MOLTESGRACIES', 'CATALUNYA', 'catalan'],
+  ];
+  LANGS.forEach(([cc, col, title, lang, hi, thx, country, fr], i) => {
+    const t = 'lang' + cc.toLowerCase(), b = 'flag' + cc.toLowerCase();
+    TITLES[t] = title; BADGES[b] = [cc, col, 'Drapeau ' + fr];
+    add(lang, 'Langue : ' + fr + '. Tu parles la langue de la meute !', ['t:' + t, 'c:250', 'xp:100']);
+    add(hi, 'Bonjour en ' + fr + ' !', ['e:salut', 'c:150']);
+    add(thx, 'Merci en ' + fr + ' !', ['c:200', 'xp:50']);
+    add(country, 'Pays : ' + country.charAt(0) + country.slice(1).toLowerCase() + '. Le drapeau est à toi.', ['b:' + b, 'c:200', 'col:' + pickI(CO, i)]);
+  });
+  TITLES.polyglotte = 'Polyglotte'; add('POLYGLOTTE', 'Tu parles toutes les langues du Signal.', ['t:polyglotte', 'n:rainbow', 'c:1000']); add('BABEL', 'La tour de Babel s’effondre… sur une pile de pièces.', R(3, 1, ['t:polyglotte']));
+
+  /* 2) Fêtes du monde (limitées dans le temps) */
+  const md2 = (d, m, a, b) => d.getMonth() + 1 === m && d.getDate() >= a && d.getDate() <= b;
+  const WORLD = [
+    ['DIADEREYES', 'Día de Reyes (Espagne)', 1, 5, 7, ['h:5', 'c:400']], ['BURNSNIGHT', 'Burns Night (Écosse)', 1, 24, 26, ['c:300', 'e:danse']], ['AUSTRALIADAY', 'Australia Day', 1, 26, 26, ['col:summer', 'c:300']],
+    ['WAITANGI', 'Waitangi Day (Nouvelle-Zélande)', 2, 6, 6, ['c:300', 'xp:100']], ['SAINTJORDI', 'Sant Jordi (Catalogne)', 4, 23, 23, ['fur:livre', 'fur:potfleur', 'c:300']], ['KONINGSDAG', 'Koningsdag (Pays-Bas)', 4, 26, 27, ['col:inferno', 'c:300']],
+    ['HANAMI', 'Hanami (Japon)', 3, 25, 31, ['col:dream', 'e:zen', 'c:300']], ['HANAMI2', 'Hanami, deuxième floraison', 4, 1, 10, ['th:dreamland', 'c:300']], ['KODOMONOHI', 'Kodomo no Hi (Japon)', 5, 5, 5, ['e:jump', 'c:300']],
+    ['CINCODEMAYO', 'Cinco de Mayo (Mexique)', 5, 5, 5, ['e:danseparty', 'c:300']], ['MIDSOMMAR', 'Midsommar (Suède)', 6, 19, 25, ['col:summer', 'fur:potfleur', 'c:300']], ['FESTAJUNINA', 'Festa Junina (Brésil)', 6, 1, 30, ['e:dansefolle', 'c:250']],
+    ['CANADADAY', 'Fête du Canada', 7, 1, 1, ['c:400', 'fx-fireworks']], ['INDEPENDENCEDAY', 'Independence Day (États-Unis)', 7, 4, 4, ['c:400', 'fx-fireworks']], ['TANABATA', 'Tanabata (Japon)', 7, 7, 7, ['th:celestial', 'c:300']],
+    ['FETENATIONALESUISSE', 'Fête nationale suisse', 8, 1, 1, ['c:300', 'fx-fireworks']], ['FERRAGOSTO', 'Ferragosto (Italie)', 8, 15, 15, ['col:aqua', 'c:300']], ['OKTOBERFEST', 'Oktoberfest (Allemagne)', 9, 20, 30, ['fur:tonneau', 'e:danse', 'c:300']],
+    ['OKTOBERFEST2', 'Oktoberfest, dernière semaine', 10, 1, 5, ['fur:tonneau', 'c:300']], ['DIADELOSMUERTOS', 'Día de los Muertos (Mexique)', 10, 31, 31, ['th:ghosttown', 'e:ghostdance', 'c:400']], ['DIADELOSMUERTOS2', 'Día de los Muertos', 11, 1, 2, ['col:ghost', 'c:400']],
+    ['GUYFAWKES', 'Guy Fawkes Night (Royaume-Uni)', 11, 5, 5, ['fx-fireworks', 'c:300']], ['SANTALUCIA', 'Sankta Lucia (Suède)', 12, 13, 13, ['fur:lanternepapier', 'c:300']], ['HOGMANAY', 'Hogmanay (Écosse)', 12, 31, 31, ['fx-fireworks', 'c:500']],
+    ['KINGSDAYNL', 'Fête du Roi', 4, 27, 27, ['c:200']], ['SAINTANDRE', 'Saint-André (Écosse)', 11, 30, 30, ['c:300']], ['NOWRUZ', 'Norouz (Nouvel an perse)', 3, 20, 22, ['col:summer', 'fur:potfleur', 'c:400']],
+    ['SONGKRAN', 'Songkran (Thaïlande)', 4, 13, 15, ['col:aqua', 'c:400']], ['HOLI', 'Holi, fête des couleurs (Inde)', 3, 1, 15, ['n:rainbow', 'c:400']], ['STNICOLASNL', 'Sinterklaas (Pays-Bas)', 12, 5, 5, ['fur:cadeau', 'c:300']],
+  ];
+  WORLD.forEach(([code, name, m, a, b, rw], i) => { const id = 'w_' + code.toLowerCase(); const per = (a === b ? 'le ' + (a === 1 ? '1er' : a) : 'du ' + (a === 1 ? '1er' : a) + ' au ' + b) + ' ' + MOIS[m - 1]; EVENTS[id] = { name, when: d => md2(d, m, a, b), period: per, rewards: rw }; add(code, 'Événement : ' + name, ['event:' + id]); });
+
+  /* 3) Les 12 signes du zodiaque (valables pendant leur période) */
+  const ZOD = [['BELIER', 'Bélier', 3, 21, 4, 19], ['TAUREAU', 'Taureau', 4, 20, 5, 20], ['GEMEAUX', 'Gémeaux', 5, 21, 6, 20], ['CANCER', 'Cancer', 6, 21, 7, 22], ['LION', 'Lion', 7, 23, 8, 22], ['VIERGE', 'Vierge', 8, 23, 9, 22], ['BALANCE', 'Balance', 9, 23, 10, 22], ['SCORPION', 'Scorpion', 10, 23, 11, 21], ['SAGITTAIRE', 'Sagittaire', 11, 22, 12, 21], ['CAPRICORNE', 'Capricorne', 12, 22, 1, 19], ['VERSEAU', 'Verseau', 1, 20, 2, 18], ['POISSONS', 'Poissons', 2, 19, 3, 20]];
+  ZOD.forEach(([code, name, m1, d1, m2, d2], i) => { const id = 'z_' + code.toLowerCase(); TITLES['zod' + i] = name; EVENTS[id] = { name: 'Saison du ' + name, when: d => { const m = d.getMonth() + 1, dd = d.getDate(); return (m === m1 && dd >= d1) || (m === m2 && dd <= d2); }, period: 'du ' + d1 + ' ' + MOIS[m1 - 1] + ' au ' + d2 + ' ' + MOIS[m2 - 1], rewards: ['t:zod' + i, 'th:' + pickI(TH, i), 'c:500'] }; add(code, 'Signe : ' + name, ['event:' + id]); });
+
+  /* 4) Zodiaque chinois : un animal par année, valable toute l'année */
+  const CZ = [['CHEVAL', 'Cheval'], ['CHEVRE', 'Chèvre'], ['SINGE', 'Singe'], ['COQ', 'Coq'], ['CHIEN', 'Chien'], ['COCHON', 'Cochon'], ['RAT', 'Rat'], ['BUFFLE', 'Buffle'], ['TIGRE', 'Tigre'], ['LAPIN', 'Lapin'], ['DRAGON', 'Dragon'], ['SERPENT', 'Serpent']];
+  for (let y = 2026; y <= 2049; y++) { const [c, n] = CZ[(y - 2026) % 12]; const id = 'cz' + y; EVENTS[id] = { name: 'Année du ' + n + ' ' + y, when: d => d.getFullYear() === y, period: 'pendant toute l’année ' + y, rewards: R(3, y) }; add('ANNEEDU' + c + y, 'Événement : Année du ' + n + ' ' + y, ['event:' + id]); }
+
+  /* 5) Fréquences radio : de 87.5 à 108.0 MHz, chacune un code (FM875 … FM1080). Quelques-unes cachent un jackpot. */
+  const JACK = { 1013: 'La fréquence du Dernier Signal. Tu l’as trouvée.', 999: 'Neuf, neuf, neuf… Le Mordu écoute aussi.', 1077: 'Une voix murmure ton nom.', 887: 'Station fantôme : elle n’émet que pour toi.', 1042: 'La réponse à tout.', 913: 'Message codé : « ne fais confiance à personne ».', 1066: 'Une vieille radio militaire grésille.' };
+  for (let f = 875; f <= 1080; f++) {
+    const mhz = (f / 10).toFixed(1);
+    if (JACK[f]) add('FM' + f, 'Fréquence ' + mhz + ' MHz — ' + JACK[f], R(4, f, ['b:radio']));
+    else add('FM' + f, 'Fréquence ' + mhz + ' MHz : ' + pickI(['un grésillement', 'de la musique lointaine', 'une météo d’un autre temps', 'un appel au secours effacé', 'des parasites', 'un vieux jingle', 'un silence étrange', 'une émission de nuit'], f) + '.', f % 10 === 0 ? R(2, f) : R(1, f));
+  }
+
+  /* 6) Références : jeux vidéo, animés, films, séries, internet, culture française */
+  const REFS = [
+    // jeux vidéo
+    ['ZELDA', 'C’est dangereux d’y aller seul. Prends ça.', 2], ['TRIFORCE', 'Courage, sagesse et force.', 3], ['MARIO', 'Wahoo ! Une étoile pour toi.', 2], ['LUIGI', 'Le frère qu’on oublie toujours.', 1], ['PEACH', 'La princesse est dans un autre château.', 1], ['BOWSER', 'Le vrai méchant, c’est lui.', 2], ['KIRBY', 'Il aspire tout, même les pièces.', 1], ['PIKACHU', 'Pika pika !', 2], ['ATTRAPEZLESTOUS', 'Attrapez-les tous… les codes.', 3], ['SONIC', 'Trop lent.', 1], ['TAILS', 'Le renard volant.', 1],
+    ['KRATOS', 'BOY !', 2], ['MASTERCHIEF', 'Il a besoin d’une arme.', 2], ['STEVE', 'Un bloc à la fois.', 1], ['CREEPER', 'Ssssss… BOUM.', 2], ['ENDERMAN', 'Ne le regarde pas dans les yeux.', 2], ['DIAMANTS', 'Des diamants !', 2], ['NETHER', 'Il fait chaud ici.', 1], ['GLADOS', 'Le test est presque terminé.', 2], ['PORTAL', 'Pense en portails.', 1],
+    ['GERALT', 'Hmm.', 2], ['WITCHER', 'Le loup blanc te salue.', 3], ['CLOUDSTRIFE', 'Pas intéressé.', 1], ['SEPHIROTH', 'Une seule aile.', 2], ['LINK', 'HYAAA !', 1], ['SAMUS', 'Chasseuse de primes.', 2], ['PACMAN', 'Waka waka.', 1], ['TETRIS', 'La ligne parfaite.', 1], ['DOOM', 'Rip and tear.', 2], ['HALFLIFE3', 'Il n’existe pas. Ce code non plus. Enfin si.', 4],
+    ['FORTNITE', 'Une victoire royale !', 2], ['VBUCKS', 'Ce ne sont pas des V-bucks, mais c’est presque pareil.', 1], ['VALORANT', 'Clutch ou kick.', 1], ['LEAGUEOFLEGENDS', 'Ennemi détruit.', 1], ['ROCKETLEAGUE', 'What a save!', 1], ['FIFA', 'Golazo !', 1], ['GTA', 'Mission accomplie. Respect +.', 2], ['ELDENRING', 'Essaie avec des doigts, mais un trou.', 3], ['DARKSOULS', 'VOUS ÊTES MORT. Mais voilà des pièces.', 2], ['HOLLOWKNIGHT', 'Silksong arrive… un jour.', 2],
+    ['UNDERTALE', 'Tu es rempli de détermination.', 2], ['SANS', 'Tu vas passer un sale quart d’heure.', 2], ['CELESTE', 'Tu peux le faire.', 1], ['STARDEW', 'Une belle journée à la ferme.', 1], ['ANIMALCROSSING', 'Tom Nook te réclame un prêt.', 1], ['ROBLOX', 'Oof.', 1], ['GENSHIN', 'Un vœu à 5 étoiles !', 3], ['PALWORLD', 'Attrape et travaille.', 1], ['LETHALCOMPANY', 'Quota atteint.', 2], ['PHASMOPHOBIA', 'Le fantôme est dans la pièce.', 2],
+    // animés et mangas
+    ['NARUTO', 'Dattebayo !', 2], ['RASENGAN', 'Une sphère d’énergie dans ta main.', 2], ['SASUKE', 'Je dois venger mon clan.', 1], ['ONEPIECE', 'Le trésor existe !', 3], ['GOMUGOMU', 'Ton bras s’étire jusqu’aux pièces.', 2], ['LUFFY', 'Je serai le roi des pirates !', 2], ['ZORO', 'Perdu, encore.', 1], ['DRAGONBALL', 'Sept boules, un vœu.', 3], ['KAMEHAMEHA', 'KAAA… MEEE… HAAA… MEEE… HAAAA !', 2], ['GOKU', 'Salut, c’est moi Goku !', 2], ['VEGETA', 'Il est à plus de 9000 !', 2],
+    ['BANKAI', 'Ton zanpakutō se libère.', 3], ['ICHIGO', 'Un shinigami remplaçant.', 1], ['ATTACKONTITAN', 'Shinzou wo sasageyo !', 2], ['ERENYEAGER', 'Tatakae.', 2], ['DEMONSLAYER', 'Respiration de l’eau, premier mouvement.', 2], ['TANJIRO', 'Le cœur pur.', 1], ['JUJUTSU', 'Extension du territoire.', 3], ['GOJO', 'Le plus fort.', 3], ['MYHEROACADEMIA', 'Plus Ultra !', 2], ['DEATHNOTE', 'Tout se passe comme prévu.', 2], ['KIRA', 'Kira est parmi nous.', 2],
+    ['HUNTERXHUNTER', 'Le Nen se réveille.', 2], ['FULLMETAL', 'L’échange équivalent.', 2], ['CHAINSAWMAN', 'Vroum vroum.', 2], ['SPYXFAMILY', 'Waku waku !', 1], ['POKEMON', 'Un Pokémon sauvage apparaît !', 1], ['TOTORO', 'Un gros chat-bus passe.', 2], ['GHIBLI', 'Le vent se lève.', 2], ['SAILORMOON', 'Au nom de la lune, je vais te punir !', 3],
+    // films et séries
+    ['STRANGERTHINGS', 'L’Upside Down s’ouvre.', 2], ['ELEVEN', 'Des gaufres et des pouvoirs.', 1], ['WEDNESDAY', 'Elle ne sourit pas. Toi oui.', 2], ['ARCANE', 'Piltover et Zaun.', 3], ['JINX', 'Boum boum.', 2], ['SQUIDGAME', 'Un, deux, trois, soleil.', 2], ['LACASADEPAPEL', 'Bella ciao.', 2], ['BREAKINGBAD', 'Say my name.', 2], ['GAMEOFTHRONES', 'L’hiver arrive.', 3], ['WINTERISCOMING', 'L’hiver est vraiment arrivé.', 2], ['THEOFFICE', 'That’s what she said.', 1],
+    ['FRIENDS', 'Pivot ! PIVOT !', 1], ['HARRYPOTTER', 'Tu es un sorcier.', 3], ['EXPELLIARMUS', 'Désarmé !', 1], ['ALOHOMORA', 'La porte s’ouvre.', 1], ['LUMOS', 'Que la lumière soit.', 1], ['SEIGNEURDESANNEAUX', 'Un anneau pour les gouverner tous.', 3], ['MONPRECIEUX', 'Mon précieux…', 2], ['GANDALF', 'Vous ne passerez pas !', 2], ['STARWARS', 'Que la Force soit avec toi.', 3], ['DARKVADOR', 'Je suis ton père.', 2], ['YODA', 'Des pièces, tu auras.', 2],
+    ['MATRIX', 'Pilule rouge ou pilule bleue ?', 3], ['NEO', 'Il est l’élu.', 2], ['TERMINATOR', 'I’ll be back.', 2], ['JURASSICPARK', 'La vie trouve toujours un chemin.', 2], ['INTERSTELLAR', 'Ne te laisse pas emporter dans cette douce nuit.', 3], ['INCEPTION', 'Un rêve dans un rêve.', 2], ['SHREK', 'C’est mon marais !', 1], ['TOYSTORY', 'Vers l’infini et au-delà !', 2], ['LEROILION', 'Hakuna matata.', 2], ['AVENGERS', 'Avengers, rassemblement !', 3], ['IRONMAN', 'Je suis Iron Man.', 2],
+    ['SPIDERMAN', 'Un grand pouvoir implique de grandes responsabilités.', 2], ['BATMAN', 'Je suis la nuit.', 2], ['JOKER', 'Pourquoi tant de sérieux ?', 2], ['GHOSTBUSTERS', 'Qui tu vas appeler ?', 2], ['RETOURVERSLEFUTUR', 'Il faut 1,21 gigowatt !', 2], ['TITANIC', 'Je suis le roi du monde !', 1], ['AMELIEPOULAIN', 'Les petits plaisirs.', 1], ['ASTERIX', 'Ils sont fous ces Romains !', 2], ['OBELIX', 'Je ne suis pas gros !', 1], ['KAAMELOTT', 'C’est pas faux.', 2], ['CESTPASFAUX', 'C’est pas faux.', 1],
+    ['OSS117', 'Comment est votre blanquette ?', 2], ['LESVISITEURS', 'Okayyyy.', 1], ['LACITEDELAPEUR', 'Barbecue party !', 1], ['BIENVENUECHEZLESCHTIS', 'Bienvenue chez les Ch’tis.', 1], ['INTOUCHABLES', 'Une belle amitié.', 1], ['TAXI', 'Ça va vite.', 1], ['LESBRONZES', 'On ne sait jamais sur un malentendu…', 1],
+    // internet et expressions
+    ['MDR', 'Mort de rire.', 1], ['PTDR', 'Pété de rire.', 1], ['JPP', 'J’en peux plus.', 1], ['OKLM', 'Au calme.', 1], ['WESH', 'Wesh la meute.', 1], ['FRERO', 'Frérot, t’as trouvé un code.', 1], ['ONESTLA', 'On est là !', 1], ['GG', 'Bien joué.', 1], ['EZ', 'Trop facile.', 1], ['WTF', 'Quoi ?!', 1], ['LOL', 'Lol.', 1], ['BRUH', 'Bruh.', 1], ['POG', 'Pog !', 1], ['POGGERS', 'POGGERS !', 1], ['KEKW', 'Kekw.', 1], ['COPIUM', 'Une grande inspiration.', 1], ['HOPIUM', 'L’espoir fait vivre.', 1],
+    ['RIZZ', 'Tu as du charisme.', 1], ['SKIBIDI', 'Skibidi bop.', 1], ['OHIO', 'Seulement dans l’Ohio.', 1], ['AURA', '+1000 aura.', 2], ['AURAFARMING', 'Tu farmes de l’aura.', 2], ['COOKED', 'Tu es cuit.', 1], ['NOCAP', 'Sans mentir.', 1], ['SLAY', 'Tu as tout déchiré.', 1], ['ITSJOEVER', 'C’est fini… ou pas.', 1], ['WEBACK', 'On est de retour.', 1], ['GIGACHAD', 'Le menton parfait.', 2], ['STONKS', 'Stonks.', 2], ['DOGE', 'Very wow. Much coin.', 2], ['NYANCAT', 'Un chat arc-en-ciel passe.', 2],
+    ['TROLLFACE', 'Problème ?', 1], ['THISISFINE', 'Tout va bien.', 1], ['DISTRACTEDBOYFRIEND', 'Il regarde ailleurs.', 1], ['HIDEPAIN', 'Harold cache sa douleur.', 1], ['CHEH', 'Cheh.', 1], ['ALED', 'À l’aide !', 1], ['TKT', 'T’inquiète.', 1], ['JESUISPASCONTENT', 'Il n’est pas content.', 1], ['CAVAETRETOUTNOIR', 'Ça va être tout noir.', 1],
+    // culture française
+    ['TOUREIFFEL', 'Elle scintille rien que pour toi.', 2], ['ARCDETRIOMPHE', 'Victoire !', 1], ['LOUVRE', 'La Joconde te sourit.', 2], ['JOCONDE', 'Son sourire est un mystère.', 2], ['VERSAILLES', 'Le Roi-Soleil t’accorde une audience.', 3], ['MONTSAINTMICHEL', 'La marée monte.', 2], ['MARSEILLE', 'Le Vieux-Port te salue.', 1], ['LYON', 'Un bouchon lyonnais.', 1], ['BORDEAUX', 'Un canelé ?', 1], ['TOULOUSE', 'La ville rose.', 1], ['LILLE', 'Une gaufre et une braderie.', 1],
+    ['NANTES', 'Un éléphant mécanique passe.', 1], ['STRASBOURG', 'Le marché de Noël ouvre.', 1], ['NICE', 'La promenade des Anglais.', 1], ['CORSE', 'L’île de beauté.', 1], ['BRETAGNE', 'Kenavo !', 1], ['ALSACE', 'Une tarte flambée.', 1], ['RACLETTE', 'L’appareil chauffe.', 1], ['TARTIFLETTE', 'Du reblochon partout.', 1], ['FONDUE', 'Ne fais pas tomber ton pain.', 1], ['CROQUEMONSIEUR', 'Croustillant.', 1], ['BLANQUETTE', 'Elle est bonne.', 1], ['RATATOUILLE', 'Tout le monde peut cuisiner.', 2],
+    ['CREPE', 'Beurre-sucre.', 1], ['MACARON', 'Pistache ou framboise ?', 1], ['ECLAIR', 'Au chocolat.', 1], ['PAINPERDU', 'Pas si perdu.', 1], ['CAMEMBERT', 'Bien fait.', 1], ['ESCARGOT', 'Avec du beurre persillé.', 1], ['CASSOULET', 'Un plat de compétition.', 1], ['BOUILLABAISSE', 'Fraîche du port.', 1], ['QUICHE', 'Lorraine, évidemment.', 1], ['GRATINDAUPHINOIS', 'Doré à point.', 1],
+    // mythologie (beaucoup de loups !)
+    ['FENRIR', 'Le grand loup brise ses chaînes.', 4], ['SKOLL', 'Le loup qui poursuit le soleil.', 3], ['HATI', 'Le loup qui poursuit la lune.', 3], ['LYCAON', 'Le premier loup-garou.', 3], ['LUPA', 'La louve de Rome.', 2], ['ROMULUS', 'Fondateur de Rome.', 1], ['REMUS', 'Le frère oublié.', 1], ['ODIN', 'Le père de tout.', 3], ['THOR', 'Mjöllnir s’abat.', 2], ['LOKI', 'Le trompeur… comme le Mordu.', 3], ['FREYA', 'Déesse de l’amour.', 2], ['VALHALLA', 'Les braves t’attendent.', 3], ['RAGNAROK', 'La fin des temps… et des pièces.', 4], ['YGGDRASIL', 'L’arbre-monde.', 2],
+    ['ZEUS', 'La foudre tombe.', 3], ['HERA', 'Reine de l’Olympe.', 2], ['POSEIDON', 'Les vagues t’obéissent.', 2], ['HADES', 'Le maître des morts.', 3], ['ATHENA', 'La sagesse.', 2], ['APOLLON', 'Le soleil brille.', 2], ['ARTEMIS', 'Chasseresse sous la lune.', 3], ['HERMES', 'Le messager rapide.', 1], ['ARES', 'La guerre.', 1], ['ACHILLE', 'Attention au talon.', 1], ['ULYSSE', 'Un long voyage.', 1], ['MEDUSE', 'Ne la regarde pas.', 2], ['CERBERE', 'Trois têtes, trois fois plus de pièces.', 3], ['PANDORE', 'Tu as ouvert la boîte…', 4], ['OLYMPE', 'Les dieux t’accueillent.', 3],
+    ['ANUBIS', 'Le dieu à tête de chacal pèse ton cœur.', 3], ['RA', 'Le soleil d’Égypte.', 2], ['OSIRIS', 'Il revient d’entre les morts.', 2], ['HORUS', 'L’œil qui voit tout.', 2], ['SPHINX', 'Résous l’énigme.', 2], ['PHARAON', 'Le trésor du tombeau.', 3], ['MERLIN', 'Enchanteur.', 2], ['EXCALIBUR', 'Retirée de la pierre.', 3], ['ARTHUR', 'Le roi.', 2], ['GRAAL', 'Tu l’as trouvé.', 4], ['AMATERASU', 'La déesse du soleil.', 2], ['KITSUNE', 'Le renard à neuf queues.', 3], ['BABAYAGA', 'La sorcière de la forêt.', 2],
+    ['WENDIGO', 'Il a faim.', 3], ['SKINWALKER', 'Il prend ton apparence.', 3], ['CHUPACABRA', 'Il rôde dans la nuit.', 2], ['BIGFOOT', 'Une empreinte géante.', 2], ['NESSIE', 'Le monstre du loch.', 2], ['YETI', 'Une silhouette dans la neige.', 2], ['VAMPIRE', 'Un ennemi de toujours.', 2], ['DRACULA', 'Bienvenue dans mon château.', 3], ['GARGOUILLE', 'Elle veille sur les toits.', 1], ['BANSHEE', 'Son cri annonce la mort.', 2], ['GOLEM', 'Fait d’argile.', 1],
+    // espace
+    ['MERCURE', 'La plus proche du soleil.', 1], ['VENUS', 'L’étoile du berger.', 1], ['TERRE', 'Notre maison.', 1], ['JUPITER', 'La géante.', 2], ['SATURNE', 'Ses anneaux brillent.', 2], ['URANUS', 'Pas de blague.', 1], ['NEPTUNE', 'Bleu profond.', 1], ['PLUTON', 'Toujours une planète dans nos cœurs.', 2], ['LUNE', 'Elle veille sur la meute.', 2], ['SOLEIL', 'Il se lève pour toi.', 1], ['ETOILEPOLAIRE', 'Elle guide les égarés.', 2], ['SIRIUS', 'L’étoile du chien.', 2], ['ORION', 'Le chasseur céleste.', 2], ['ANDROMEDE', 'Une autre galaxie.', 3], ['VOIELACTEE', 'Notre galaxie.', 2],
+    ['TROUNOIR', 'Rien ne s’en échappe… sauf ces pièces.', 4], ['SUPERNOVA', 'Une explosion d’étoile.', 3], ['COMETE', 'Elle passe tous les 76 ans.', 2], ['APOLLO11', 'Un petit pas pour l’homme.', 3], ['HOUSTON', 'Houston, on a un problème.', 2], ['SPOUTNIK', 'Bip… bip… bip…', 2], ['THOMASPESQUET', 'Un Français dans l’espace.', 2], ['ISS', 'La station tourne au-dessus de toi.', 1], ['MARSROVER', 'Une trace dans la poussière rouge.', 2], ['ALIEN', 'Ils sont parmi nous.', 2],
+    // animaux
+    ['LOUP', 'Le loup, ton frère.', 2], ['LOUVE', 'La mère de la meute.', 2], ['LOUVETEAU', 'Un petit loup grandit.', 1], ['RENARD', 'Le renard rusé.', 1], ['OURS', 'Il hiberne… sur un tas de pièces.', 1], ['HIBOU', 'Il voit tout la nuit.', 1], ['CHOUETTE', 'Chouette, un code !', 1], ['CORBEAU', 'Messager des ténèbres.', 2], ['CERF', 'Le roi de la forêt.', 1], ['SANGLIER', 'Il charge !', 1],
+    ['LYNX', 'Les yeux perçants.', 1], ['AIGLE', 'Il vole haut.', 1], ['FAUCON', 'Il plonge.', 1], ['PANTHERE', 'L’ombre noire.', 2], ['TIGREBLANC', 'Très rare.', 3], ['ORQUE', 'La baleine tueuse.', 2], ['REQUIN', 'Dents de la mer.', 1], ['PIEUVRE', 'Huit bras pour tes pièces.', 1], ['AXOLOTL', 'Il sourit toujours.', 2], ['CAPYBARA', 'Le plus calme de tous.', 2], ['PANDA', 'Bambou ?', 1], ['KOALA', 'Il dort 20 heures par jour.', 1], ['PINGOUIN', 'Il glisse.', 1], ['LICORNE', 'Elle existe vraiment.', 3], ['PHENIX', 'Il renaît de ses cendres.', 4], ['GRIFFON', 'Mi-aigle, mi-lion.', 3],
+    // couleurs et pierres
+    ['ROUGE', 'Rouge sang.', 1], ['BLEU', 'Bleu nuit.', 1], ['VERT', 'Vert forêt.', 1], ['JAUNE', 'Jaune soleil.', 1], ['VIOLET', 'Violet royal.', 1], ['NOIR', 'Noir absolu.', 1], ['BLANC', 'Blanc lune.', 1], ['ORANGE', 'Orange feu.', 1], ['ROSE', 'Rose bonbon.', 1], ['DORE', 'Doré.', 2], ['ARGENT', 'Argent pur.', 2], ['RUBIS', 'Un rubis brut.', 2], ['SAPHIR', 'Un saphir bleu.', 2], ['EMERAUDE', 'Une émeraude.', 2], ['AMETHYSTE', 'Une améthyste.', 2], ['OPALE', 'Une opale rare.', 3], ['OBSIDIENNE', 'Pierre volcanique.', 2], ['ONYX', 'Pierre noire.', 2], ['TOPAZE', 'Une topaze dorée.', 2], ['PERLE', 'Une perle de nacre.', 2],
+    // sports et clubs
+    ['PSG', 'Ici c’est Paris.', 1], ['OM', 'Droit au but.', 1], ['OL', 'Allez l’OL.', 1], ['ASSE', 'Allez les Verts.', 1], ['LOSC', 'Allez Lille.', 1], ['RCLENS', 'Sang et or.', 1], ['MBAPPE', 'Une accélération fulgurante.', 2], ['ZIDANE', 'Une roulette parfaite.', 2], ['GRIEZMANN', 'Une petite danse.', 1], ['MESSI', 'La pulga.', 2], ['RONALDO', 'SIUUUU !', 2], ['NEYMAR', 'Une chute très théâtrale.', 1], ['WEMBANYAMA', 'Le géant français.', 2], ['TEDDYRINER', 'Imbattable.', 2], ['LEONMARCHAND', 'Quatre fois en or.', 3], ['JO2024', 'Les Jeux de Paris.', 2], ['TOURDEFRANCE', 'Le maillot jaune.', 2], ['ROLANDGARROS', 'Terre battue.', 1], ['COUPEDUMONDE', 'Champions du monde !', 3], ['ALLEZLESBLEUS', 'Allez les Bleus !', 2],
+  ];
+  REFS.forEach(([code, desc, tier], i) => add(code, desc, R(tier, i + 7)));
+
+  /* 7) Les chiffres porte-bonheur et les codes secrets du Signal */
+  const NUM = { 7: ['Le chiffre porte-bonheur.', 2], 13: ['Il porte malheur… ou chance.', 2], 42: ['La réponse à la grande question.', 3], 77: ['Double sept.', 2], 99: ['Presque cent.', 1], 100: ['Cent pour cent.', 2], 111: ['Un, un, un.', 1], 123: ['Un, deux, trois.', 1], 222: ['Deux, deux, deux.', 1], 333: ['Trois, trois, trois.', 1], 404: ['Code introuvable.', 2], 500: ['Erreur interne du serveur.', 1], 666: ['Le chiffre de la bête.', 3], 707: ['Un avion décolle.', 1], 777: ['JACKPOT !', 4], 888: ['Triple chance.', 3], 911: ['Appel d’urgence.', 1], 999: ['Neuf, neuf, neuf.', 2], 1000: ['Mille.', 2], 1234: ['Le pire mot de passe.', 1], 1337: ['Leet.', 3], 2048: ['Les tuiles fusionnent.', 2], 3141: ['Pi, encore.', 2], 9999: ['Le maximum.', 2], 10000: ['Dix mille.', 3], 31415: ['Pi, toujours.', 3], 65536: ['Deux puissance seize.', 3], 123456: ['Sérieusement ?', 1], 112358: ['Fibonacci.', 3] };
+  for (const [n, [d, t]] of Object.entries(NUM)) add('NUM' + n, 'Nombre ' + n + ' : ' + d, R(t, +n));
+  const SECRET = ['ZONE7', 'SECTEUR7', 'BUNKER', 'ANTENNE', 'EMETTEUR', 'RECEPTEUR', 'GRESILLEMENT', 'PARASITES', 'ONDECOURTE', 'ONDELONGUE', 'MORSE', 'SOS', 'MAYDAY', 'ROGER', 'TERMINE', 'ALPHA', 'BRAVO', 'CHARLIE', 'DELTA', 'ECHO', 'FOXTROT', 'GOLF', 'HOTEL', 'INDIA', 'JULIETT', 'KILO', 'LIMA', 'MIKE', 'NOVEMBER', 'OSCAR', 'PAPA', 'QUEBEC', 'ROMEO', 'SIERRA', 'TANGO', 'UNIFORM', 'VICTOR', 'WHISKEY', 'XRAY', 'YANKEE', 'ZULU', 'LASTSIGNAL', 'PREMIERSIGNAL', 'SIGNALPERDU', 'SIGNALRETROUVE', 'QUIESTLAMORDU', 'NEFAISCONFIANCEAPERSONNE', 'LAUBEARRIVE', 'LANUITTOMBE', 'ILESTPARMINOUS'];
+  SECRET.forEach((c, i) => add(c, pickI(['Un message capté sur la fréquence de secours.', 'Le code de la Zone 7.', 'Une transmission radio retrouvée.', 'Alphabet radio de l’OTAN.', 'Un mot de passe de l’ancien bunker.'], c.length + i), R(['LASTSIGNAL', 'QUIESTLAMORDU', 'NEFAISCONFIANCEAPERSONNE', 'SIGNALRETROUVE', 'ILESTPARMINOUS'].includes(c) ? 4 : ['ZONE7', 'BUNKER', 'MORSE', 'SOS', 'MAYDAY'].includes(c) ? 3 : i % 5 === 0 ? 2 : 1, i + 300)));
+}
+
 /* =====================================================================
    VIE EN 3D : maison qui s'agrandit, lieux à explorer, cueillette, cuisine,
    pêche, bornes d'arcade, défis du jour, sommeil qui raccourcit la nuit
