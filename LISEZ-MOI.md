@@ -129,6 +129,14 @@ Ce que permet l'onglet Admin :
 - **Cadeaux** : offrir un cadeau à tous les joueurs, avec une date limite si tu veux.
 - **Site** : annonce en haut de l'écran d'accueil, message d'accueil, pièces et XP multipliées en fin de partie, soldes dans la boutique, événement offert, message de maintenance, cadeau de bienvenue.
 - **Statistiques** : nombre de comptes, de joueurs connectés, de parties.
+- **Codes en lot** : générer jusqu'à 200 codes à usage unique d'un coup (concours, live), puis supprimer le lot.
+- **Direct** : envoyer un message qui s'affiche en grand chez tous les joueurs connectés, et changer la météo des parties 3D (neige, cendres, lucioles).
+- **Économie** : pièces de départ, gains par partie, victoire et survie, XP, bonus du jour, plafond des activités 3D, prix et jackpot de la roue, prix des agrandissements de maison, durées par défaut des parties.
+- **Prix boutique** : changer le prix de n'importe quel objet (0 = gratuit).
+- **Contenu** : texte d'accueil, noms des bots, récompenses de connexion des 7 jours.
+- **Classement** : retirer un joueur ou tout remettre à zéro.
+- **Journal** : tout ce que l'admin a fait, et qui a utilisé tes codes limités.
+- **Fiche joueur** (onglet Joueurs) : fixer ses pièces, son XP et son niveau de maison, retirer un objet, rendre un code de nouveau utilisable, remettre ses statistiques à zéro.
 
 Sans Upstash, les réglages et les codes admin sont effacés à chaque redémarrage de Render, comme les comptes. Avec Upstash, tout est gardé.
 

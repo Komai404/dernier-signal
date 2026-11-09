@@ -754,6 +754,14 @@ body.thfx-glitch #app { animation: glitchapp 7s steps(1) infinite; } @keyframes 
 @media (prefers-reduced-motion: reduce) { #life-sleep .z, .lf-bob { animation: none; } .lf-bob.bite { animation: none; transform: translateY(10px); } }
 .mtabs .tabdot { color: var(--signal); font-size: 10px; vertical-align: middle; }
 .mtabs .tab-admin { color: var(--signal); }
+.adm-pop-in { width: min(560px, 100%); background: var(--panel); border: 2px solid var(--signal); padding: 24px; display: grid; gap: 12px; justify-items: start; box-shadow: 0 0 60px rgba(230,58,46,.35); }
+.adm-pop-in h2 { margin: 0; font: 900 34px/1 var(--f-display); text-transform: uppercase; }
+.adm-pop-in p { margin: 0; font-size: 19px; color: var(--bone); white-space: pre-wrap; }
+.adm-pop-in.s-alerte { border-color: #ffb84f; box-shadow: 0 0 60px rgba(255,184,79,.35); }
+.adm-pop-in.s-fete { border-color: #ffd36b; box-shadow: 0 0 60px rgba(255,211,107,.4); }
+#adm-pop { z-index: 95; }
+.fiche { border-color: var(--frost); }
+textarea.input { resize: vertical; font-family: inherit; }
 /* annonce du site */
 #site-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 12px; padding: max(8px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); background: var(--bc, #e63a2e); color: #fff; font: 600 15px/1.3 var(--f-body); text-align: center; box-shadow: 0 4px 18px rgba(0,0,0,.35); }
 #site-banner[hidden] { display: none !important; }
@@ -1250,6 +1258,7 @@ function makeServerDB() {
         for (const s of subs.values()) post({ op: 'sub', path: s.path, kind: s.kind, subId: s.id }).catch(() => {});
         readyRes(); helloCbs.forEach(cb => { try { cb(); } catch {} });
       });
+      es.addEventListener('admin', ev => { try { if (typeof adminPopup === 'function') adminPopup(JSON.parse(ev.data)); } catch {} });
       es.addEventListener('rtc', ev => { try { const m = JSON.parse(ev.data); rtcCbs.forEach(cb => cb(m.from, m.data)); } catch {} });
       es.addEventListener('pos', ev => { try { const m = JSON.parse(ev.data); posCbs.forEach(cb => cb(m.all)); } catch {} });
       es.addEventListener('snap', ev => { const m = JSON.parse(ev.data); const s = subs.get(m.id); if (s) { try { s.cb(m.payload); } catch (err) { console.error(err); } } });
@@ -1298,7 +1307,7 @@ function newState(code, hostPid, hostName, mj, keys) {
   return {
     v: 1, code, host: hostPid, hostName, mj: !!mj, hostPub: keys.pub, hostPriv: keys.priv,
     phase: 'lobby', round: 0, endsAt: 0, ev: 1,
-    settings: { roles: { gardien: true, scientifique: true, rodeur: true, reanimateur: true, chasseur: true, constructeur: true, discret: true, empoisonneur: true }, timers: clone(CONFIG.TIMERS), mode: 'classic', map: 'foret', ai: false },
+    settings: { roles: { gardien: true, scientifique: true, rodeur: true, reanimateur: true, chasseur: true, constructeur: true, discret: true, empoisonneur: true }, timers: Object.assign(clone(CONFIG.TIMERS), typeof siteTimers === 'function' ? siteTimers() : {}), mode: 'classic', map: 'foret', ai: false },
     players: {}, order: [], seq: {},
     night: null, votes: {}, chat: [], lair: [], priv: {}, knows: {}, events: {}, notice: {},
     announce: null, revive: null, history: [], winner: null, winReason: '', closeAt: 0, kicked: {}, paused: false, pauseLeft: 0, stats: { conta: [], elim: [] },
@@ -4400,6 +4409,10 @@ function g3RoomDecor(h, room, time) {
 function g3Particles(dt, E, m) {
   const P = G3.parts, w = G3.world;
   if (G.pub && G.pub.settings && EVENTS[G.pub.settings.event] && EVENTS[G.pub.settings.event].fx === 'snow' && P.length < 400) for (let k = 0; k < 3; k++) P.push({ k: 'snow', c: [0.95, 0.97, 1], x: m.x + (Math.random() - 0.5) * 40, y: 8 + Math.random() * 4, z: m.z + (Math.random() - 0.5) * 40, vx: (Math.random() - 0.5) * 0.3, vy: -1.2, vz: (Math.random() - 0.5) * 0.3, life: 0, max: 7, s: 0.05 });
+  const WX = typeof SITE !== 'undefined' && SITE.cfg && SITE.cfg.weather;
+  if (WX === 'snow' && P.length < 400) for (let k = 0; k < 3; k++) P.push({ k: 'snow', c: [0.95, 0.97, 1], x: m.x + (Math.random() - 0.5) * 40, y: 8 + Math.random() * 4, z: m.z + (Math.random() - 0.5) * 40, vx: (Math.random() - 0.5) * 0.3, vy: -1.2, vz: (Math.random() - 0.5) * 0.3, life: 0, max: 7, s: 0.05 });
+  if (WX === 'ash' && P.length < 400) for (let k = 0; k < 2; k++) P.push({ k: 'snow', c: [0.42, 0.4, 0.39], x: m.x + (Math.random() - 0.5) * 40, y: 8 + Math.random() * 4, z: m.z + (Math.random() - 0.5) * 40, vx: 0.25 + Math.random() * 0.2, vy: -0.55, vz: (Math.random() - 0.5) * 0.3, life: 0, max: 14, s: 0.065 });
+  if (WX === 'fireflies') { let have = 0; for (const p of P) if (p.k === 'fireflies') have++; for (let i = have; i < 70; i++) { const a = Math.random() * 6.28, r = 2 + Math.random() * 24; P.push({ k: 'fireflies', x: m.x + Math.cos(a) * r, y: 0.4 + Math.random() * 2.2, z: m.z + Math.sin(a) * r, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.1, vz: (Math.random() - 0.5) * 0.4, life: 0, max: 5 + Math.random() * 8, s: 0.13, ph: Math.random() * 6.28, c: [0.75, 1, 0.35] }); } }
   for (const em of w.emit) {
     if (em.kind === 'fire') {
       em.acc = (em.acc || 0) + dt * 26 * (em.s || 1);
@@ -6079,6 +6092,32 @@ const addEv = (id, ev, code) => { EVENTS[id] = ev; if (!CODES[code]) CODES[code]
   L.forEach(([c, d, t], i) => add(c, d, t, i + 9000));
 }
 
+/* --- encore des codes : Pokémon de Kanto, chiens, voitures, super-héros, pierres de lune --- */
+{
+  const TH = ['galaxy', 'aurora', 'celestial', 'eclipse', 'universe', 'darkmatter', 'nightking', 'kingdom', 'dreamland', 'rainbow', 'blackgold', 'lunar', 'crimson', 'ice', 'cyber', 'neon', 'toxic', 'purplesky', 'fire', 'moon'];
+  const FR = ['diamond', 'infinity', 'legendary', 'imperial', 'eternal', 'royal', 'moon', 'neon', 'fire', 'gold', 'golda', 'ghost'];
+  const NF = ['rainbow', 'diamond', 'gold', 'glitch', 'ghost', 'fire', 'ice', 'neon', 'violet', 'blood'];
+  const CO = COLLECTIONS.map(c => c[0]); const EM = Object.keys(EMOTES);
+  const pI = (arr, i) => arr[((i % arr.length) + arr.length) % arr.length];
+  const R = (tier, i) => tier === 1 ? ['c:' + (120 + (i * 37) % 200), 'xp:' + (30 + (i * 13) % 50)] : tier === 2 ? ['c:' + (300 + (i * 53) % 300), 'e:' + pI(EM, i * 7), 'xp:100'] : tier === 3 ? ['c:' + (800 + (i * 71) % 700), 'col:' + pI(CO, i * 5), 'th:' + pI(TH, i * 3), 'xp:300'] : ['c:' + (3000 + (i * 97) % 2000), 'col:' + pI(CO, i * 11), 'th:' + pI(TH, i * 7), 'f:' + pI(FR, i), 'n:' + pI(NF, i), 'box', 'box', 'xp:800', 'fx-rain'];
+  const add = (code, desc, tier, i) => { code = code.toUpperCase().normalize('NFD').replace(/[^A-Z0-9]/g, ''); if (code.length >= 2 && !CODES[code]) CODES[code] = [desc, R(tier, i)]; };
+  const W = s => s.split('|');
+  // les 151 Pokémon de Kanto (noms français) : les légendaires et les starters valent plus
+  const KANTO = W('Bulbizarre|Herbizarre|Florizarre|Salameche|Reptincel|Dracaufeu|Carapuce|Carabaffe|Tortank|Chenipan|Chrysacier|Papilusion|Aspicot|Coconfort|Dardargnan|Roucool|Roucoups|Roucarnage|Rattata|Rattatac|Piafabec|Rapasdepic|Abo|Arbok|Pikachu|Raichu|Sabelette|Sablaireau|Nidoran femelle|Nidorina|Nidoqueen|Nidoran male|Nidorino|Nidoking|Melofee|Melodelfe|Goupix|Feunard|Rondoudou|Grodoudou|Nosferapti|Nosferalto|Mystherbe|Ortide|Rafflesia|Paras|Parasect|Mimitoss|Aeromite|Taupiqueur|Triopikeur|Miaouss|Persian|Psykokwak|Akwakwak|Ferosinge|Colossinge|Caninos|Arcanin|Ptitard|Tetarte|Tartard|Abra|Kadabra|Alakazam|Machoc|Machopeur|Mackogneur|Chetiflor|Boustiflor|Empiflor|Tentacool|Tentacruel|Racaillou|Gravalanch|Grolem|Ponyta|Galopa|Ramoloss|Flagadoss|Magneti|Magneton|Canarticho|Doduo|Dodrio|Otaria|Lamantine|Tadmorv|Grotadmorv|Kokiyas|Crustabri|Fantominus|Spectrum|Ectoplasma|Onix|Soporifik|Hypnomade|Krabby|Krabboss|Voltorbe|Electrode|Noeunoeuf|Noadkoko|Osselait|Ossatueur|Kicklee|Tygnon|Excelangue|Smogo|Smogogo|Rhinocorne|Rhinoferos|Leveinard|Saquedeneu|Kangourex|Hypotrempe|Hypocean|Poissirene|Poissoroy|Stari|Staross|Mr Mime|Insecateur|Lippoutou|Elektek|Magmar|Scarabrute|Tauros|Magicarpe|Leviator|Lokhlass|Metamorph|Evoli|Aquali|Voltali|Pyroli|Porygon|Amonita|Amonistar|Kabuto|Kabutops|Ptera|Ronflex|Artikodin|Electhor|Sulfura|Minidraco|Draco|Dracolosse|Mewtwo|Mew');
+  const LEG = new Set(['Artikodin', 'Electhor', 'Sulfura', 'Mewtwo', 'Mew', 'Dracolosse']); const STRONG = new Set(['Dracaufeu', 'Tortank', 'Florizarre', 'Pikachu', 'Leviator', 'Ectoplasma', 'Alakazam', 'Arcanin', 'Lokhlass', 'Ronflex', 'Evoli', 'Ptera', 'Metamorph']);
+  KANTO.forEach((n, i) => add('POKE' + n, 'Pokémon n°' + String(i + 1).padStart(3, '0') + ' : ' + n + (LEG.has(n) ? '. Légendaire !' : '.'), LEG.has(n) ? 4 : STRONG.has(n) ? 3 : i % 5 === 0 ? 2 : 1, i + 11000));
+  add('POKEDEX151', 'Le Pokédex de Kanto est complet… dans ta tête.', 4, 11999);
+  // chiens (cousins du loup)
+  W('Husky|Malamute|Berger allemand|Berger belge|Malinois|Chien loup tchecoslovaque|Akita|Shiba|Samoyede|Golden retriever|Labrador|Border collie|Beagle|Bouledogue|Carlin|Chihuahua|Teckel|Caniche|Dalmatien|Doberman|Rottweiler|Saint-Bernard|Terre-neuve|Bouvier bernois|Corgi|Lévrier|Basset|Cocker|Jack Russell|Yorkshire|Spitz|Chow-chow|Dogue allemand|Pitbull|Staffie|Shar-pei|Bichon|Lhassa apso|Pomeranian|Loup de Saarloos').forEach((n, i) => add('CHIEN' + n, 'Chien : ' + n + '. Un cousin du loup, en plus gentil.', n.includes('loup') || n === 'Husky' || n === 'Malamute' ? 3 : i % 6 === 0 ? 2 : 1, i + 12000));
+  // voitures
+  W('Renault|Peugeot|Citroen|Bugatti|Alpine|Ferrari|Lamborghini|Porsche|Mercedes|BMW|Audi|Volkswagen|Toyota|Honda|Nissan|Mazda|Subaru|Tesla|Ford|Chevrolet|Dodge|Jeep|Mini|Fiat|Maserati|Aston Martin|McLaren|Rolls-Royce|Bentley|Koenigsegg|DeLorean|Twingo|Clio|Supra|Skyline').forEach((n, i) => add('AUTO' + n, 'Voiture : ' + n + '. Vroum.', ['Bugatti', 'Koenigsegg', 'DeLorean', 'Ferrari', 'Lamborghini', 'McLaren'].includes(n) ? 3 : i % 7 === 0 ? 2 : 1, i + 13000));
+  // super-héros et vilains
+  W('Superman|Wonder Woman|Flash|Aquaman|Green Lantern|Cyborg|Robin|Batgirl|Catwoman|Harley Quinn|Poison Ivy|Le Pingouin|Bane|Lex Luthor|Darkseid|Captain America|Thor Odinson|Hulk|Black Widow|Hawkeye|Black Panther|Doctor Strange|Scarlet Witch|Vision|Ant-Man|Captain Marvel|Venom|Carnage|Magneto|Professeur X|Tornade|Cyclope|Jean Grey|Diablo|Daredevil|Punisher|Moon Knight|Silver Surfer|Galactus|Ultron').forEach((n, i) => add('HERO' + n, 'Super-héros ou vilain : ' + n + '.', ['Galactus', 'Darkseid', 'Superman', 'Scarlet Witch'].includes(n) ? 3 : i % 4 === 0 ? 2 : 1, i + 14000));
+  // les phases de la lune et les lunes du système solaire
+  W('Nouvelle lune|Premier croissant|Premier quartier|Gibbeuse croissante|Pleine lune|Gibbeuse decroissante|Dernier quartier|Dernier croissant|Lune bleue|Lune de sang|Super lune|Lune noire').forEach((n, i) => add('PHASE' + n, 'Phase de lune : ' + n + '. La meute lève la tête.', ['Lune de sang', 'Lune bleue', 'Lune noire'].includes(n) ? 4 : i % 3 === 0 ? 2 : 1, i + 15000));
+  W('Phobos|Deimos|Io|Europe|Ganymede|Callisto|Titan|Encelade|Mimas|Rhea|Japet|Triton|Charon|Miranda|Oberon|Titania').forEach((n, i) => add('LUNE' + n, 'Une lune lointaine : ' + n + '.', n === 'Titan' || n === 'Europe' ? 3 : 1, i + 16000));
+}
+
 /* =====================================================================
    VIE EN 3D : maison qui s'agrandit, lieux à explorer, cueillette, cuisine,
    pêche, bornes d'arcade, défis du jour, sommeil qui raccourcit la nuit
@@ -6102,7 +6141,7 @@ const CHALL = {
   cueillir: ['Cueillir 8 ingrédients', 8], pecher: ['Pêcher 3 poissons', 3], cuisiner: ['Cuisiner 2 plats', 2], manger: ['Manger un plat', 1], parcours: ['Finir le parcours', 1],
   arcade: ['Faire 15 points au Coureur', 15], serpent: ['Atteindre une longueur de 12 au Serpent', 12], signal: ['Trouver 3 signaux cachés', 3], voeu: ['Faire un vœu au puits', 1], dormir: ['Dormir une nuit entière', 1], explorer: ['Visiter les 4 lieux', 4],
 };
-const LIFE_CAP = 400; // pièces maximum par jour grâce aux activités (hors défis)
+let LIFE_CAP = 400; // pièces maximum par jour grâce aux activités (hors défis)
 Object.assign(TITLES, { chatelain: 'Châtelain', cuisinier: 'Chef cuisinier', pecheur: 'Pêcheur', explorateur: 'Explorateur', coureur: 'Coureur des bois' });
 Object.assign(BADGES, { manoir: ['⌂', '#d8a92f', 'Manoir'], poele: ['♨', '#ff9b6b', 'Cuisinier'], hamecon: ['⚓', '#6aa8d8', 'Pêcheur'] });
 Object.assign(CODES, {
@@ -6702,10 +6741,11 @@ const _priceOfBase = priceOf; priceOf = id => { const p = _priceOfBase(id); cons
 document.addEventListener('submit', async ev => {
   const f = ev.target; if (!f.dataset || !f.dataset.code) return;
   const c = SITE.cfg; const raw = ($('#code-in') || {}).value || ''; const code = String(raw).toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (!c || !code || !(c.codes || []).length || !(window.crypto && crypto.subtle)) return;
+  if (!c || !code || !(window.crypto && crypto.subtle) || (CODES[code] && !(c.codes || []).length)) return;
   ev.preventDefault(); ev.stopImmediatePropagation();
   const h = await siteHash(code);
-  if (!c.codes.includes(h)) { const r = redeem(code); G.codeMsg = r.msg; toast(r.msg, !r.ok); if (r.page && pf().pages[r.page]) { G.metaTab = 'archives'; G.metaPage = r.page; } metaRender(); if (r.cheat) G.metaTab = 'codes'; return; }
+  if (!SITE.cfg.codes.includes(h) && !CODES[code]) await siteLoad(); // un code tout juste créé par l'admin
+  if (!SITE.cfg.codes.includes(h)) { const r = redeem(code); G.codeMsg = r.msg; toast(r.msg, !r.ok); if (r.page && pf().pages[r.page]) { G.metaTab = 'archives'; G.metaPage = r.page; } metaRender(); if (r.cheat) G.metaTab = 'codes'; return; }
   const P_ = pf(); const say = (msg, bad) => { G.codeMsg = msg; toast(msg, bad); metaRender(); };
   if (P_.codes[code]) return say('Tu as déjà utilisé ce code.', true);
   try {
@@ -6787,7 +6827,7 @@ const fmtDT = t => new Date(t).toLocaleString('fr-FR', { day: 'numeric', month: 
 function adminHTML() {
   if (!isAdmin()) return '<p class="dim">Réservé à l’administrateur.</p>';
   if (!ADM.cfg && !ADM.busy) { admRun('cfg'); return '<p class="dim">Chargement du panneau admin…</p>'; }
-  const TABS = [['codes', 'Codes'], ['edit', ADM.edit ? 'Modifier' : 'Ajouter un code'], ['joueurs', 'Joueurs'], ['cadeaux', 'Cadeaux'], ['site', 'Site'], ['stats', 'Statistiques']];
+  const TABS = [['codes', 'Codes'], ['edit', ADM.edit ? 'Modifier' : 'Ajouter un code'], ['generateur', 'Codes en lot'], ['joueurs', 'Joueurs'], ['cadeaux', 'Cadeaux'], ['direct', 'Direct'], ['site', 'Site'], ['eco', 'Économie'], ['prix', 'Prix boutique'], ['contenu', 'Contenu'], ['classement', 'Classement'], ['journal', 'Journal'], ['stats', 'Statistiques']];
   let h = '<div class="adm"><div class="adm-head"><b>Panneau administrateur</b><span class="dim">Tout ce que tu changes ici s’applique à tous les joueurs du site en moins de 2 minutes.</span></div>'
     + '<div class="rtabs subtabs" role="tablist">' + TABS.map(([k, l]) => '<button role="tab" data-a="adm-tab" data-t="' + k + '" aria-selected="' + (k === ADM.tab) + '">' + e(l) + '</button>').join('') + '</div>';
   const C = ADM.cfg;
@@ -6816,10 +6856,11 @@ function adminHTML() {
   if (ADM.tab === 'joueurs') {
     h += '<form class="row adm-row" data-adm="find"><input class="input grow" id="adm-pq" placeholder="Pseudo (laisse vide pour tout voir)" value="' + e(ADM.pq) + '"><button class="btn frost small">Chercher</button></form>';
     if (ADM.target) h += '<div class="adm-box"><b>Donner à ' + e(ADM.target) + '</b><div class="field"><label for="adm-gmsg">Message</label><input class="input" id="adm-gmsg" maxlength="200" placeholder="Un cadeau de l’administrateur !"></div>' + rbHTML('give', 'Cadeau') + '<div class="row"><button class="btn red small" data-a="adm-give">Envoyer le cadeau</button><button class="btn ghost small" data-a="adm-target" data-n="">Annuler</button></div><p class="dim">Le joueur le reçoit à sa prochaine connexion (ou dans les 2 minutes s’il est en ligne).</p></div>';
+    if (ADM.fiche) h += ficheHTML(ADM.fiche);
     if (!ADM.players) h += '<p class="dim">Lance une recherche pour voir les comptes.</p>';
     else h += '<p class="dim">' + ADM.players.length + ' compte' + (ADM.players.length > 1 ? 's' : '') + (ADM.players.length >= 300 ? ' (300 premiers)' : '') + '</p><div class="adm-list">' + ADM.players.map(p => '<div class="adm-item' + (p.banned ? ' off' : '') + '"><div class="grow"><b>' + e(p.name) + '</b>' + (p.admin ? ' <span class="tag frost">admin</span>' : '') + (p.banned ? ' <span class="tag">suspendu</span>' : '') + '<div class="adm-meta">◉ ' + fmtCoins(p.coins) + ' · ' + fmtCoins(p.xp) + ' XP · ' + p.games + ' parties, ' + p.wins + ' victoires · ' + p.codes + ' codes · maison ' + p.house + (p.gifts ? ' · ' + p.gifts + ' cadeau(x) en attente' : '') + ' · créé le ' + (p.created ? fmtDT(p.created) : '?') + (p.upd ? ' · vu le ' + fmtDT(p.upd) : '') + '</div>'
       + (ADM.pass === p.name ? '<form class="row" data-adm="pass" data-n="' + e(p.name) + '"><input class="input" id="adm-newpass" type="text" minlength="6" placeholder="Nouveau mot de passe" required><button class="btn red small">Valider</button></form>' : '') + '</div>'
-      + '<div class="adm-acts"><button class="btn ghost small" data-a="adm-target" data-n="' + e(p.name) + '">Donner</button>' + (p.admin ? '' : '<button class="btn ghost small" data-a="adm-ban" data-n="' + e(p.name) + '" data-v="' + (p.banned ? 0 : 1) + '">' + (p.banned ? 'Réactiver' : 'Suspendre') + '</button><button class="btn ghost small" data-a="adm-pass" data-n="' + e(p.name) + '">Mot de passe</button>' + (ADM.del === '@' + p.name ? '<button class="btn red small" data-a="adm-pdel" data-n="' + e(p.name) + '">Confirmer</button>' : '<button class="btn ghost small" data-a="adm-pdel?" data-n="' + e(p.name) + '">Supprimer</button>')) + '</div></div>').join('') + '</div>';
+      + '<div class="adm-acts"><button class="btn frost small" data-a="adm-fiche" data-n="' + e(p.name) + '">Fiche</button><button class="btn ghost small" data-a="adm-target" data-n="' + e(p.name) + '">Donner</button>' + (p.admin ? '' : '<button class="btn ghost small" data-a="adm-ban" data-n="' + e(p.name) + '" data-v="' + (p.banned ? 0 : 1) + '">' + (p.banned ? 'Réactiver' : 'Suspendre') + '</button><button class="btn ghost small" data-a="adm-pass" data-n="' + e(p.name) + '">Mot de passe</button>' + (ADM.del === '@' + p.name ? '<button class="btn red small" data-a="adm-pdel" data-n="' + e(p.name) + '">Confirmer</button>' : '<button class="btn ghost small" data-a="adm-pdel?" data-n="' + e(p.name) + '">Supprimer</button>')) + '</div></div>').join('') + '</div>';
   }
   if (ADM.tab === 'cadeaux') {
     h += '<div class="adm-box"><b>Offrir un cadeau à tous les joueurs</b><div class="adm-grid"><div class="field"><label for="adm-amsg">Message</label><input class="input" id="adm-amsg" maxlength="200" placeholder="Merci d’être là !"></div><div class="field"><label for="adm-auntil">Réclamable jusqu’au (facultatif)</label><input class="input" id="adm-auntil" type="datetime-local"></div></div>' + rbHTML('all', 'Cadeau') + '<button class="btn red small" data-a="adm-giftall">Offrir à tout le monde</button></div>';
@@ -6837,6 +6878,7 @@ function adminHTML() {
       + '<div class="field wide"><label for="adm-maint">Maintenance : message en rouge pour tout le monde (vide = désactivée)</label><input class="input" id="adm-maint" maxlength="200" value="' + e(C.maint || '') + '"></div></div>'
       + rbHTML('welcome', 'Cadeau de bienvenue (une fois par compte)') + '<button class="btn red">Enregistrer les réglages</button></form>';
   }
+  h += adminMoreHTML();
   if (ADM.tab === 'stats') {
     if (!ADM.stats && !ADM.busy) admReq('stats').then(r => { ADM.stats = r; metaRender(); }).catch(err => toast(err.message, true));
     const S2 = ADM.stats; h += S2 ? '<div class="adm-stats">' + [['Comptes', S2.players], ['Connectés en ce moment', S2.online], ['Parties en mémoire', S2.games], ['Codes du jeu', fmtCoins(Object.keys(CODES).length)], ['Tes codes', S2.codes], ['Codes retirés', S2.off]].map(([l, v]) => '<div><span class="eyebrow">' + l + '</span><b>' + v + '</b></div>').join('') + '</div><p class="dim">' + (S2.persistent ? 'Stockage permanent (Upstash) actif.' : 'Stockage temporaire : configure Upstash pour garder les comptes et les réglages.') + '</p><button class="btn ghost small" data-a="adm-restat">Actualiser</button>' : '<p class="dim">Chargement…</p>';
@@ -6902,7 +6944,7 @@ const WHEEL = [ // [libellé, récompense, poids, couleur]
   ['50 pièces', ['c:50'], 22, '#2a3038'], ['150 pièces', ['c:150'], 18, '#3a2a2a'], ['300 pièces', ['c:300'], 12, '#2a3830'], ['200 XP', ['xp:200'], 14, '#2a2f40'],
   ['Coffre', ['box'], 10, '#40301e'], ['Panier', ['ing:champignon:2', 'ing:baie:2', 'ing:herbe:2', 'ing:poisson:2'], 12, '#2e3a24'], ['Gains ×2', ['dbl:2'], 9, '#2e2440'], ['JACKPOT 3 000', ['c:3000', 'fx-rain'], 3, '#5a1a14'],
 ];
-const WHEEL_PRICE = 150;
+let WHEEL_PRICE = 150;
 const ACH = [ // [id, nom, description, test(P, L), récompenses]
   ['g1', 'Premier signal', 'Jouer 1 partie', P => P.stats.games >= 1, ['c:100']], ['g10', 'Habitué', 'Jouer 10 parties', P => P.stats.games >= 10, ['c:300']], ['g50', 'Vétéran', 'Jouer 50 parties', P => P.stats.games >= 50, ['c:1000', 'box']], ['g100', 'Pilier de la Zone', 'Jouer 100 parties', P => P.stats.games >= 100, ['c:2500', 't:pilier']], ['g500', 'Légende vivante', 'Jouer 500 parties', P => P.stats.games >= 500, ['c:10000', 't:legendevivante', 'f:legendary']],
   ['w1', 'Première victoire', 'Gagner 1 partie', P => P.stats.wins >= 1, ['c:150']], ['w10', 'Gagnant', 'Gagner 10 parties', P => P.stats.wins >= 10, ['c:500']], ['w50', 'Champion', 'Gagner 50 parties', P => P.stats.wins >= 50, ['c:2000', 'box']], ['w100', 'Invaincu', 'Gagner 100 parties', P => P.stats.wins >= 100, ['c:5000', 't:invaincu']],
@@ -6967,6 +7009,141 @@ document.addEventListener('click', ev => {
 });
 // petit rappel : un point rouge sur l'onglet Bonus quand quelque chose t'attend
 function bonusPending() { const P_ = bonusState(); if (loginCanClaim() || P_.wheel !== dayKey()) return true; const L = typeof lifeP === 'function' ? lifeP() : { stats: {} }; return ACH.some(a => { if (P_.ach[a[0]]) return false; try { return a[3](P_, L); } catch { return false; } }); }
+
+ADM.rb.gen = [];
+/* =====================================================================
+   ADMIN, SUITE : économie, prix, contenu, direct, codes en lot, classement, journal, fiche joueur
+   ===================================================================== */
+TITLES.createur = 'Créateur du jeu'; BADGES.createur = ['♛', '#ffd36b', 'Créateur'];
+const SITE_BASE = { eco: Object.assign({}, ECO), houses: HOUSE.map(h => h && h[1]), login: LOGIN_REW.map(x => x.slice()), bots: BOT_NAMES.slice(), wheel: WHEEL[WHEEL.length - 1][1].slice(), wheelLab: WHEEL[WHEEL.length - 1][0], lede: null };
+function siteTimers() { return (SITE.cfg && SITE.cfg.timers) || {}; }
+const _siteApplyBase = siteApply;
+siteApply = function () {
+  _siteApplyBase(); const c = SITE.cfg; if (!c) return;
+  Object.assign(ECO, SITE_BASE.eco, c.eco || {});
+  for (let k = 1; k <= 6; k++) HOUSE[k][1] = (c.houses && c.houses[k] != null) ? c.houses[k] : SITE_BASE.houses[k];
+  LIFE_CAP = c.lifeCap > 0 ? c.lifeCap : 400;
+  WHEEL_PRICE = c.wheel && c.wheel.price != null ? c.wheel.price : 150;
+  const jp = c.wheel && c.wheel.jackpot; const J = WHEEL[WHEEL.length - 1]; J[1] = jp ? ['c:' + jp, 'fx-rain'] : SITE_BASE.wheel.slice(); J[0] = jp ? 'JACKPOT ' + fmtCoins(jp) : SITE_BASE.wheelLab;
+  for (let i = 0; i < 7; i++) LOGIN_REW[i] = (c.login && c.login[i] && c.login[i].length) ? c.login[i].slice() : SITE_BASE.login[i].slice();
+  const bots = (c.bots || []).length >= 4 ? c.bots : SITE_BASE.bots; BOT_NAMES.splice(0, BOT_NAMES.length, ...bots);
+  const lede = $('#scr-home .lede'); if (lede) { if (SITE_BASE.lede == null) SITE_BASE.lede = lede.innerHTML; if (c.lede) lede.textContent = c.lede; else lede.innerHTML = SITE_BASE.lede; }
+  if (isAdmin() && !owns('t:createur')) { const P_ = pf(); P_.inv['t:createur'] = 1; P_.inv['b:createur'] = 1; pfSave(); toast('Titre [Créateur du jeu] et badge ♛ ajoutés à ton casier.'); }
+};
+priceOf = id => { const o = SITE.cfg && SITE.cfg.prices && SITE.cfg.prices[id]; const p = o != null ? o : _priceOfBase(id); const s = SITE.cfg && SITE.cfg.sale; return s > 0 && p > 0 ? Math.max(1, Math.round(p * (100 - s) / 100)) : p; };
+/* récompenses spéciales que seul l'admin envoie (fiche joueur) */
+const _grantAdmBase = grant;
+grant = function (tok, quiet) {
+  const P_ = pf(); const i = tok.indexOf(':'); const k = i < 0 ? tok : tok.slice(0, i), v = i < 0 ? '' : tok.slice(i + 1);
+  if (k === 'setc') { P_.coins = Math.max(0, Math.round(+v || 0)); return 'Pièces fixées à ' + fmtCoins(P_.coins); }
+  if (k === 'setxp') { P_.xp = Math.max(0, Math.round(+v || 0)); return 'XP fixée à ' + fmtCoins(P_.xp) + ' (niveau ' + level() + ')'; }
+  if (k === 'sethouse') { P_.house = Math.max(1, Math.min(6, Math.round(+v || 1))); if (typeof houseRebuild === 'function') houseRebuild(); return 'Maison au niveau ' + P_.house; }
+  if (k === 'take') { if (!P_.inv[v]) return ''; delete P_.inv[v]; for (const [ek, ev] of Object.entries(P_.eq)) if (typeof ev === 'string' && v.endsWith(':' + ev) && ['title', 'badge', 'badge2', 'frame', 'nameFx', 'theme'].includes(ek)) P_.eq[ek] = { title: 'nouveau', frame: 'none', nameFx: 'none', theme: 'base' }[ek] || ''; return 'Retiré : ' + ((itemInfo(v) || {}).name || v); }
+  if (k === 'uncode') { delete P_.codes[v]; return 'Le code ' + v + ' est de nouveau utilisable'; }
+  if (k === 'resetstats') { P_.stats = { games: 0, wins: 0, losses: 0, streak: 0, best: 0, survived: 0, byRole: {}, since: Date.now() }; return 'Statistiques remises à zéro'; }
+  return _grantAdmBase(tok, quiet);
+};
+/* message en direct de l'admin (tous les joueurs connectés au site) */
+function adminPopup(m) {
+  let el = $('#adm-pop'); if (!el) { document.body.insertAdjacentHTML('beforeend', '<div id="adm-pop" class="modal" hidden><div class="adm-pop-in" role="alertdialog" aria-modal="true" aria-labelledby="adm-pop-t"></div></div>'); el = $('#adm-pop'); }
+  const ttl = { info: 'Message de l’administrateur', alerte: 'Alerte de l’administrateur', fete: 'C’est la fête !' }[m.style] || 'Message de l’administrateur';
+  el.querySelector('.adm-pop-in').className = 'adm-pop-in s-' + (m.style || 'info');
+  setHTML(el.querySelector('.adm-pop-in'), '<span class="eyebrow">📡 Transmission prioritaire</span><h2 id="adm-pop-t">' + e(ttl) + '</h2><p>' + e(m.msg) + '</p><button class="btn red" data-a="adm-pop-ok">Compris</button>');
+  el.hidden = false; if (m.style === 'fete' && typeof fireworksFx === 'function') fireworksFx(); if (typeof lifeBeep === 'function') { lifeBeep(660); lifeBeep(880, 0.15, 'square', 0.15); }
+  if (document.pointerLockElement) document.exitPointerLock();
+}
+document.addEventListener('click', ev => { if (ev.target.closest('[data-a="adm-pop-ok"]')) $('#adm-pop').hidden = true; });
+
+/* --- panneaux supplémentaires --- */
+function adminMoreHTML() {
+  const C = ADM.cfg; const T = ADM.tab; let h = '';
+  if (T === 'direct') {
+    h += '<div class="adm-box"><b>Message instantané</b><p class="dim">Il s’affiche tout de suite en grand chez tous les joueurs connectés au site, même en pleine partie.</p><div class="field"><label for="adm-bmsg">Message</label><textarea class="input" id="adm-bmsg" rows="3" maxlength="300" placeholder="Le serveur redémarre dans 5 minutes !"></textarea></div><div class="row"><select class="input" id="adm-bstyle" aria-label="Style"><option value="info">Information</option><option value="alerte">Alerte</option><option value="fete">Fête (feu d’artifice)</option></select><button class="btn red small" data-a="adm-bcast">Envoyer à tout le monde</button></div></div>';
+    h += '<div class="adm-box"><b>Météo en 3D</b><p class="dim">Change le ciel pour toutes les parties en 3D.</p><div class="row"><select class="input" id="adm-weather">' + [['', 'Normale'], ['snow', 'Neige'], ['ash', 'Cendres'], ['fireflies', 'Lucioles']].map(([v, l]) => '<option value="' + v + '"' + ((C.weather || '') === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select><button class="btn frost small" data-a="adm-weather">Appliquer</button></div></div>';
+  }
+  if (T === 'eco') {
+    const E = C.eco || {}; const B = SITE_BASE.eco; const fld = (k, l) => '<div class="field"><label for="adm-e-' + k + '">' + l + '</label><input class="input" id="adm-e-' + k + '" type="number" min="0" value="' + (E[k] != null ? E[k] : '') + '" placeholder="' + B[k] + ' (par défaut)"></div>';
+    const TM = C.timers || {}; const tf = (k, l, d) => '<div class="field"><label for="adm-t-' + k + '">' + l + ' (secondes)</label><input class="input" id="adm-t-' + k + '" type="number" min="5" max="1800" value="' + (TM[k] || '') + '" placeholder="' + d + ' (par défaut)"></div>';
+    h += '<form class="adm-form" data-adm="eco"><b>Gains</b><div class="adm-grid">' + fld('START', 'Pièces d’un nouveau joueur') + fld('GAME', 'Pièces par partie jouée') + fld('WIN', 'Pièces en plus pour une victoire') + fld('SURVIVE', 'Pièces en plus si on survit') + fld('DAILY', 'Bonus du jour') + fld('XP_GAME', 'XP par partie') + fld('XP_WIN', 'XP en plus pour une victoire') + '<div class="field"><label for="adm-lcap">Pièces max par jour grâce aux activités 3D</label><input class="input" id="adm-lcap" type="number" min="0" value="' + (C.lifeCap || '') + '" placeholder="400 (par défaut)"></div></div>'
+      + '<b>Roue de la fortune</b><div class="adm-grid"><div class="field"><label for="adm-wp">Prix d’un tour payant</label><input class="input" id="adm-wp" type="number" min="0" value="' + ((C.wheel || {}).price != null ? C.wheel.price : '') + '" placeholder="150"></div><div class="field"><label for="adm-wj">Jackpot (pièces)</label><input class="input" id="adm-wj" type="number" min="0" value="' + ((C.wheel || {}).jackpot || '') + '" placeholder="3000"></div></div>'
+      + '<b>Prix des agrandissements de maison</b><div class="adm-grid">' + [2, 3, 4, 5, 6].map(k => '<div class="field"><label for="adm-h' + k + '">Niveau ' + k + ' : ' + e(HOUSE[k][0]) + '</label><input class="input" id="adm-h' + k + '" type="number" min="0" value="' + ((C.houses || [])[k] != null ? C.houses[k] : '') + '" placeholder="' + SITE_BASE.houses[k] + '"></div>').join('') + '</div>'
+      + '<b>Durées par défaut des nouvelles parties</b><div class="adm-grid">' + tf('reveal', 'Découverte du rôle', CONFIG.TIMERS.reveal) + tf('night', 'Nuit', CONFIG.TIMERS.night) + tf('day', 'Jour', CONFIG.TIMERS.day) + tf('vote', 'Vote', CONFIG.TIMERS.vote) + tf('result', 'Résultat', CONFIG.TIMERS.result) + '</div>'
+      + '<p class="dim">Laisse une case vide pour garder la valeur par défaut.</p><button class="btn red">Enregistrer l’économie</button></form>';
+  }
+  if (T === 'prix') {
+    const P2 = C.prices || {}; const type = ADM.rbType.prix || 't';
+    h += '<div class="adm-box"><b>Changer le prix d’un objet</b><p class="dim">0 = gratuit. Les soldes de l’onglet Site s’appliquent en plus.</p><div class="rb-add"><select class="input" id="adm-pt" data-a="adm-rb-type" data-k="prix">' + RB_TYPES.filter(t => ['t', 'b', 'e', 'th', 'f', 'n', 'fur', 'h', 'a', 'bk', 'fx'].includes(t[0])).map(([k, l]) => '<option value="' + k + '"' + (k === type ? ' selected' : '') + '>' + e(l) + '</option>').join('') + '</select><select class="input" id="adm-pi">' + rbOptions(type).map(([v, l]) => { const id = type + ':' + v; return '<option value="' + e(id) + '">' + e(l) + ' — ' + fmtCoins(_priceOfBase(id)) + '</option>'; }).join('') + '</select><input class="input" id="adm-pp" type="number" min="0" placeholder="Nouveau prix"><button class="btn red small" data-a="adm-price">Fixer</button></div></div>';
+    const ids = Object.keys(P2); h += '<h3>Prix modifiés <small>' + ids.length + '</small></h3>' + (ids.length ? '<div class="adm-list">' + ids.map(id => '<div class="adm-item"><div class="grow"><b>' + e(rbLabel(id)) + '</b><div class="adm-meta">' + fmtCoins(_priceOfBase(id)) + ' → ' + (P2[id] === 0 ? 'gratuit' : fmtCoins(P2[id])) + '</div></div><div class="adm-acts"><button class="btn ghost small" data-a="adm-unprice" data-id="' + e(id) + '">Prix normal</button></div></div>').join('') + '</div>' : '<p class="dim">Aucun.</p>');
+  }
+  if (T === 'contenu') {
+    if (!ADM.rb.loginLoaded) { for (let i = 0; i < 7; i++) ADM.rb['login' + i] = ((C.login || [])[i] && C.login[i].length ? C.login[i] : SITE_BASE.login[i]).slice(); ADM.rb.loginLoaded = true; }
+    h += '<form class="adm-form" data-adm="contenu"><div class="field"><label for="adm-lede">Texte de présentation sur l’accueil (vide = texte d’origine)</label><textarea class="input" id="adm-lede" rows="3" maxlength="400">' + e(C.lede || '') + '</textarea></div>'
+      + '<div class="field"><label for="adm-bots">Noms des bots (un par ligne, au moins 4, vide = noms d’origine)</label><textarea class="input" id="adm-bots" rows="4">' + e((C.bots || []).join('\n')) + '</textarea></div>'
+      + '<b>Récompenses de connexion (7 jours)</b>' + [0, 1, 2, 3, 4, 5, 6].map(i => rbHTML('login' + i, 'Jour ' + (i + 1))).join('') + '<button class="btn red">Enregistrer le contenu</button></form>';
+  }
+  if (T === 'generateur') {
+    h += '<div class="adm-box"><b>Créer des codes à usage unique</b><p class="dim">Parfait pour un concours ou un live : chaque code ne marche qu’une fois.</p><div class="adm-grid"><div class="field"><label for="adm-gp">Début du code</label><input class="input mono" id="adm-gp" maxlength="20" placeholder="LIVE"></div><div class="field"><label for="adm-gn">Combien de codes</label><input class="input" id="adm-gn" type="number" min="1" max="200" value="10"></div><div class="field"><label for="adm-gm">Utilisations par code</label><input class="input" id="adm-gm" type="number" min="1" value="1"></div><div class="field"><label for="adm-gt">Valables jusqu’au (facultatif)</label><input class="input" id="adm-gt" type="datetime-local"></div><div class="field wide"><label for="adm-gd">Message</label><input class="input" id="adm-gd" maxlength="200" placeholder="Bravo, tu as gagné le concours !"></div></div>' + rbHTML('gen', 'Récompenses de chaque code') + '<button class="btn red small" data-a="adm-gen">Générer les codes</button>'
+      + (ADM.genOut ? '<div class="field"><label for="adm-gout">Codes créés (' + ADM.genOut.length + ') : copie-les</label><textarea class="input mono" id="adm-gout" rows="6" readonly>' + e(ADM.genOut.join('\n')) + '</textarea></div>' : '') + '</div>';
+    const batches = {}; for (const [c, v] of Object.entries(C.codes || {})) if (v.batch) { const b = batches[v.batch] = batches[v.batch] || { n: 0, used: 0 }; b.n++; if ((v.uses || 0) >= (v.max || 1)) b.used++; }
+    h += '<h3>Lots de codes <small>' + Object.keys(batches).length + '</small></h3>' + (Object.keys(batches).length ? '<div class="adm-list">' + Object.entries(batches).map(([b, x]) => '<div class="adm-item"><div class="grow"><b class="mono">' + e(b) + '…</b><div class="adm-meta">' + x.n + ' codes · ' + x.used + ' épuisés</div></div><div class="adm-acts"><button class="btn ghost small" data-a="adm-batchdel" data-b="' + e(b) + '">Supprimer le lot</button></div></div>').join('') + '</div>' : '<p class="dim">Aucun lot.</p>');
+  }
+  if (T === 'classement') {
+    if (!ADM.lb && !ADM.busy) admReq('lb').then(r => { ADM.lb = r; metaRender(); }).catch(err => toast(err.message, true));
+    h += '<div class="row"><button class="btn ghost small" data-a="adm-lbload">Actualiser</button>' + (ADM.del === 'lb' ? '<button class="btn red small" data-a="adm-lbreset">Confirmer : tout effacer</button>' : '<button class="btn ghost small" data-a="adm-lbreset?">Remettre le classement à zéro</button>') + '</div>';
+    h += ADM.lb ? (ADM.lb.length ? '<div class="adm-list">' + ADM.lb.map((r, i) => '<div class="adm-item"><div class="grow"><b>' + (i + 1) + '. ' + e(r.name) + '</b><div class="adm-meta">' + r.wins + ' victoires · ' + r.games + ' parties · série ' + r.best + ' · niv. ' + r.lvl + '</div></div><div class="adm-acts"><button class="btn ghost small" data-a="adm-lbdel" data-id="' + e(r.id) + '">Retirer</button></div></div>').join('') + '</div>' : '<p class="dim">Classement vide.</p>') : '<p class="dim">Chargement…</p>';
+  }
+  if (T === 'journal') {
+    const L = C.log || []; h += '<div class="row"><button class="btn ghost small" data-a="adm-logload">Actualiser</button><button class="btn ghost small" data-a="adm-logclear">Vider le journal</button></div><div class="adm-list">' + (L.length ? L.map(x => '<div class="adm-item"><div class="grow"><span class="adm-meta">' + fmtDT(x.t) + '</span> ' + e(x.txt) + '</div></div>').join('') : '<p class="dim">Rien pour l’instant.</p>') + '</div>';
+  }
+  return h;
+}
+function ficheHTML(F) {
+  const st = F.stats || {};
+  return '<div class="adm-box fiche"><div class="row"><b>Fiche de ' + e(F.name) + '</b><span class="grow"></span><button class="btn ghost small" data-a="adm-fiche-x">Fermer la fiche</button></div>'
+    + '<div class="adm-meta">' + (F.banned ? 'SUSPENDU · ' : '') + st.games + ' parties · ' + st.wins + ' victoires · série max ' + (st.best || 0) + ' · survécu ' + (st.survived || 0) + ' · créé le ' + (F.created ? fmtDT(F.created) : '?') + ' · ' + F.gifts.length + ' cadeau(x) en attente</div>'
+    + '<form class="adm-grid" data-adm="fiche"><div class="field"><label for="adm-fc">Pièces</label><input class="input" id="adm-fc" type="number" min="0" value="' + F.coins + '"></div><div class="field"><label for="adm-fx">XP</label><input class="input" id="adm-fx" type="number" min="0" value="' + F.xp + '"></div><div class="field"><label for="adm-fh">Niveau de maison</label><select class="input" id="adm-fh">' + [1, 2, 3, 4, 5, 6].map(n => '<option' + (n === F.house ? ' selected' : '') + '>' + n + '</option>').join('') + '</select></div><button class="btn red small">Appliquer</button></form>'
+    + '<div class="row"><button class="btn ghost small" data-a="adm-fstats">Remettre ses statistiques à zéro</button></div>'
+    + '<b>Inventaire <small>' + F.inv.length + '</small></b><div class="rb-chips">' + (F.inv.length ? F.inv.map(id => '<span class="rb-chip">' + e(rbLabel(id)) + '<button type="button" data-a="adm-ftake" data-id="' + e(id) + '" aria-label="Retirer">×</button></span>').join('') : '<span class="dim">Vide.</span>') + '</div>'
+    + '<b>Codes utilisés <small>' + F.codes.length + '</small></b><div class="rb-chips">' + (F.codes.length ? F.codes.slice(0, 300).map(c => '<span class="rb-chip mono">' + e(c) + '<button type="button" data-a="adm-funcode" data-c="' + e(c) + '" aria-label="Rendre de nouveau utilisable">×</button></span>').join('') : '<span class="dim">Aucun.</span>') + '</div>'
+    + '<p class="dim">Les changements arrivent chez le joueur à sa prochaine connexion, ou dans les 2 minutes s’il est en ligne. La fiche montre l’état de sa dernière sauvegarde.</p></div>';
+}
+async function ficheLoad(name) { try { ADM.fiche = await admReq('player', { name }); } catch (err) { toast(err.message, true); } metaRender(); }
+const ficheSend = (r, msg) => admRun('give', { name: ADM.fiche.name, r, msg: msg || 'Ton compte a été mis à jour par l’administrateur.' }, 'Envoyé à ' + ADM.fiche.name + '.').then(() => ficheLoad(ADM.fiche.name));
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a^="adm-"]'); if (!el) return; const a = el.dataset.a; const C = ADM.cfg;
+  const cfgSet = (cfg, msg) => admRun('cfgset', { cfg }, msg);
+  if (a === 'adm-bcast') { const msg = $('#adm-bmsg').value.trim(); if (!msg) return toast('Écris un message.', true); admReq('broadcast', { msg, style: $('#adm-bstyle').value }).then(r => { toast('Message envoyé à ' + r.sent + ' connexion' + (r.sent > 1 ? 's' : '') + '.'); $('#adm-bmsg').value = ''; }).catch(err => toast(err.message, true)); }
+  if (a === 'adm-weather') cfgSet({ weather: $('#adm-weather').value }, 'Météo changée.');
+  if (a === 'adm-price') { const id = $('#adm-pi').value, pr = $('#adm-pp').value; if (pr === '') return toast('Indique un prix.', true); cfgSet({ prices: Object.assign({}, C.prices || {}, { [id]: +pr }) }, 'Prix changé : ' + rbLabel(id) + '.'); }
+  if (a === 'adm-unprice') { const P2 = Object.assign({}, C.prices || {}); delete P2[el.dataset.id]; cfgSet({ prices: P2 }, 'Prix normal rétabli.'); }
+  if (a === 'adm-gen') { const pre = $('#adm-gp').value; admReq('codegen', { prefix: pre, n: +$('#adm-gn').value, max: +$('#adm-gm').value || 1, to: dtOut($('#adm-gt').value), d: $('#adm-gd').value, r: ADM.rb.gen }).then(r => { ADM.genOut = r.codes; toast(r.codes.length + ' codes créés.'); return admRun('cfg'); }).catch(err => toast(err.message, true)); }
+  if (a === 'adm-batchdel') admRun('codebatchdel', { batch: el.dataset.b }, 'Lot supprimé.');
+  if (a === 'adm-lbload') { ADM.lb = null; metaRender(); }
+  if (a === 'adm-lbreset?') { ADM.del = 'lb'; metaRender(); }
+  if (a === 'adm-lbreset') { ADM.del = null; admReq('lbreset').then(() => { ADM.lb = null; toast('Classement remis à zéro.'); metaRender(); }).catch(err => toast(err.message, true)); }
+  if (a === 'adm-lbdel') admReq('lbdel', { id: el.dataset.id }).then(() => { ADM.lb = null; metaRender(); }).catch(err => toast(err.message, true));
+  if (a === 'adm-logload') admRun('cfg');
+  if (a === 'adm-logclear') admRun('logclear', {}, 'Journal vidé.');
+  if (a === 'adm-fiche') ficheLoad(el.dataset.n);
+  if (a === 'adm-fiche-x') { ADM.fiche = null; metaRender(); }
+  if (a === 'adm-fstats') ficheSend(['resetstats']);
+  if (a === 'adm-ftake') ficheSend(['take:' + el.dataset.id], 'L’administrateur a retiré un objet de ton casier.');
+  if (a === 'adm-funcode') ficheSend(['uncode:' + el.dataset.c], 'Un code est de nouveau utilisable pour toi.');
+});
+document.addEventListener('change', ev => { if (ev.target.id === 'adm-pt') { ADM.rbType.prix = ev.target.value; metaRender(); } });
+document.addEventListener('submit', ev => {
+  const f = ev.target; if (!f.dataset || !f.dataset.adm) return; const k = f.dataset.adm;
+  if (!['eco', 'contenu', 'fiche'].includes(k)) return; ev.preventDefault(); ev.stopImmediatePropagation();
+  if (k === 'eco') {
+    const eco = {}; for (const key of ['START', 'GAME', 'WIN', 'SURVIVE', 'DAILY', 'XP_GAME', 'XP_WIN']) { const v = $('#adm-e-' + key).value; if (v !== '') eco[key] = +v; }
+    const houses = [null, null]; for (let n = 2; n <= 6; n++) { const v = $('#adm-h' + n).value; houses[n] = v === '' ? null : +v; }
+    const timers = {}; for (const t of ['reveal', 'night', 'day', 'vote', 'result']) { const v = $('#adm-t-' + t).value; if (v !== '') timers[t] = +v; }
+    const wp = $('#adm-wp').value, wj = $('#adm-wj').value;
+    admRun('cfgset', { cfg: { eco, houses, timers, lifeCap: +$('#adm-lcap').value || 0, wheel: { price: wp === '' ? 150 : +wp, jackpot: wj === '' ? 3000 : +wj } } }, 'Économie enregistrée.');
+  }
+  if (k === 'contenu') { const bots = $('#adm-bots').value.split(/[\n,]/).map(x => x.trim()).filter(Boolean); if (bots.length && bots.length < 4) return toast('Il faut au moins 4 noms de bots.', true); admRun('cfgset', { cfg: { lede: $('#adm-lede').value, bots, login: [0, 1, 2, 3, 4, 5, 6].map(i => ADM.rb['login' + i] || []) } }, 'Contenu enregistré.'); }
+  if (k === 'fiche') ficheSend(['setc:' + (+$('#adm-fc').value || 0), 'setxp:' + (+$('#adm-fx').value || 0), 'sethouse:' + $('#adm-fh').value]);
+}, true);
 
 /* =====================================================================
    CHAT VOCAL (WebRTC, de joueur à joueur ; le serveur ne fait que présenter les joueurs)

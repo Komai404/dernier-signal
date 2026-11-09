@@ -172,7 +172,8 @@ const verifierOf = (name, pass) => crypto.pbkdf2Sync(String(pass), 'dernier-sign
 
 /* ---------- réglages du site (modifiables par l'admin) ---------- */
 const CFG_FILE = path.join(DATA_DIR, 'config.json');
-let CFG = { codes: {}, off: {}, banner: null, motd: '', coinMul: 1, xpMul: 1, sale: 0, event: '', maint: '', welcome: [], gifts: [], upd: 0 };
+let CFG = { codes: {}, off: {}, banner: null, motd: '', coinMul: 1, xpMul: 1, sale: 0, event: '', maint: '', welcome: [], gifts: [], eco: {}, prices: {}, timers: {}, bots: [], lede: '', weather: '', login: [], houses: [], wheel: {}, lifeCap: 0, log: [], upd: 0 };
+const admLog = txt => { CFG.log = [{ t: Date.now(), txt: String(txt).slice(0, 200) }, ...(CFG.log || [])].slice(0, 200); clearTimeout(admLog.t); admLog.t = setTimeout(() => cfgSave().catch(() => {}), 3000); };
 async function cfgLoad() { try { const raw = UP_URL ? await upstash(['GET', 'ds:cfg']) : fs.readFileSync(CFG_FILE, 'utf8'); if (raw) CFG = Object.assign(CFG, JSON.parse(raw)); } catch (e) { if (e.code !== 'ENOENT') console.error('réglages', e.message); } }
 async function cfgSave() { CFG.upd = Date.now(); if (UP_URL) await upstash(['SET', 'ds:cfg', JSON.stringify(CFG)]); else { fs.mkdirSync(DATA_DIR, { recursive: true }); fs.writeFileSync(CFG_FILE, JSON.stringify(CFG)); } }
 cfgLoad();
@@ -183,7 +184,7 @@ const num = (v, a, b, d) => { const x = +v; return Number.isFinite(x) ? Math.max
 const CODE_RX = /^[A-Z0-9]{2,40}$/;
 const codeHash = c => crypto.createHash('sha256').update('ds-code:' + c).digest('hex').slice(0, 24);
 // les codes perso restent secrets : le navigateur ne reçoit que leur empreinte, et demande le contenu au serveur quand on tape le bon code
-const publicCfg = () => ({ codes: Object.entries(CFG.codes).filter(([, v]) => v.on !== false).map(([c]) => codeHash(c)), off: CFG.off, banner: CFG.banner, motd: CFG.motd, coinMul: CFG.coinMul, xpMul: CFG.xpMul, sale: CFG.sale, event: CFG.event, maint: CFG.maint, welcome: CFG.welcome, gifts: CFG.gifts, upd: CFG.upd });
+const publicCfg = () => ({ eco: CFG.eco, prices: CFG.prices, timers: CFG.timers, bots: CFG.bots, lede: CFG.lede, weather: CFG.weather, login: CFG.login, houses: CFG.houses, wheel: CFG.wheel, lifeCap: CFG.lifeCap, codes: Object.entries(CFG.codes).filter(([, v]) => v.on !== false).map(([c]) => codeHash(c)), off: CFG.off, banner: CFG.banner, motd: CFG.motd, coinMul: CFG.coinMul, xpMul: CFG.xpMul, sale: CFG.sale, event: CFG.event, maint: CFG.maint, welcome: CFG.welcome, gifts: CFG.gifts, upd: CFG.upd });
 async function allAccounts(q) {
   let keys = UP_URL ? (await upstash(['KEYS', 'acc:*'])).map(k => k.slice(4)) : Object.keys(accLocal);
   if (q) keys = keys.filter(k => k.includes(accKey(q)));
@@ -196,7 +197,8 @@ async function admin(req, res) {
   let b; try { b = await readBody(req); } catch { return json(res, 400, { code: 'invalid_argument' }); }
   const k = accKey(b.user); if (!isAdminK(k)) return json(res, 403, { code: 'not_admin', error: 'Réservé à l’administrateur.' });
   const me = await accGet(k); if (!me || !okToken(me, b.token)) return json(res, 403, { code: 'bad_token', error: 'Session admin expirée : reconnecte-toi.' });
-  const ok = r => json(res, 200, { result: r === undefined ? Object.assign(publicCfg(), { codes: CFG.codes }) : r });
+  const ok = r => json(res, 200, { result: r === undefined ? Object.assign(publicCfg(), { codes: CFG.codes, log: CFG.log }) : r });
+  if (b.op !== 'cfg' && b.op !== 'players' && b.op !== 'stats' && b.op !== 'player' && b.op !== 'lb') admLog(b.op + (b.code ? ' ' + String(b.code).slice(0, 40) : '') + (b.name ? ' → ' + String(b.name).slice(0, 20) : '') + (b.msg ? ' : ' + String(b.msg).slice(0, 80) : ''));
   const code = typeof b.code === 'string' ? b.code.toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
   try {
     switch (b.op) {
@@ -221,11 +223,36 @@ async function admin(req, res) {
         if ('event' in v) CFG.event = /^[a-z0-9_]{0,40}$/.test(v.event || '') ? v.event || '' : '';
         if ('maint' in v) CFG.maint = cleanStr(v.maint, 200);
         if ('welcome' in v) CFG.welcome = cleanToks(v.welcome);
+        if ('eco' in v && v.eco && typeof v.eco === 'object') { const E = {}; for (const [k2, lim] of Object.entries({ START: 100000, GAME: 100000, WIN: 100000, SURVIVE: 100000, DAILY: 100000, XP_GAME: 100000, XP_WIN: 100000 })) if (v.eco[k2] !== '' && v.eco[k2] != null && Number.isFinite(+v.eco[k2])) E[k2] = Math.round(num(v.eco[k2], 0, lim, 0)); CFG.eco = E; }
+        if ('prices' in v && v.prices && typeof v.prices === 'object') { const P2 = {}; for (const [id, pr] of Object.entries(v.prices).slice(0, 500)) if (TOK_RX.test(id) && Number.isFinite(+pr)) P2[id] = Math.round(num(pr, 0, 1e7, 0)); CFG.prices = P2; }
+        if ('timers' in v && v.timers && typeof v.timers === 'object') { const T2 = {}; for (const k2 of ['reveal', 'night', 'day', 'vote', 'result']) if (v.timers[k2] && Number.isFinite(+v.timers[k2])) T2[k2] = Math.round(num(v.timers[k2], 5, 1800, 60)); CFG.timers = T2; }
+        if ('bots' in v) CFG.bots = Array.isArray(v.bots) ? v.bots.map(x => cleanStr(x, 16)).filter(Boolean).slice(0, 60) : [];
+        if ('lede' in v) CFG.lede = cleanStr(v.lede, 400);
+        if ('weather' in v) CFG.weather = ['', 'snow', 'ash', 'fireflies'].includes(v.weather) ? v.weather : '';
+        if ('login' in v) CFG.login = Array.isArray(v.login) ? v.login.slice(0, 7).map(cleanToks) : [];
+        if ('houses' in v) CFG.houses = Array.isArray(v.houses) ? v.houses.slice(0, 7).map(x => x === '' || x == null ? null : Math.round(num(x, 0, 1e7, 0))) : [];
+        if ('wheel' in v && v.wheel && typeof v.wheel === 'object') CFG.wheel = { price: Math.round(num(v.wheel.price, 0, 1e6, 150)), jackpot: Math.round(num(v.wheel.jackpot, 0, 1e7, 3000)) };
+        if ('lifeCap' in v) CFG.lifeCap = Math.round(num(v.lifeCap, 0, 1e7, 0));
         await cfgSave(); return ok();
       }
       case 'giftall': { const r = cleanToks(b.r); if (!r.length) return json(res, 400, { code: 'invalid_argument', error: 'Ajoute au moins une récompense.' }); CFG.gifts = [{ id: crypto.randomBytes(6).toString('base64url'), msg: cleanStr(b.msg, 200) || 'Un cadeau de l’équipe du jeu !', r, until: num(b.until, 0, 9e15, 0), at: Date.now() }, ...CFG.gifts].slice(0, 40); await cfgSave(); return ok(); }
       case 'giftdel': CFG.gifts = CFG.gifts.filter(g => g.id !== b.id); await cfgSave(); return ok();
       case 'players': return ok(await allAccounts(cleanStr(b.q, 16)));
+      case 'broadcast': { const msg = cleanStr(b.msg, 300); if (!msg) return json(res, 400, { code: 'invalid_argument', error: 'Écris un message.' }); const style = ['info', 'alerte', 'fete'].includes(b.style) ? b.style : 'info'; let n = 0; for (const c of conns.values()) { emit(c, 'admin', { msg, style }); n++; } return ok({ sent: n }); }
+      case 'codegen': {
+        const pre = typeof b.prefix === 'string' ? b.prefix.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 20) : ''; const n2 = Math.round(num(b.n, 1, 200, 10)); const r = cleanToks(b.r);
+        if (!r.length) return json(res, 400, { code: 'invalid_argument', error: 'Ajoute au moins une récompense.' });
+        const AL = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; const out = [];
+        while (out.length < n2) { let c = pre; for (let i = 0; i < 6; i++) c += AL[crypto.randomInt(AL.length)]; if (CFG.codes[c]) continue; CFG.codes[c] = { d: cleanStr(b.d, 200) || 'Code à usage unique', r, from: 0, to: num(b.to, 0, 9e15, 0), max: Math.round(num(b.max, 1, 1e6, 1)), uses: 0, on: true, at: Date.now(), batch: pre || 'lot' }; out.push(c); }
+        await cfgSave(); return ok({ codes: out });
+      }
+      case 'codebatchdel': { const pre = String(b.batch || ''); let n2 = 0; for (const [c, v] of Object.entries(CFG.codes)) if (v.batch === pre) { delete CFG.codes[c]; n2++; } await cfgSave(); return ok(); }
+      case 'lb': return ok(Object.entries(board).map(([id, v]) => Object.assign({ id }, v)).sort((a, c) => c.wins - a.wins || c.games - a.games).slice(0, 200));
+      case 'lbdel': delete board[b.id]; dirty = true; return ok(null);
+      case 'lbreset': board = {}; dirty = true; return ok(null);
+      case 'player': { const tk = accKey(b.name); const t = tk && await accGet(tk); if (!t) return json(res, 404, { code: 'unknown_account', error: 'Joueur introuvable.' }); const p = t.prof || {};
+        return ok({ name: t.name, banned: !!t.banned, created: t.created, upd: t.upd, gifts: t.gifts || [], coins: p.coins || 0, xp: p.xp || 0, house: p.house || 1, stats: p.stats || {}, inv: Object.keys(p.inv || {}), codes: Object.keys(p.codes || {}), eq: p.eq || {}, login: p.login || null, ach: Object.keys(p.ach || {}) }); }
+      case 'logclear': CFG.log = []; await cfgSave(); return ok();
       case 'stats': { const n = UP_URL ? (await upstash(['KEYS', 'acc:*'])).length : Object.keys(accLocal).length; return ok({ players: n, online: conns.size, games: Object.keys(owners).length, codes: Object.keys(CFG.codes).length, off: Object.keys(CFG.off).length, persistent: !!UP_URL }); }
     }
     // actions sur un joueur
@@ -252,7 +279,7 @@ async function redeemLimited(req, res) {
   const who = (typeof b.user === 'string' && b.user ? 'u:' + accKey(b.user) : '') || 'ip:' + (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0];
   const seen = redeemSeen.get(code) || new Set(); if (seen.has(who)) return json(res, 409, { code: 'already', error: 'Tu as déjà utilisé ce code.' });
   if ((c.uses || 0) >= c.max) return json(res, 410, { code: 'empty', error: 'Trop tard : ce code a déjà été utilisé ' + c.max + ' fois.' });
-  c.uses = (c.uses || 0) + 1; seen.add(who); redeemSeen.set(code, seen); await cfgSave();
+  c.uses = (c.uses || 0) + 1; seen.add(who); redeemSeen.set(code, seen); admLog('code ' + code + ' utilisé par ' + who.replace(/^(u|ip):/, '') + ' (' + c.uses + '/' + c.max + ')'); await cfgSave();
   return give(c.max - c.uses);
 }
 function tooMany(ip) { const t = Date.now(); const x = (tries.get(ip) || []).filter(z => t - z < 10 * 60e3); x.push(t); tries.set(ip, x); return x.length > 20; }
