@@ -5724,6 +5724,36 @@ const MORE_EVENT_CODES = {
 };
 for (const [code, ev] of Object.entries(MORE_EVENT_CODES)) if (!CODES[code]) CODES[code] = ['Événement : ' + EVENTS[ev].name, ['event:' + ev]];
 
+/* --- la bombe de codes : un code par année, par mois, par semaine, par jour et par heure --- */
+const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const MOIS_CODE = ['JANVIER', 'FEVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN', 'JUILLET', 'AOUT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DECEMBRE'];
+const isoWeek = d => { const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y0) / 86400000 + 1) / 7); };
+const addEv = (id, ev, code) => { EVENTS[id] = ev; if (!CODES[code]) CODES[code] = ['Événement : ' + ev.name, ['event:' + id]]; };
+{
+  const TH = ['galaxy', 'aurora', 'celestial', 'eclipse', 'universe', 'darkmatter', 'nightking', 'kingdom', 'dreamland', 'rainbow', 'blackgold', 'lunar', 'crimson', 'ice', 'cyber'];
+  const FR = ['diamond', 'infinity', 'legendary', 'imperial', 'eternal', 'royal', 'moon', 'neon', 'fire', 'gold'];
+  const NF = ['rainbow', 'diamond', 'gold', 'glitch', 'ghost', 'fire', 'ice', 'neon', 'violet', 'blood'];
+  const CO = ['mythic', 'infinity', 'ultimate', 'ascension', 'imperial', 'royal', 'cosmic', 'starlight', 'galaxy', 'iceking', 'inferno', 'alpha', 'mooncurse', 'diamond', 'ancient'];
+  const EM = ['ultimate', 'legendary', 'omega', 'galaxie', 'royaldance', 'phantom', 'diamant', 'boss', 'moonwalk', 'confettis', 'spin', 'grandsalut', 'trophee', 'invisible', 'glitch'];
+  const COL = ['#ffd36b', '#8fb0ff', '#ff5b47', '#3ad99a', '#b28cff', '#4fe8ff', '#ff7aa8', '#ff9b4f', '#e3dfd5', '#d8a92f'];
+  // une édition par année : valable toute l'année, récompenses énormes
+  for (let y = 2026, k = 0; y <= 2050; y++, k++) {
+    TITLES['ed' + y] = 'Édition ' + y; BADGES['y' + y] = ['’' + String(y).slice(2), COL[k % COL.length], 'Édition ' + y];
+    addEv('an' + y, { name: 'Année ' + y, when: d => d.getFullYear() === y, period: 'pendant toute l’année ' + y, rewards: ['t:ed' + y, 'b:y' + y, 'col:' + CO[k % CO.length], 'th:' + TH[k % TH.length], 'f:' + FR[k % FR.length], 'n:' + NF[k % NF.length], 'e:' + EM[k % EM.length], 'c:5000', 'xp:1000', 'dbl:5', 'box', 'box', 'box', 'fx-fireworks'] }, 'SIGNAL' + y);
+    addEv('nouvelan' + y, { name: 'Bonne année ' + y, when: d => d.getFullYear() === y && d.getMonth() === 0 && d.getDate() <= 7, period: 'du 1er au 7 janvier ' + y, rewards: ['c:' + (1000 + k * 10), 'box', 'rand', 'fx-fireworks'] }, 'BONNEANNEE' + y);
+    for (let m = 0; m < 12 && y <= 2030; m++) addEv('m' + y + '_' + m, { name: MOIS[m][0].toUpperCase() + MOIS[m].slice(1) + ' ' + y, when: d => d.getFullYear() === y && d.getMonth() === m, period: 'en ' + MOIS[m] + ' ' + y, rewards: ['c:800', 'xp:200', 'box', 'e:' + EM[(k + m) % EM.length]] }, MOIS_CODE[m] + y);
+  }
+  // un code par jour de l'année (valable ce jour-là, chaque année)
+  for (let m = 0; m < 12; m++) for (let dd = 1; dd <= [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m]; dd++) {
+    const code = 'JOUR' + String(dd).padStart(2, '0') + String(m + 1).padStart(2, '0'); const nm = (dd === 1 ? '1er' : dd) + ' ' + MOIS[m];
+    addEv('d' + (m + 1) + '_' + dd, { name: 'Le ' + nm, when: d => d.getMonth() === m && d.getDate() === dd, period: 'le ' + nm, rewards: dd % 7 === 0 ? ['c:300', 'box'] : ['c:150', 'xp:50'] }, code);
+  }
+  // un code par semaine (numéro de semaine)
+  for (let w = 1; w <= 53; w++) addEv('w' + w, { name: 'Semaine ' + w, when: d => isoWeek(d) === w, period: 'pendant la semaine n°' + w + ' de l’année', rewards: ['c:300', 'e:' + EM[w % EM.length]] }, 'SEMAINE' + String(w).padStart(2, '0'));
+  // un code par heure
+  for (let h = 0; h < 24; h++) addEv('h' + h, { name: h + ' h', when: d => d.getHours() === h, period: 'entre ' + h + ' h et ' + (h + 1) % 24 + ' h', rewards: ['c:60', 'xp:20'] }, 'HEURE' + String(h).padStart(2, '0'));
+}
+
 /* =====================================================================
    VIE EN 3D : maison qui s'agrandit, lieux à explorer, cueillette, cuisine,
    pêche, bornes d'arcade, défis du jour, sommeil qui raccourcit la nuit
