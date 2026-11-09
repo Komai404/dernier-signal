@@ -148,6 +148,22 @@ Ce que permet l'onglet Admin :
 
 Sans Upstash, les réglages et les codes admin sont effacés à chaque redémarrage de Render, comme les comptes. Avec Upstash, tout est gardé.
 
+## Modèles 3D (Blockbench)
+
+Les personnages et les décors de la 3D sont faits avec Blockbench. Les fichiers sont dans `modeles/` :
+
+- `personnage.bbmodel` : le corps des joueurs, en 6 os (jambes, torse, bras, tête) que le jeu anime.
+- `decors.bbmodel` : pins (trois niveaux de détail), chêne, arbre mort, rocher, buisson, fleurs, champignon, souche, tronc couché, caisse, tonneau, lampadaire, banc, lanterne, panneau, voiture.
+- `maison.bbmodel` : lit, table, chaise, lampe de table, fenêtre à volets, lanterne murale, boîte aux lettres, cheminée, lierre.
+
+Pour retoucher un modèle :
+
+1. Ouvre le fichier `.bbmodel` dans Blockbench et modifie-le. Chaque groupe du premier niveau est un modèle ; ses sous-groupes sont des os (leur origine sert de pivot).
+2. Le nom d'un cube donne sa couleur : un rôle (`tone` peau, `hair` cheveux, `top` haut, `bottom` pantalon, `leaf` feuillage, `bark` écorce, `stone`, `wood`, `metal`, `light`…) ou une couleur `#rrggbb`. On peut l'éclaircir ou l'assombrir avec `*0.8`. Ajoute `~` pour qu'il bouge au vent, `!` pour qu'il brille (vitres, lampes).
+3. Enregistre, puis lance `node outils/blockbench/convertir.js` : il produit la ligne `const BBM = …` à mettre dans le jeu.
+
+Les plans d'origine sont dans `outils/blockbench/specs.js` (`node outils/blockbench/fabriquer-bbmodel.js` refait les fichiers Blockbench).
+
 ## Chat vocal
 
 Sur le site (Render ou ton propre serveur), chaque joueur peut parler au micro :
