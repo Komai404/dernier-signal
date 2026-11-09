@@ -752,6 +752,66 @@ body.thfx-glitch #app { animation: glitchapp 7s steps(1) infinite; } @keyframes 
 @keyframes zz { 50% { transform: translateY(-10px); opacity: .6; } }
 .lf-sleepbtn { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); z-index: 55; }
 @media (prefers-reduced-motion: reduce) { #life-sleep .z, .lf-bob { animation: none; } .lf-bob.bite { animation: none; transform: translateY(10px); } }
+.mtabs .tabdot { color: var(--signal); font-size: 10px; vertical-align: middle; }
+.mtabs .tab-admin { color: var(--signal); }
+/* annonce du site */
+#site-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 12px; padding: max(8px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); background: var(--bc, #e63a2e); color: #fff; font: 600 15px/1.3 var(--f-body); text-align: center; box-shadow: 0 4px 18px rgba(0,0,0,.35); }
+#site-banner[hidden] { display: none !important; }
+#site-banner b { font-family: var(--f-mono); text-transform: uppercase; letter-spacing: .08em; }
+#site-banner .bn-x { background: rgba(0,0,0,.25); border: 0; color: #fff; width: 32px; height: 32px; font-size: 20px; line-height: 1; cursor: pointer; flex: none; }
+#site-motd { display: grid; gap: 8px; margin-top: 12px; }
+#site-motd .motd { margin: 0; padding: 10px 14px; border-left: 3px solid var(--signal); background: rgba(255,255,255,.04); color: var(--bone); font-size: 17px; }
+.site-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.site-chips span { border: 1px solid var(--frost); color: var(--frost); padding: 5px 10px; font: 600 13px var(--f-mono); }
+/* panneau admin */
+.adm { display: grid; gap: 14px; }
+.adm-head { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--signal); background: rgba(230,58,46,.08); }
+.adm-head b { font-family: var(--f-display); font-size: 22px; text-transform: uppercase; }
+.adm-row { gap: 8px; flex-wrap: wrap; }
+.adm-row .grow { flex: 1; min-width: 200px; }
+.adm-list { display: grid; gap: 6px; }
+.adm-item { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; padding: 10px 12px; border: 1px solid var(--line); }
+.adm-item.off { opacity: .55; }
+.adm-item .grow { flex: 1; min-width: 220px; }
+.adm-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.adm-sub { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.adm-sub span { border: 1px solid var(--line-2); padding: 2px 7px; font: 500 12px var(--f-mono); color: var(--bone); }
+.adm-meta { margin-top: 4px; font: 500 12px var(--f-mono); color: var(--dim); }
+.adm-form, .adm-box { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--line); }
+.adm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; align-items: end; }
+.adm-grid .wide { grid-column: 1 / -1; }
+.adm-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.adm-stats div { border: 1px solid var(--line); padding: 12px; display: grid; gap: 4px; }
+.adm-stats b { font: 900 30px var(--f-display); font-variant-numeric: tabular-nums; }
+.rb { display: grid; gap: 8px; padding: 12px; border: 1px dashed var(--line-2); }
+.rb-head { display: flex; gap: 8px; align-items: baseline; }
+.rb-head small { color: var(--dim); font-family: var(--f-mono); }
+.rb-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.rb-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--frost); color: var(--bone); padding: 3px 4px 3px 9px; font: 600 13px var(--f-mono); }
+.rb-chip button { background: none; border: 0; color: var(--dim); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; }
+.rb-chip button:hover { color: var(--signal); }
+.rb-add { display: flex; flex-wrap: wrap; gap: 8px; }
+.rb-add select, .rb-add input { flex: 1; min-width: 160px; }
+/* bonus */
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.cal-d { position: relative; border: 1px solid var(--line); padding: 10px 8px; display: grid; gap: 6px; align-content: start; min-height: 86px; }
+.cal-d b { font: 600 12px/1.3 var(--f-mono); color: var(--bone); }
+.cal-d.done { opacity: .5; }
+.cal-d.today { border-color: var(--signal); background: rgba(230,58,46,.1); }
+.cal-d i { position: absolute; top: 6px; right: 8px; color: #3ad96a; font-style: normal; }
+@media (max-width: 640px) { .cal { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.wheel-box { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+.wheel-wrap { position: relative; width: 240px; height: 240px; flex: none; }
+.wheel-disc { position: absolute; inset: 0; border-radius: 50%; border: 4px solid var(--bone); overflow: hidden; }
+.wheel-disc span { position: absolute; left: 50%; top: 50%; width: 92px; margin-left: -46px; margin-top: -8px; text-align: center; font: 700 11px var(--f-mono); color: #fff; transform-origin: 50% 8px; text-shadow: 0 1px 2px #000; }
+.wheel-ptr { position: absolute; left: 50%; top: -6px; margin-left: -10px; z-index: 2; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid var(--signal); }
+.wheel-side { flex: 1; min-width: 220px; display: grid; gap: 10px; justify-items: start; }
+.ach { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+.ach-i { border: 1px solid var(--line); padding: 10px 12px; display: grid; gap: 4px; align-content: start; justify-items: start; }
+.ach-i small { color: var(--dim); }
+.ach-i .ach-r { font: 600 12px var(--f-mono); color: var(--frost); }
+.ach-i.ready { border-color: var(--signal); }
+.ach-i.got { opacity: .6; }
 </style>
 
 <div class="atmo" aria-hidden="true"></div>
@@ -5142,10 +5202,11 @@ function redeem(raw) {
   if (bf) { if (!P_.duo.includes(bf[1])) P_.duo.push(bf[1]); P_.codes['BESTFRIEND' + bf[1]] = Date.now(); pfSave(); checkDuos(); return { ok: true, msg: 'Code duo ' + bf[1] + ' enregistré. Quand tu joueras dans la même partie qu’un ami qui a entré BESTFRIEND' + bf[1] + ', vous recevrez tous les deux le badge Duo ' + bf[1] + '.' }; }
   if (code === 'BESTFRIEND') return { ok: false, msg: 'Ajoute un numéro à choisir avec ton ami : par exemple BESTFRIEND42.' };
   const def = CODES[code]; if (!def) return { ok: false, msg: 'Code inconnu. Vérifie l’orthographe.' };
+  if (SITE.cfg && SITE.cfg.off && SITE.cfg.off[code]) return { ok: false, msg: 'Ce code a été retiré du jeu.' };
   if (code === 'CKE26') { P_.cheat = 1; P_.cheatHide = 0; P_.codes[code] = P_.codes[code] || Date.now(); pfSave(); return { ok: true, msg: 'Panneau de triche ouvert.', cheat: true }; }
   if (P_.codes[code]) { const pg = def[1].find(r => r.startsWith('page:')); return { ok: false, msg: 'Tu as déjà utilisé ce code.', page: pg ? pg.slice(5) : null }; }
   const evTok = def[1].find(r => r.startsWith('event:'));
-  if (evTok) { const ev = EVENTS[evTok.slice(6)]; if (!ev.when(new Date())) return { ok: false, msg: 'L’événement « ' + ev.name + ' » n’est disponible que ' + ev.period + '. Reviens à ce moment-là !' }; P_.event = { id: evTok.slice(6), day: today() }; }
+  if (evTok) { const ev = EVENTS[evTok.slice(6)]; if (!ev.when(new Date()) && !(SITE.cfg && SITE.cfg.event === evTok.slice(6))) return { ok: false, msg: 'L’événement « ' + ev.name + ' » n’est disponible que ' + ev.period + '. Reviens à ce moment-là !' }; P_.event = { id: evTok.slice(6), day: today() }; }
   const got = []; for (const r of (evTok ? EVENTS[evTok.slice(6)].rewards : def[1])) { const g = grant(r, true); if (g) got.push(g); }
   P_.codes[code] = Date.now();
   let extra = '';
@@ -5170,8 +5231,9 @@ function pfGameEnd(pub, view) {
   let gain = ECO.GAME + (won ? ECO.WIN : 0) + (view.alive ? ECO.SURVIVE : 0); let mult = 1;
   if (P_.perks.rush) { mult *= 3; P_.perks.rush = 0; } else if (P_.perks.dbl > 0) { mult *= 2; P_.perks.dbl--; }
   if (P_.vip) gain += 20;
+  if (siteMul('coinMul') !== 1) mult *= siteMul('coinMul');
   gain = Math.round(gain * mult); P_.coins += gain; P_.earned += gain;
-  const l0 = level(); P_.xp += ECO.XP_GAME + (won ? ECO.XP_WIN : 0);
+  const l0 = level(); P_.xp += Math.round((ECO.XP_GAME + (won ? ECO.XP_WIN : 0)) * siteMul('xpMul'));
   P_.history.unshift({ t: Date.now(), role: view.role, camp: view.camp, won: !!won, n: pub.players.length, mode: pub.settings && pub.settings.mode }); P_.history.length = Math.min(P_.history.length, 40);
   if (won && !P_.inv['b:firstwin']) P_.inv['b:firstwin'] = 1;
   if (st.wins >= 10) P_.inv['b:tenwins'] = 1;
@@ -5302,7 +5364,7 @@ function metaRender() {
   const P_ = pf(); const T = G.metaTab;
   let h = '<div class="meta-head"><span class="coins" title="Tes pièces">◉ ' + fmtCoins(P_.coins) + '</span><span class="lvl">Niv. ' + level() + '</span><span class="grow"></span><button class="btn ghost small" data-a="meta-close">Fermer</button></div>';
   if (G.metaPid && G.metaPid !== G.pid) { box.innerHTML = h + profileHTML(G.metaPid); drawProfAvatar(); return; }
-  h += '<div class="rtabs mtabs" role="tablist">' + META_TABS.map(([k, l]) => '<button role="tab" data-a="meta-tab" data-t="' + k + '" aria-selected="' + (k === T) + '">' + l + '</button>').join('') + '</div>';
+  h += '<div class="rtabs mtabs" role="tablist">' + META_TABS.map(([k, l]) => '<button role="tab" data-a="meta-tab" data-t="' + k + '" aria-selected="' + (k === T) + '"' + (k === 'admin' ? ' class="tab-admin"' : '') + '>' + l + (k === 'bonus' && bonusPending() ? ' <span class="tabdot" aria-label="à récupérer">●</span>' : '') + '</button>').join('') + '</div>';
   if (T === 'profil') h += profileHTML(G.pid, true);
   if (T === 'boutique') h += shopHTML();
   if (T === 'casier') h += lockerHTML();
@@ -5310,6 +5372,8 @@ function metaRender() {
   if (T === 'chambre') h += roomHTML();
   if (T === 'codes') h += codesHTML();
   if (T === 'archives') h += archivesHTML();
+  if (T === 'bonus') h += bonusHTML();
+  if (T === 'admin') h += adminHTML();
   const keep = document.activeElement && document.activeElement.id; box.innerHTML = h;
   if (keep && $('#' + keep)) { const el = $('#' + keep); el.focus(); }
   drawProfAvatar(); if ($('#skin-prev')) drawSkinPreview($('#skin-prev'), mySkin());
@@ -5571,8 +5635,8 @@ async function accBoot() {
     } else if (m === 'server') {
       accReq('info').then(i => { ACC.persistent = !!(i && i.persistent); }).catch(() => {});
       const st = accState(); if (!st || !st.token) return;
-      try { const r = await accReq('load', { user: st.name, token: st.token }); const local = pf(); if (r.prof && (r.upd || 0) > (local.upd || 0)) accAdopt(r.prof, r.name); else accSaveSoon(); ACC.lastSave = Date.now(); }
-      catch (e) { if (e.code === 'unknown_account' && st.verifier) { const r = await accReq('restore', { user: st.name, verifier: st.verifier, prof: pf() }); accSet(Object.assign({}, st, { token: r.token })); ACC.lastSave = Date.now(); } else if (e.code === 'bad_token') accSet(Object.assign({}, st, { token: null })); }
+      try { const r = await accReq('load', { user: st.name, token: st.token }); if (!!r.admin !== !!st.admin) accSet(Object.assign({}, accState(), { admin: !!r.admin })); const local = pf(); if (r.prof && (r.upd || 0) > (local.upd || 0)) accAdopt(r.prof, r.name); else accSaveSoon(); ACC.lastSave = Date.now(); }
+      catch (e) { if (e.code === 'unknown_account' && st.verifier) { const r = await accReq('restore', { user: st.name, verifier: st.verifier, prof: pf() }); accSet(Object.assign({}, st, { token: r.token })); ACC.lastSave = Date.now(); } else if (e.code === 'bad_token' || e.code === 'banned') { accSet(Object.assign({}, st, { token: null, admin: false })); if (e.code === 'banned') toast(e.message, true); } }
     }
   } catch (e) { console.warn('compte', e); }
   render();
@@ -5616,12 +5680,12 @@ async function accSubmit(kind) {
       const r = await accReq('register', { user: name, verifier: v, prof: P_ }); accSet({ name: r.name, token: r.token, verifier: v }); accAdopt(null, r.name);
       toast('Compte créé ! Ta progression est sauvegardée.');
     } else {
-      const r = await accReq('login', { user: name, verifier: v }); accSet({ name: r.name, token: r.token, verifier: v });
+      const r = await accReq('login', { user: name, verifier: v }); accSet({ name: r.name, token: r.token, verifier: v, admin: !!r.admin });
       const local = LS.get(PF_KEY, null); let prof = r.prof;
       if (prof && local && profHasProgress(local) && !local.acc) { prof = mergeProf(prof, local); toast('Connecté. La progression de cet appareil a été ajoutée à ton compte.'); } else toast('Connecté. Bon retour, ' + r.name + ' !');
       accAdopt(prof || local, r.name); pf().acc = r.name; LS.set(PF_KEY, pf());
     }
-    pf().acc = accState().name; G.accMsg = ''; pfSave(); ACC.lastSave = Date.now(); metaRender(); render();
+    pf().acc = accState().name; G.accMsg = ''; pfSave(); ACC.lastSave = Date.now(); adminTabSync(); siteLoad(); siteGifts(); metaRender(); render();
   } catch (e) { msg(e.message || 'Impossible pour le moment.'); }
   finally { ACC.busy = false; }
 }
@@ -5629,7 +5693,7 @@ async function accLogout() {
   const st = accState(); if (!st) return;
   try { await accSaveNow(); } catch {}
   try { if (st.token) await accReq('logout', { user: st.name, token: st.token }); } catch {}
-  accSet(null); PF = null; LS.set(PF_KEY, null); LS.set('ds_skin', null); pf(); applyTheme(); G.profSig = '';
+  accSet(null); adminTabSync(); if (G.metaTab === 'admin') G.metaTab = 'profil'; PF = null; LS.set(PF_KEY, null); LS.set('ds_skin', null); pf(); applyTheme(); G.profSig = '';
   toast('Déconnecté. Ta progression reste dans ton compte.'); metaRender(); render();
 }
 
@@ -5987,6 +6051,32 @@ const addEv = (id, ev, code) => { EVENTS[id] = ev; if (!CODES[code]) CODES[code]
     ['Sport', 'Un entraînement de champion.', 'Football|Basketball|Handball|Volleyball|Rugby|Tennis|Badminton|Ping-pong|Natation|Plongee|Surf|Ski|Snowboard|Patinage|Hockey|Cyclisme|BMX|Skateboard|Roller|Escalade|Randonnee|Course a pied|Marathon|Athletisme|Saut en hauteur|Lancer de javelot|Boxe|Judo|Karate|Taekwondo|Lutte|Escrime|Tir a l arc|Equitation|Golf|Petanque|Bowling|Flechettes|Billard americain|Echecs|Parkour|Yoga|Musculation|Crossfit|Danse|Breakdance|Gymnastique|Trampoline|Aviron|Kayak'],
   ];
   THEMES2.forEach(([cat, line, list], j) => words(list).forEach((w, i) => add(w, cat + ' : ' + w + '. ' + line, R((i + j) % 17 === 0 ? 3 : (i + j) % 6 === 0 ? 2 : 1, j * 100 + i + 7000))));
+}
+
+/* --- nouveau paquet de références --- */
+{
+  const TH = ['galaxy', 'aurora', 'celestial', 'eclipse', 'universe', 'darkmatter', 'nightking', 'kingdom', 'dreamland', 'rainbow', 'blackgold', 'lunar', 'crimson', 'ice', 'cyber', 'neon', 'toxic', 'purplesky', 'fire', 'moon'];
+  const FR = ['diamond', 'infinity', 'legendary', 'imperial', 'eternal', 'royal', 'moon', 'neon', 'fire', 'gold', 'golda', 'ghost'];
+  const NF = ['rainbow', 'diamond', 'gold', 'glitch', 'ghost', 'fire', 'ice', 'neon', 'violet', 'blood'];
+  const CO = COLLECTIONS.map(c => c[0]); const EM = Object.keys(EMOTES);
+  const pI = (arr, i) => arr[((i % arr.length) + arr.length) % arr.length];
+  const R = (tier, i) => tier === 1 ? ['c:' + (120 + (i * 37) % 200), 'xp:' + (30 + (i * 13) % 50)] : tier === 2 ? ['c:' + (300 + (i * 53) % 300), 'e:' + pI(EM, i * 7), 'xp:100'] : tier === 3 ? ['c:' + (800 + (i * 71) % 700), 'col:' + pI(CO, i * 5), 'th:' + pI(TH, i * 3), 'xp:300'] : ['c:' + (3000 + (i * 97) % 2000), 'col:' + pI(CO, i * 11), 'th:' + pI(TH, i * 7), 'f:' + pI(FR, i), 'n:' + pI(NF, i), 'box', 'box', 'xp:800', 'fx-rain'];
+  const add = (code, desc, tier, i) => { code = code.toUpperCase().normalize('NFD').replace(/[^A-Z0-9]/g, ''); if (code.length >= 2 && !CODES[code]) CODES[code] = [desc, R(tier, i)]; };
+  const L = [
+    // musique
+    ['JUL', 'La main en l’air, c’est l’OVNI.', 2], ['NINHO', 'Un disque de diamant de plus.', 2], ['PNL', 'Au DD, dans la tour.', 2], ['ORELSAN', 'Basique, simple.', 2], ['NEKFEU', 'Un vrai poète.', 2], ['DAMSO', 'Il revient du Batterie Faible.', 2], ['SCH', 'JVLIVS.', 2], ['GAZO', 'La drill débarque.', 1], ['TIAKOLA', 'Un refrain dans la tête.', 1], ['AYANAKAMURA', 'Djadja en boucle.', 2], ['ANGELE', 'Balance ton quoi.', 1], ['STROMAE', 'Alors on danse.', 3], ['AYA', 'La chanteuse la plus écoutée.', 1], ['SOPRANO', 'Un été de folie.', 1], ['GIMS', 'Lunettes de soleil, même la nuit.', 2], ['BOOBA', 'Le Duc.', 2], ['IAM', 'Le mia.', 2], ['MCSOLAAR', 'Bouge de là.', 2], ['JOHNNY', 'Allumer le feu !', 2], ['DAFTPUNK', 'Plus fort, meilleur, plus rapide.', 3], ['JUSTICE', 'Une croix lumineuse.', 2], ['DAVIDGUETTA', 'Les platines s’allument.', 2], ['INDOCHINE', 'L’aventurier.', 1], ['EDITHPIAF', 'Rien de rien.', 2], ['AZNAVOUR', 'La bohème.', 1], ['MYLENEFARMER', 'Désenchantée.', 2], ['TAYLORSWIFT', 'Era après era.', 2], ['BEYONCE', 'Queen B.', 2], ['DRAKE', 'Started from the bottom.', 1], ['EMINEM', 'Le vrai Slim Shady.', 2], ['BTS', 'L’armée est là.', 2], ['BLACKPINK', 'In your area.', 2], ['THEWEEKND', 'Les lumières de la ville.', 2], ['BADBUNNY', 'Un tube d’été.', 1], ['MICHAELJACKSON', 'Le roi de la pop.', 3], ['QUEEN', 'Nous sommes les champions.', 3], ['ACDC', 'Haute tension.', 2], ['NIRVANA', 'L’esprit adolescent.', 2], ['METALLICA', 'Maître des marionnettes.', 2], ['LINKINPARK', 'In the end.', 2],
+    // animés, encore
+    ['ITACHI', 'Le sharingan s’active.', 3], ['KAKASHI', 'En retard, comme toujours.', 2], ['MADARA', 'Le vrai Uchiha.', 3], ['PAIN', 'Shinra Tensei.', 3], ['GAARA', 'Le sable te protège.', 2], ['HINATA', 'Le byakugan voit tout.', 1], ['SHANKS', 'Le Roux.', 3], ['ACE', 'Poing ardent.', 2], ['NAMI', 'La navigatrice.', 1], ['SANJI', 'La jambe noire.', 1], ['CHOPPER', 'Un petit renne docteur.', 1], ['GEAR5', 'Le dieu du soleil s’éveille.', 4], ['FRIEZA', 'Sa forme ultime.', 3], ['CELL', 'La forme parfaite.', 2], ['BROLY', 'Le super guerrier légendaire.', 3], ['SUPERSAIYAN', 'Tes cheveux deviennent dorés.', 3], ['ULTRAINSTINCT', 'Ton corps bouge tout seul.', 4], ['ALLMIGHT', 'Je suis là !', 2], ['DEKU', 'One For All.', 2], ['LEVI', 'Le soldat le plus fort de l’humanité.', 3], ['MIKASA', 'Elle protège Eren.', 2], ['NEZUKO', 'Une bambou, un sourire.', 2], ['ZENITSU', 'Respiration de la foudre.', 2], ['INOSUKE', 'Tête de sanglier !', 1], ['SUKUNA', 'Le roi des fléaux.', 4], ['YUJI', 'Divergent fist.', 2], ['LIGHT', 'Je suis Kira.', 3], ['RYUK', 'Il adore les pommes.', 2], ['KILLUA', 'L’assassin au cœur tendre.', 2], ['GON', 'Jajanken !', 2], ['EDWARDELRIC', 'Fullmetal Alchemist.', 2], ['DENJI', 'Un homme-tronçonneuse.', 2], ['POCHITA', 'Le chien-tronçonneuse.', 2], ['ANYA', 'Elle lit dans les pensées.', 1], ['SAITAMA', 'Un seul coup.', 3], ['ONEPUNCHMAN', 'Ok.', 2], ['LUFFYGEAR5', 'Nika rit.', 4], ['SOLOLEVELING', 'Arise.', 3], ['SUNGJINWOO', 'Le monarque des ombres.', 4], ['FRIEREN', 'Une mage qui ne vieillit pas.', 3],
+    // jeux, encore
+    ['AMONGUSIMPOSTEUR', 'Il a fait une vidéo à la caméra.', 2], ['FREDDY', 'Cinq nuits.', 2], ['FNAF', 'Il est 6 h du matin.', 2], ['SLENDERMAN', 'Huit pages.', 2], ['HEROBRINE', 'Supprimé ? Vraiment ?', 3], ['WARDEN', 'Ne fais pas de bruit.', 2], ['ELYTRA', 'Tu voles enfin.', 2], ['NETHERITE', 'L’équipement ultime.', 3], ['ENDERDRAGON', 'Le dragon tombe.', 3], ['CREEPERAWMAN', 'Aw man.', 1], ['PIKA', 'Pika !', 1], ['MEWTWO', 'Le Pokémon clonné.', 3], ['MEW', 'Il était caché sous un camion.', 4], ['DRACAUFEU', 'Une flamme de dragon.', 3], ['TORTANK', 'Des canons à eau.', 2], ['FLORIZARRE', 'Une fleur géante.', 2], ['EVOLI', 'Huit évolutions possibles.', 2], ['RONFLEX', 'Il bloque la route.', 2], ['ECTOPLASMA', 'Un fantôme qui sourit.', 2], ['LUCARIO', 'L’aura.', 2], ['RAYQUAZA', 'Le dragon du ciel.', 3], ['ARCEUS', 'Le Pokémon créateur.', 4], ['SHINY', 'Une couleur rare !', 4], ['MASTERBALL', 'Capture garantie.', 3], ['KIRBYAVALER', 'Il aspire encore.', 1], ['GANONDORF', 'Le roi du malheur.', 3], ['MIPHA', 'La championne Zora.', 1], ['ELLIE', 'The Last of Us.', 2], ['JOEL', 'Un survivant.', 2], ['CLICKER', 'Ne fais aucun bruit.', 2], ['ARTHURMORGAN', 'Un cowboy au grand cœur.', 3], ['TRESPASSER', 'Un espion parmi nous.', 2], ['SNAKE', 'Snaaake !', 2], ['LARACROFT', 'Pilleuse de tombes.', 2], ['ALOY', 'La chasseuse de machines.', 2], ['AMATERASUOKAMI', 'Une louve divine.', 4], ['SIF', 'Le grand loup gris.', 4], ['WOLFLINK', 'Link se transforme en loup.', 4], ['GREYWARDEN', 'Gardien des Ombres.', 2], ['HUNTERSDREAM', 'Le rêve du chasseur.', 3],
+    // loups et nuit
+    ['HURLEMENT', 'Un long hurlement dans la nuit.', 2], ['PLEINELUNE', 'La lune est pleine.', 3], ['MEUTE', 'La meute est unie.', 2], ['CHEFDEMEUTE', 'Tu mènes la meute.', 3], ['LOUPALPHA', 'Le loup alpha.', 3], ['LOUPOMEGA', 'Le dernier de la meute.', 1], ['LOUPSOLITAIRE', 'Seul contre tous.', 2], ['LOUPGRIS', 'Un pelage d’argent.', 2], ['LOUPNOIR', 'Une ombre dans les bois.', 3], ['LOUPBLANC', 'Le loup des neiges.', 3], ['LOUPROUGE', 'Une légende de sang.', 4], ['CROC', 'Des crocs acérés.', 1], ['GRIFFE', 'Une griffe dans l’écorce.', 1], ['MORSURE', 'La morsure du Mordu.', 2], ['PISTE', 'Des traces dans la boue.', 1], ['TANIERE', 'La tanière de la meute.', 2], ['LYCANTHROPE', 'Le loup-garou se révèle.', 3], ['BALLEDARGENT', 'Une balle en argent.', 3], ['ACONIT', 'La plante qui repousse les loups.', 2], ['ECLIPSELUNAIRE', 'La lune devient rouge.', 4], ['NUITSANSFIN', 'L’aube ne vient pas.', 3], ['BROUILLARD', 'On n’y voit rien.', 1], ['FEUDECAMP', 'Une veillée autour du feu.', 1], ['VEILLEUR', 'Il ne dort jamais.', 2], ['SENTINELLE', 'Elle garde le village.', 2],
+    // mèmes, encore
+    ['QUOICOUBEH', 'Feur… euh, quoicoubeh.', 1], ['FEUR', 'Quoi ? Feur.', 1], ['APAGNAN', 'Apagnan.', 1], ['ENTRAINDETESTER', 'Je suis en train de tester.', 1], ['CESTCIAO', 'C’est ciao.', 1], ['ATTENDSJEFINIS', 'Attends, je finis ma partie.', 1], ['CESTNON', 'C’est non.', 1], ['ICIONPARLEFRANCAIS', 'Ici, on parle français.', 1], ['TUESSERIEUX', 'Tu es sérieux là ?', 1], ['MAISOUI', 'Mais oui c’est clair.', 1], ['ILESTOU', 'Il est où le code ? Ici.', 1], ['BAKA', 'Baka !', 1], ['UWU', 'UwU', 1], ['OWO', 'OwO', 1], ['NANI', 'NANI ?!', 1], ['SHEESH', 'Sheeesh.', 1], ['VIBECHECK', 'Vibe check réussi.', 1], ['MAINCHARACTERENERGY', 'Toute la lumière sur toi.', 2], ['SIGMAGRINDSET', 'Réveil à 4 h.', 2], ['TOUCHEDEGRASS', 'Un peu d’herbe fraîche.', 1], ['GGWP', 'Bien joué tout le monde.', 1], ['WP', 'Bien joué.', 1], ['NT', 'Bien tenté.', 1], ['GLHF', 'Bonne chance, amuse-toi.', 1],
+    // séries et films, encore
+    ['BREAKINGBADHEISENBERG', 'Je suis celui qui frappe.', 3], ['WALTERWHITE', 'Le professeur de chimie.', 2], ['THEWITCHERCIRI', 'L’enfant surprise.', 2], ['DEXTER', 'Le passager noir.', 2], ['SHERLOCK', 'Élémentaire.', 2], ['LUPIN', 'Gentleman cambrioleur.', 2], ['MERCREDI', 'Elle déteste les mercredis.', 1], ['THEBOYS', 'Les super-héros ne sont pas des héros.', 2], ['HOMELANDER', 'Le patriote.', 3], ['THELASTOFUS', 'Cherche la lumière.', 3], ['DUNE', 'L’épice doit couler.', 3], ['SHAIHULUD', 'Le ver géant.', 3], ['OPPENHEIMER', 'Le destructeur des mondes.', 2], ['BARBIE', 'Tout en rose.', 1], ['WALLE', 'Un petit robot.', 1], ['COCO', 'Ne m’oublie pas.', 2], ['VAIANA', 'L’océan t’appelle.', 1], ['LAREINEDESNEIGES', 'Libérée, délivrée.', 2], ['ENCANTO', 'On ne parle pas de Bruno.', 1], ['TOYSTORYWOODY', 'Il y a un serpent dans ma botte.', 1], ['MINIONS', 'Banana !', 1], ['KUNGFUPANDA', 'Skadoosh.', 2], ['SPIDERVERSE', 'N’importe qui peut porter le masque.', 3], ['MILESMORALES', 'Le nouveau Spider-Man.', 2], ['GROOT', 'Je s’appelle Groot.', 2], ['THANOS', 'Inévitable.', 3], ['INFINITYGAUNTLET', 'Un claquement de doigts.', 4], ['WAKANDAFOREVER', 'Wakanda pour toujours.', 2], ['DEADPOOL', 'Il brise le quatrième mur.', 2], ['WOLVERINE', 'Des griffes en adamantium.', 3],
+  ];
+  L.forEach(([c, d, t], i) => add(c, d, t, i + 9000));
 }
 
 /* =====================================================================
@@ -6562,6 +6652,321 @@ document.addEventListener('click', ev => {
   if (a === 'lf-sleep') lifeSleep(true);
   if (a === 'lf-wake') lifeSleep(false);
 });
+
+/* =====================================================================
+   RÉGLAGES DU SITE (bannière, message, soldes, multiplicateurs, cadeaux)
+   + PANNEAU ADMIN (codes, joueurs, cadeaux, site)
+   ===================================================================== */
+const SITE = { cfg: null, busy: false };
+const siteMul = k => { const v = SITE.cfg && +SITE.cfg[k]; return v > 0 ? v : 1; };
+async function siteHash(code) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('ds-code:' + code)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('').slice(0, 24); }
+async function siteLoad() {
+  if (location.protocol === 'file:') return;
+  try { const r = await fetch('api/config', { cache: 'no-store' }); if (!r.ok) return; const j = await r.json(); if (!j || !j.result || !Array.isArray(j.result.codes)) return; SITE.cfg = j.result; siteApply(); } catch {}
+}
+function siteApply() {
+  const c = SITE.cfg; if (!c) return;
+  // bannière en haut de l'écran (annonce ou maintenance)
+  let bn = $('#site-banner'); if (!bn) { document.body.insertAdjacentHTML('afterbegin', '<div id="site-banner" role="status" hidden></div>'); bn = $('#site-banner'); }
+  const gone = LS.get('ds_banner_x', 0);
+  if (c.maint) { bn.hidden = false; bn.style.setProperty('--bc', '#e63a2e'); setHTML(bn, '<b>Maintenance</b> ' + e(c.maint)); }
+  else if (c.banner && c.banner.text && gone !== c.banner.id) { bn.hidden = false; bn.style.setProperty('--bc', c.banner.color || '#e63a2e'); setHTML(bn, '<span>' + e(c.banner.text) + '</span><button class="bn-x" data-a="site-bx" aria-label="Masquer l’annonce">×</button>'); }
+  else bn.hidden = true;
+  if ($('#scr-home') && $('#scr-home').hidden) bn.hidden = true;
+  // message d'accueil et soldes sur l'écran d'accueil
+  const lede = $('#scr-home .lede'); if (lede) { let m = $('#site-motd'); if (!m) { lede.insertAdjacentHTML('afterend', '<div id="site-motd"></div>'); m = $('#site-motd'); }
+    const parts = []; if (c.motd) parts.push('<p class="motd">' + e(c.motd) + '</p>');
+    const chips = []; if (c.sale > 0) chips.push('Soldes : −' + c.sale + ' % dans la boutique'); if (c.coinMul > 1) chips.push('Pièces ×' + c.coinMul + ' en fin de partie'); if (c.xpMul > 1) chips.push('XP ×' + c.xpMul); if (c.event && EVENTS[c.event]) chips.push('Événement offert : ' + EVENTS[c.event].name);
+    if (chips.length) parts.push('<div class="site-chips">' + chips.map(x => '<span>' + e(x) + '</span>').join('') + '</div>');
+    setHTML(m, parts.join('')); }
+  // cadeaux pour tout le monde et cadeau de bienvenue
+  const P_ = pf(); P_.gotGifts = P_.gotGifts || {}; let changed = false;
+  for (const g of c.gifts || []) { if (P_.gotGifts[g.id] || (g.until && Date.now() > g.until)) continue; P_.gotGifts[g.id] = Date.now(); changed = true; siteGive(g.r, g.msg); }
+  const st = typeof accState === 'function' && accState();
+  if (st && st.token && (c.welcome || []).length && !P_.welcomeGot) { P_.welcomeGot = Date.now(); changed = true; siteGive(c.welcome, 'Cadeau de bienvenue'); }
+  if (changed) pfSave();
+  adminTabSync();
+}
+function siteGive(tokens, msg) { const got = []; for (const t of tokens) { try { const g = grant(t, true); if (g) got.push(g); } catch {} } pfSave(); applyTheme(); toast('🎁 ' + msg + (got.length ? ' : ' + got.join(', ') : '')); if (!$('#meta').hidden) metaRender(); }
+async function siteGifts() { // cadeaux envoyés par l'admin à ce compte précis
+  const st = typeof accState === 'function' && accState(); if (!st || !st.token || accMode() !== 'server') return;
+  try { const g = await accReq('gifts', { user: st.name, token: st.token }); for (const x of g || []) siteGive(x.r, x.msg); } catch {}
+}
+// l'annonce s'affiche sur l'écran d'accueil ; en partie, elle apparaît une fois en message
+setInterval(() => { const bn = $('#site-banner'); if (!bn || !SITE.cfg) return; const c = SITE.cfg; const want = !!(c.maint || (c.banner && c.banner.text && LS.get('ds_banner_x', 0) !== c.banner.id)); const home = $('#scr-home') && !$('#scr-home').hidden && $('#meta').hidden;
+  bn.hidden = !(want && home); if (want && !home && G.code && c.banner && SITE.toasted !== c.banner.id && !c.maint) { SITE.toasted = c.banner.id; toast('Annonce : ' + c.banner.text); } }, 800);
+setTimeout(() => { siteLoad(); siteGifts(); }, 600); setInterval(() => { siteLoad(); siteGifts(); }, 90000);
+// soldes et multiplicateurs
+const _priceOfBase = priceOf; priceOf = id => { const p = _priceOfBase(id); const s = SITE.cfg && SITE.cfg.sale; return s > 0 ? Math.max(1, Math.round(p * (100 - s) / 100)) : p; };
+// codes perso : le navigateur compare l'empreinte du code tapé, puis demande le contenu au serveur
+document.addEventListener('submit', async ev => {
+  const f = ev.target; if (!f.dataset || !f.dataset.code) return;
+  const c = SITE.cfg; const raw = ($('#code-in') || {}).value || ''; const code = String(raw).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!c || !code || !(c.codes || []).length || !(window.crypto && crypto.subtle)) return;
+  ev.preventDefault(); ev.stopImmediatePropagation();
+  const h = await siteHash(code);
+  if (!c.codes.includes(h)) { const r = redeem(code); G.codeMsg = r.msg; toast(r.msg, !r.ok); if (r.page && pf().pages[r.page]) { G.metaTab = 'archives'; G.metaPage = r.page; } metaRender(); if (r.cheat) G.metaTab = 'codes'; return; }
+  const P_ = pf(); const say = (msg, bad) => { G.codeMsg = msg; toast(msg, bad); metaRender(); };
+  if (P_.codes[code]) return say('Tu as déjà utilisé ce code.', true);
+  try {
+    const st = accState(); const r = await fetch('api/redeem', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code, user: st && st.token ? st.name : '' }) });
+    const j = await r.json().catch(() => ({})); if (!r.ok) return say(j.error || 'Code indisponible.', true);
+    const got = []; for (const t of j.result.r || []) { try { const g = grant(t, true); if (g) got.push(g); } catch {} }
+    P_.codes[code] = Date.now(); pfSave(); applyTheme();
+    say(j.result.d + (got.length ? ' : ' + got.join(', ') + '.' : '.') + (j.result.left != null ? ' (encore ' + j.result.left + ' utilisation' + (j.result.left > 1 ? 's' : '') + ')' : ''));
+  } catch { say('Serveur injoignable, réessaie.', true); }
+}, true);
+
+/* ----------------------------------------------------------- panneau admin */
+const ADM = { tab: 'codes', cfg: null, q: '', pq: '', players: null, stats: null, rb: { code: [], give: [], all: [], welcome: [] }, rbType: {}, edit: null, target: null, del: null, msg: '', busy: false };
+const isAdmin = () => { const st = typeof accState === 'function' && accState(); return !!(st && st.token && st.admin && accMode() === 'server'); };
+function adminTabSync() { const has = META_TABS.some(t => t[0] === 'admin'); if (isAdmin() && !has) META_TABS.push(['admin', 'Admin']); if (!isAdmin() && has) META_TABS.splice(META_TABS.findIndex(t => t[0] === 'admin'), 1); }
+async function admReq(op, body) {
+  const st = accState(); ADM.busy = true;
+  try { const r = await fetch('api/admin', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(Object.assign({ op, user: st.name, token: st.token }, body || {})) });
+    const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Erreur ' + r.status); return j.result; }
+  finally { ADM.busy = false; }
+}
+async function admRun(op, body, okMsg) { try { const r = await admReq(op, body); if (r && r.codes && !Array.isArray(r.codes)) ADM.cfg = r; if (okMsg) toast(okMsg); siteLoad(); return r; } catch (err) { toast(err.message, true); return null; } finally { metaRender(); } }
+/* --- récompenses : catalogue pour le constructeur --- */
+const RB_TYPES = [
+  ['c', 'Pièces', 'num'], ['xp', 'XP', 'num'], ['box', 'Coffres', 'num'], ['t', 'Titre', 'list'], ['b', 'Badge', 'list'], ['e', 'Emote', 'list'], ['col', 'Collection de tenues', 'list'], ['th', 'Thème', 'list'], ['f', 'Cadre', 'list'], ['n', 'Effet de pseudo', 'list'],
+  ['fur', 'Meuble', 'list'], ['h', 'Couvre-chef', 'list'], ['a', 'Accessoire', 'list'], ['bk', 'Dos', 'list'], ['fx', 'Effet visuel', 'list'], ['house', 'Niveau de maison', 'list'], ['ing', 'Ingrédients', 'list'],
+  ['dbl', 'Gains doublés (parties)', 'num'], ['cp', 'Coupon de réduction (%)', 'num'], ['tax', 'Achats sans frais', 'num'], ['rand', 'Bonus surprise', 'none'], ['fx-', 'Effet à l’écran', 'list'], ['event', 'Événement (récompenses d’un événement)', 'list'],
+];
+function rbOptions(type) {
+  const L = (obj, lab) => Object.keys(obj).map(k => [k, lab(k)]);
+  switch (type) {
+    case 't': return L(TITLES, k => '[' + TITLES[k] + ']').sort((a, b) => a[1].localeCompare(b[1]));
+    case 'b': return L(BADGES, k => BADGES[k][0] + ' ' + BADGES[k][2]).sort((a, b) => a[1].localeCompare(b[1]));
+    case 'e': return L(EMOTES, k => EMOTES[k][0]).sort((a, b) => a[1].localeCompare(b[1]));
+    case 'col': return COLLECTIONS.map(c => [c[0], c[1]]);
+    case 'th': return L(THEMES, k => THEMES[k][0]).filter(x => x[0] !== 'base');
+    case 'f': return L(FRAMES, k => FRAMES[k][0]).filter(x => x[0] !== 'none');
+    case 'n': return L(NAMEFX, k => NAMEFX[k]).filter(x => x[0] !== 'none');
+    case 'fur': return L(FURNITURE, k => FURNITURE[k][1] + ' (' + FURNITURE[k][0] + ')').sort((a, b) => a[1].localeCompare(b[1]));
+    case 'h': return HATS.map((x, i) => [String(i), x]).slice(HAT_FREE); case 'a': return ACCS.map((x, i) => [String(i), x]).slice(ACC_FREE);
+    case 'bk': return BACKS.map((x, i) => [String(i), x]).slice(BACK_FREE); case 'fx': return FXS.map((x, i) => [String(i), x]).slice(FX_FREE);
+    case 'house': return [2, 3, 4, 5, 6].map(n => [String(n), 'Niveau ' + n + ' : ' + HOUSE[n][0]]);
+    case 'ing': return Object.keys(ING).flatMap(k => [1, 3, 5, 10].map(n => [k + ':' + n, n + ' × ' + ING[k][0]]));
+    case 'fx-': return [['fireworks', 'Feu d’artifice'], ['rain', 'Pluie de pièces']];
+    case 'event': return Object.entries(EVENTS).filter(([id]) => !/^(an\d|nouvelan\d|m\d|d\d|w\d|h\d|dt|cz)/.test(id)).map(([id, v]) => [id, v.name]).sort((a, b) => a[1].localeCompare(b[1]));
+  }
+  return [];
+}
+function rbLabel(tok) {
+  if (tok === 'box') return 'Coffre'; if (tok === 'rand') return 'Bonus surprise'; if (tok === 'fx-fireworks') return 'Feu d’artifice'; if (tok === 'fx-rain') return 'Pluie de pièces';
+  const [k, v, w] = tok.split(':');
+  if (k === 'c') return fmtCoins(+v) + ' pièces'; if (k === 'xp') return v + ' XP'; if (k === 'dbl') return 'Gains ×2 (' + v + ' parties)'; if (k === 'cp') return 'Coupon −' + v + ' %'; if (k === 'tax') return v + ' achats sans frais';
+  if (k === 'col') { const c = COLLECTIONS.find(x => x[0] === v); return 'Collection ' + (c ? c[1] : v); }
+  if (k === 'house') return 'Maison niveau ' + v; if (k === 'ing') return (w || 1) + ' × ' + (ING[v] ? ING[v][0] : v); if (k === 'event') return 'Événement : ' + (EVENTS[v] ? EVENTS[v].name : v);
+  const i = itemInfo(tok); return i ? i.name : tok;
+}
+function rbHTML(key, title) {
+  const list = ADM.rb[key]; const type = ADM.rbType[key] || 'c'; const T = RB_TYPES.find(x => x[0] === type);
+  let ctl = '';
+  if (T[2] === 'num') ctl = '<input class="input" id="rb-v-' + key + '" type="number" min="1" value="' + (type === 'c' ? 500 : type === 'xp' ? 200 : type === 'cp' ? 20 : 1) + '" aria-label="Quantité">';
+  if (T[2] === 'list') ctl = '<select class="input" id="rb-v-' + key + '" aria-label="Choix">' + rbOptions(type).map(([v, l]) => '<option value="' + e(v) + '">' + e(l) + '</option>').join('') + '</select>';
+  return '<div class="rb"><div class="rb-head"><b>' + e(title || 'Récompenses') + '</b><small>' + list.length + '</small></div>'
+    + '<div class="rb-chips">' + (list.length ? list.map((t, i) => '<span class="rb-chip">' + e(rbLabel(t)) + '<button type="button" data-a="adm-rb-del" data-k="' + key + '" data-i="' + i + '" aria-label="Retirer">×</button></span>').join('') : '<span class="dim">Aucune récompense pour l’instant.</span>') + '</div>'
+    + '<div class="rb-add"><select class="input" id="rb-t-' + key + '" data-a="adm-rb-type" data-k="' + key + '" aria-label="Type de récompense">' + RB_TYPES.map(([k, l]) => '<option value="' + k + '"' + (k === type ? ' selected' : '') + '>' + e(l) + '</option>').join('') + '</select>' + ctl + '<button type="button" class="btn ghost small" data-a="adm-rb-add" data-k="' + key + '">Ajouter</button></div></div>';
+}
+function rbAdd(key) {
+  const type = ADM.rbType[key] || 'c'; const v = ($('#rb-v-' + key) || {}).value; const n = Math.max(1, Math.round(+v || 1));
+  const L = ADM.rb[key];
+  if (type === 'box') { for (let i = 0; i < Math.min(n, 10); i++) L.push('box'); }
+  else if (type === 'rand') L.push('rand');
+  else if (type === 'fx-') L.push('fx-' + v);
+  else if (['c', 'xp', 'dbl', 'cp', 'tax'].includes(type)) L.push(type + ':' + (type === 'cp' ? Math.min(90, n) : n));
+  else if (v != null && v !== '') L.push(type + ':' + v);
+  metaRender();
+}
+const dtIn = t => t ? new Date(t - new Date(t).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
+const dtOut = s => s ? new Date(s).getTime() || 0 : 0;
+const fmtDT = t => new Date(t).toLocaleString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+function adminHTML() {
+  if (!isAdmin()) return '<p class="dim">Réservé à l’administrateur.</p>';
+  if (!ADM.cfg && !ADM.busy) { admRun('cfg'); return '<p class="dim">Chargement du panneau admin…</p>'; }
+  const TABS = [['codes', 'Codes'], ['edit', ADM.edit ? 'Modifier' : 'Ajouter un code'], ['joueurs', 'Joueurs'], ['cadeaux', 'Cadeaux'], ['site', 'Site'], ['stats', 'Statistiques']];
+  let h = '<div class="adm"><div class="adm-head"><b>Panneau administrateur</b><span class="dim">Tout ce que tu changes ici s’applique à tous les joueurs du site en moins de 2 minutes.</span></div>'
+    + '<div class="rtabs subtabs" role="tablist">' + TABS.map(([k, l]) => '<button role="tab" data-a="adm-tab" data-t="' + k + '" aria-selected="' + (k === ADM.tab) + '">' + e(l) + '</button>').join('') + '</div>';
+  const C = ADM.cfg;
+  if (ADM.tab === 'codes') {
+    const mine = Object.entries(C.codes || {}).sort((a, b) => (b[1].at || 0) - (a[1].at || 0));
+    h += '<div class="row adm-row"><a class="btn red small" data-a="adm-new">+ Ajouter un code</a><input class="input grow" id="adm-q" placeholder="Chercher parmi les ' + fmtCoins(Object.keys(CODES).length) + ' codes du jeu…" value="' + e(ADM.q) + '"></div>';
+    h += '<h3>Tes codes <small>' + mine.length + '</small></h3>' + (mine.length ? '<div class="adm-list">' + mine.map(([code, v]) => '<div class="adm-item' + (v.on === false ? ' off' : '') + '"><div class="grow"><b class="mono">' + e(code) + '</b> <span class="dim">' + e(v.d) + '</span><div class="adm-sub">' + v.r.map(t => '<span>' + e(rbLabel(t)) + '</span>').join('') + '</div><div class="adm-meta">' + (v.max ? (v.uses || 0) + ' / ' + v.max + ' utilisations' : 'utilisations illimitées') + (v.from ? ' · dès le ' + fmtDT(v.from) : '') + (v.to ? ' · jusqu’au ' + fmtDT(v.to) : '') + (v.on === false ? ' · désactivé' : '') + '</div></div>'
+      + '<div class="adm-acts"><button class="btn ghost small" data-a="adm-edit" data-c="' + e(code) + '">Modifier</button><button class="btn ghost small" data-a="adm-toggle" data-c="' + e(code) + '">' + (v.on === false ? 'Activer' : 'Désactiver') + '</button>' + (ADM.del === code ? '<button class="btn red small" data-a="adm-del" data-c="' + e(code) + '">Confirmer</button>' : '<button class="btn ghost small" data-a="adm-del?" data-c="' + e(code) + '">Retirer</button>') + '</div></div>').join('') + '</div>' : '<p class="dim">Aucun code perso pour l’instant. Crée le premier avec « Ajouter un code ».</p>');
+    const q = ADM.q.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const off = Object.keys(C.off || {});
+    if (q.length >= 2) { const hits = Object.keys(CODES).filter(c => c.includes(q) || admNorm(CODES[c][0]).includes(admNorm(ADM.q))).slice(0, 40);
+      h += '<h3>Codes du jeu <small>' + hits.length + (hits.length === 40 ? '+' : '') + '</small></h3><div class="adm-list">' + hits.map(c => '<div class="adm-item' + (C.off && C.off[c] ? ' off' : '') + '"><div class="grow"><b class="mono">' + e(c) + '</b> <span class="dim">' + e(CODES[c][0]) + '</span></div><div class="adm-acts"><button class="btn ghost small" data-a="adm-copy" data-c="' + e(c) + '">Remplacer les récompenses</button><button class="btn ghost small" data-a="adm-off" data-c="' + e(c) + '" data-v="' + (C.off && C.off[c] ? 0 : 1) + '">' + (C.off && C.off[c] ? 'Réactiver' : 'Retirer du jeu') + '</button></div></div>').join('') + '</div>'; }
+    if (off.length) h += '<h3>Codes du jeu retirés <small>' + off.length + '</small></h3><div class="adm-list">' + off.map(c => '<div class="adm-item off"><div class="grow"><b class="mono">' + e(c) + '</b></div><div class="adm-acts"><button class="btn ghost small" data-a="adm-off" data-c="' + e(c) + '" data-v="0">Réactiver</button></div></div>').join('') + '</div>';
+  }
+  if (ADM.tab === 'edit') {
+    const E = ADM.edit ? C.codes[ADM.edit] || {} : {};
+    h += '<form class="adm-form" data-adm="code"><div class="adm-grid"><div class="field"><label for="adm-name">Nom du code</label><input class="input mono" id="adm-name" maxlength="40" required value="' + e(ADM.edit || '') + '" placeholder="EX. NOEL2026"></div>'
+      + '<div class="field"><label for="adm-desc">Message affiché au joueur</label><input class="input" id="adm-desc" maxlength="200" value="' + e(E.d || '') + '" placeholder="Joyeux Noël, la meute !"></div>'
+      + '<div class="field"><label for="adm-from">Valable à partir du (facultatif)</label><input class="input" id="adm-from" type="datetime-local" value="' + dtIn(E.from) + '"></div>'
+      + '<div class="field"><label for="adm-to">Jusqu’au (facultatif)</label><input class="input" id="adm-to" type="datetime-local" value="' + dtIn(E.to) + '"></div>'
+      + '<div class="field"><label for="adm-max">Nombre d’utilisations max (0 = illimité)</label><input class="input" id="adm-max" type="number" min="0" value="' + (E.max || 0) + '"></div>'
+      + '<label class="check"><input type="checkbox" id="adm-on"' + (E.on === false ? '' : ' checked') + '> Code actif</label>' + (ADM.edit && E.max ? '<label class="check"><input type="checkbox" id="adm-reset"> Remettre le compteur à zéro (' + (E.uses || 0) + ' utilisé)</label>' : '') + '</div>'
+      + rbHTML('code', 'Récompenses du code') + (CODES[(ADM.edit || '').toUpperCase()] ? '<p class="tip">Ce nom existe déjà dans le jeu : ton code le remplace.</p>' : '')
+      + '<div class="row"><button class="btn red">' + (ADM.edit ? 'Enregistrer les modifications' : 'Créer le code') + '</button><button type="button" class="btn ghost" data-a="adm-new">Vider le formulaire</button></div></form>';
+  }
+  if (ADM.tab === 'joueurs') {
+    h += '<form class="row adm-row" data-adm="find"><input class="input grow" id="adm-pq" placeholder="Pseudo (laisse vide pour tout voir)" value="' + e(ADM.pq) + '"><button class="btn frost small">Chercher</button></form>';
+    if (ADM.target) h += '<div class="adm-box"><b>Donner à ' + e(ADM.target) + '</b><div class="field"><label for="adm-gmsg">Message</label><input class="input" id="adm-gmsg" maxlength="200" placeholder="Un cadeau de l’administrateur !"></div>' + rbHTML('give', 'Cadeau') + '<div class="row"><button class="btn red small" data-a="adm-give">Envoyer le cadeau</button><button class="btn ghost small" data-a="adm-target" data-n="">Annuler</button></div><p class="dim">Le joueur le reçoit à sa prochaine connexion (ou dans les 2 minutes s’il est en ligne).</p></div>';
+    if (!ADM.players) h += '<p class="dim">Lance une recherche pour voir les comptes.</p>';
+    else h += '<p class="dim">' + ADM.players.length + ' compte' + (ADM.players.length > 1 ? 's' : '') + (ADM.players.length >= 300 ? ' (300 premiers)' : '') + '</p><div class="adm-list">' + ADM.players.map(p => '<div class="adm-item' + (p.banned ? ' off' : '') + '"><div class="grow"><b>' + e(p.name) + '</b>' + (p.admin ? ' <span class="tag frost">admin</span>' : '') + (p.banned ? ' <span class="tag">suspendu</span>' : '') + '<div class="adm-meta">◉ ' + fmtCoins(p.coins) + ' · ' + fmtCoins(p.xp) + ' XP · ' + p.games + ' parties, ' + p.wins + ' victoires · ' + p.codes + ' codes · maison ' + p.house + (p.gifts ? ' · ' + p.gifts + ' cadeau(x) en attente' : '') + ' · créé le ' + (p.created ? fmtDT(p.created) : '?') + (p.upd ? ' · vu le ' + fmtDT(p.upd) : '') + '</div>'
+      + (ADM.pass === p.name ? '<form class="row" data-adm="pass" data-n="' + e(p.name) + '"><input class="input" id="adm-newpass" type="text" minlength="6" placeholder="Nouveau mot de passe" required><button class="btn red small">Valider</button></form>' : '') + '</div>'
+      + '<div class="adm-acts"><button class="btn ghost small" data-a="adm-target" data-n="' + e(p.name) + '">Donner</button>' + (p.admin ? '' : '<button class="btn ghost small" data-a="adm-ban" data-n="' + e(p.name) + '" data-v="' + (p.banned ? 0 : 1) + '">' + (p.banned ? 'Réactiver' : 'Suspendre') + '</button><button class="btn ghost small" data-a="adm-pass" data-n="' + e(p.name) + '">Mot de passe</button>' + (ADM.del === '@' + p.name ? '<button class="btn red small" data-a="adm-pdel" data-n="' + e(p.name) + '">Confirmer</button>' : '<button class="btn ghost small" data-a="adm-pdel?" data-n="' + e(p.name) + '">Supprimer</button>')) + '</div></div>').join('') + '</div>';
+  }
+  if (ADM.tab === 'cadeaux') {
+    h += '<div class="adm-box"><b>Offrir un cadeau à tous les joueurs</b><div class="adm-grid"><div class="field"><label for="adm-amsg">Message</label><input class="input" id="adm-amsg" maxlength="200" placeholder="Merci d’être là !"></div><div class="field"><label for="adm-auntil">Réclamable jusqu’au (facultatif)</label><input class="input" id="adm-auntil" type="datetime-local"></div></div>' + rbHTML('all', 'Cadeau') + '<button class="btn red small" data-a="adm-giftall">Offrir à tout le monde</button></div>';
+    h += '<h3>Cadeaux en cours <small>' + (C.gifts || []).length + '</small></h3>' + ((C.gifts || []).length ? '<div class="adm-list">' + C.gifts.map(g => '<div class="adm-item"><div class="grow"><b>' + e(g.msg) + '</b><div class="adm-sub">' + g.r.map(t => '<span>' + e(rbLabel(t)) + '</span>').join('') + '</div><div class="adm-meta">Envoyé le ' + fmtDT(g.at) + (g.until ? ' · jusqu’au ' + fmtDT(g.until) : '') + '</div></div><div class="adm-acts"><button class="btn ghost small" data-a="adm-giftdel" data-id="' + e(g.id) + '">Retirer</button></div></div>').join('') + '</div>' : '<p class="dim">Aucun.</p>');
+  }
+  if (ADM.tab === 'site') {
+    _admTabSite(); const bn = C.banner || {};
+    h += '<form class="adm-form" data-adm="site"><div class="adm-grid"><div class="field wide"><label for="adm-bn">Annonce en haut de l’écran (vide = aucune)</label><input class="input" id="adm-bn" maxlength="200" value="' + e(bn.text || '') + '" placeholder="Tournoi ce samedi à 20 h !"></div>'
+      + '<div class="field"><label for="adm-bnc">Couleur de l’annonce</label><input class="input" id="adm-bnc" type="color" value="' + e(bn.color || '#e63a2e') + '"></div>'
+      + '<div class="field wide"><label for="adm-motd">Message sur l’écran d’accueil</label><input class="input" id="adm-motd" maxlength="300" value="' + e(C.motd || '') + '"></div>'
+      + '<div class="field"><label for="adm-cm">Pièces en fin de partie</label><select class="input" id="adm-cm">' + [1, 1.5, 2, 3, 5, 10].map(x => '<option value="' + x + '"' + (+C.coinMul === x ? ' selected' : '') + '>×' + x + '</option>').join('') + '</select></div>'
+      + '<div class="field"><label for="adm-xm">XP en fin de partie</label><select class="input" id="adm-xm">' + [1, 1.5, 2, 3, 5, 10].map(x => '<option value="' + x + '"' + (+C.xpMul === x ? ' selected' : '') + '>×' + x + '</option>').join('') + '</select></div>'
+      + '<div class="field"><label for="adm-sale">Soldes dans la boutique (%)</label><input class="input" id="adm-sale" type="number" min="0" max="90" value="' + (C.sale || 0) + '"></div>'
+      + '<div class="field"><label for="adm-ev">Événement offert (son code marche hors période)</label><select class="input" id="adm-ev"><option value="">Aucun</option>' + rbOptions('event').map(([v, l]) => '<option value="' + e(v) + '"' + (C.event === v ? ' selected' : '') + '>' + e(l) + '</option>').join('') + '</select></div>'
+      + '<div class="field wide"><label for="adm-maint">Maintenance : message en rouge pour tout le monde (vide = désactivée)</label><input class="input" id="adm-maint" maxlength="200" value="' + e(C.maint || '') + '"></div></div>'
+      + rbHTML('welcome', 'Cadeau de bienvenue (une fois par compte)') + '<button class="btn red">Enregistrer les réglages</button></form>';
+  }
+  if (ADM.tab === 'stats') {
+    if (!ADM.stats && !ADM.busy) admReq('stats').then(r => { ADM.stats = r; metaRender(); }).catch(err => toast(err.message, true));
+    const S2 = ADM.stats; h += S2 ? '<div class="adm-stats">' + [['Comptes', S2.players], ['Connectés en ce moment', S2.online], ['Parties en mémoire', S2.games], ['Codes du jeu', fmtCoins(Object.keys(CODES).length)], ['Tes codes', S2.codes], ['Codes retirés', S2.off]].map(([l, v]) => '<div><span class="eyebrow">' + l + '</span><b>' + v + '</b></div>').join('') + '</div><p class="dim">' + (S2.persistent ? 'Stockage permanent (Upstash) actif.' : 'Stockage temporaire : configure Upstash pour garder les comptes et les réglages.') + '</p><button class="btn ghost small" data-a="adm-restat">Actualiser</button>' : '<p class="dim">Chargement…</p>';
+  }
+  return h + '</div>';
+}
+const admNorm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a^="adm-"],[data-a="site-bx"]'); if (!el) return; const a = el.dataset.a;
+  if (a === 'site-bx') { LS.set('ds_banner_x', SITE.cfg && SITE.cfg.banner && SITE.cfg.banner.id); $('#site-banner').hidden = true; return; }
+  if (a === 'adm-rb-type') return;
+  ev.preventDefault();
+  if (a === 'adm-tab') { ADM.tab = el.dataset.t; ADM.del = null; ADM.reset = true; if (ADM.tab === 'stats') ADM.stats = null; metaRender(); }
+  if (a === 'adm-new') { ADM.edit = null; ADM.rb.code = []; ADM.tab = 'edit'; ADM.reset = true; metaRender(); }
+  if (a === 'adm-edit') { const c = el.dataset.c; ADM.edit = c; ADM.rb.code = (ADM.cfg.codes[c].r || []).slice(); ADM.tab = 'edit'; ADM.reset = true; metaRender(); }
+  if (a === 'adm-copy') { const c = el.dataset.c; ADM.edit = null; ADM.reset = true; ADM.rb.code = (CODES[c][1] || []).filter(t => !t.startsWith('event:') && !t.startsWith('page:') && !t.startsWith('shop:')); ADM.tab = 'edit'; metaRender(); setTimeout(() => { if ($('#adm-name')) $('#adm-name').value = c; if ($('#adm-desc')) $('#adm-desc').value = CODES[c][0]; }, 0); }
+  if (a === 'adm-toggle') { const c = el.dataset.c, v = ADM.cfg.codes[c]; admRun('codeset', { code: c, d: v.d, r: v.r, from: v.from, to: v.to, max: v.max, on: v.on === false }, v.on === false ? 'Code réactivé.' : 'Code désactivé.'); }
+  if (a === 'adm-del?') { ADM.del = el.dataset.c; metaRender(); }
+  if (a === 'adm-del') { ADM.del = null; admRun('codedel', { code: el.dataset.c }, 'Code retiré.'); }
+  if (a === 'adm-off') admRun('codeoff', { code: el.dataset.c, off: el.dataset.v === '1' }, el.dataset.v === '1' ? 'Code retiré du jeu.' : 'Code réactivé.');
+  if (a === 'adm-rb-add') rbAdd(el.dataset.k);
+  if (a === 'adm-rb-del') { ADM.rb[el.dataset.k].splice(+el.dataset.i, 1); metaRender(); }
+  if (a === 'adm-target') { ADM.target = el.dataset.n || null; ADM.rb.give = []; metaRender(); }
+  if (a === 'adm-give') { const msg = ($('#adm-gmsg') || {}).value; admRun('give', { name: ADM.target, r: ADM.rb.give, msg }, 'Cadeau envoyé à ' + ADM.target + '.').then(r => { if (r !== null) { ADM.target = null; ADM.rb.give = []; admFind(); } }); }
+  if (a === 'adm-ban') admRun(el.dataset.v === '1' ? 'ban' : 'unban', { name: el.dataset.n }, el.dataset.v === '1' ? 'Compte suspendu.' : 'Compte réactivé.').then(admFind);
+  if (a === 'adm-pass') { ADM.pass = ADM.pass === el.dataset.n ? null : el.dataset.n; metaRender(); }
+  if (a === 'adm-pdel?') { ADM.del = '@' + el.dataset.n; metaRender(); }
+  if (a === 'adm-pdel') { ADM.del = null; admRun('delete', { name: el.dataset.n }, 'Compte supprimé.').then(admFind); }
+  if (a === 'adm-giftall') { const msg = ($('#adm-amsg') || {}).value, until = dtOut(($('#adm-auntil') || {}).value); admRun('giftall', { r: ADM.rb.all, msg, until }, 'Cadeau offert à tous les joueurs.').then(r => { if (r) ADM.rb.all = []; metaRender(); }); }
+  if (a === 'adm-giftdel') admRun('giftdel', { id: el.dataset.id }, 'Cadeau retiré.');
+  if (a === 'adm-restat') { ADM.stats = null; metaRender(); }
+});
+document.addEventListener('change', ev => { const el = ev.target; if (el.dataset && el.dataset.a === 'adm-rb-type') { ADM.rbType[el.dataset.k] = el.value; metaRender(); } });
+document.addEventListener('input', ev => { if (ev.target.id === 'adm-q') { ADM.q = ev.target.value; clearTimeout(ADM.qt); ADM.qt = setTimeout(() => { metaRender(); const i = $('#adm-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
+
+// garde ce qui est tapé dans le panneau admin quand il se redessine (ajout d'une récompense, etc.)
+const _metaRenderBase = metaRender;
+metaRender = function () {
+  let snap = null;
+  if (G.metaTab === 'admin' && !ADM.reset) { snap = {}; document.querySelectorAll('.adm input[id], .adm select[id]').forEach(el => { if (el.id.startsWith('rb-')) return; snap[el.id] = el.type === 'checkbox' ? el.checked : el.value; }); }
+  ADM.reset = false; _metaRenderBase();
+  if (snap) for (const [id, v] of Object.entries(snap)) { const el = document.getElementById(id); if (!el) continue; if (el.type === 'checkbox') el.checked = v; else el.value = v; }
+};
+async function admFind() { try { ADM.players = await admReq('players', { q: ADM.pq }); } catch (err) { toast(err.message, true); } metaRender(); }
+document.addEventListener('submit', ev => {
+  const f = ev.target; if (!f.dataset || !f.dataset.adm) return; ev.preventDefault(); const k = f.dataset.adm;
+  if (k === 'find') { ADM.pq = $('#adm-pq').value.trim(); admFind(); }
+  if (k === 'pass') { const n = f.dataset.n, pw = $('#adm-newpass').value; admRun('resetpass', { name: n, pass: pw }, 'Mot de passe de ' + n + ' changé : « ' + pw + ' ».').then(() => { ADM.pass = null; metaRender(); }); }
+  if (k === 'code') {
+    const code = $('#adm-name').value.toUpperCase().replace(/[^A-Z0-9]/g, ''); if (code.length < 2) return toast('Nom du code : au moins 2 lettres ou chiffres.', true);
+    admRun('codeset', { code, rename: ADM.edit, d: $('#adm-desc').value, r: ADM.rb.code, from: dtOut($('#adm-from').value), to: dtOut($('#adm-to').value), max: +$('#adm-max').value || 0, on: $('#adm-on').checked, resetUses: !!($('#adm-reset') && $('#adm-reset').checked) }, (ADM.edit ? 'Code modifié : ' : 'Code créé : ') + code).then(r => { if (r) { ADM.edit = code; ADM.tab = 'codes'; ADM.reset = true; metaRender(); } });
+  }
+  if (k === 'site') admRun('cfgset', { cfg: { banner: { text: $('#adm-bn').value, color: $('#adm-bnc').value }, motd: $('#adm-motd').value, coinMul: +$('#adm-cm').value, xpMul: +$('#adm-xm').value, sale: +$('#adm-sale').value || 0, event: $('#adm-ev').value, maint: $('#adm-maint').value, welcome: ADM.rb.welcome } }, 'Réglages du site enregistrés.');
+});
+// remplit le cadeau de bienvenue avec la valeur actuelle quand on ouvre l'onglet Site
+const _admTabSite = () => { if (ADM.tab === 'site' && ADM.cfg && !ADM.rb.welcomeLoaded) { ADM.rb.welcome = (ADM.cfg.welcome || []).slice(); ADM.rb.welcomeLoaded = true; } };
+
+/* =====================================================================
+   BONUS : récompense de connexion (7 jours), roue de la fortune, succès
+   ===================================================================== */
+const LOGIN_REW = [['c:100'], ['c:150', 'xp:50'], ['c:200', 'ing:champignon:2', 'ing:baie:2'], ['c:250', 'xp:150'], ['c:300', 'box'], ['c:400', 'dbl:2'], ['c:800', 'box', 'box', 'xp:300']];
+const WHEEL = [ // [libellé, récompense, poids, couleur]
+  ['50 pièces', ['c:50'], 22, '#2a3038'], ['150 pièces', ['c:150'], 18, '#3a2a2a'], ['300 pièces', ['c:300'], 12, '#2a3830'], ['200 XP', ['xp:200'], 14, '#2a2f40'],
+  ['Coffre', ['box'], 10, '#40301e'], ['Panier', ['ing:champignon:2', 'ing:baie:2', 'ing:herbe:2', 'ing:poisson:2'], 12, '#2e3a24'], ['Gains ×2', ['dbl:2'], 9, '#2e2440'], ['JACKPOT 3 000', ['c:3000', 'fx-rain'], 3, '#5a1a14'],
+];
+const WHEEL_PRICE = 150;
+const ACH = [ // [id, nom, description, test(P, L), récompenses]
+  ['g1', 'Premier signal', 'Jouer 1 partie', P => P.stats.games >= 1, ['c:100']], ['g10', 'Habitué', 'Jouer 10 parties', P => P.stats.games >= 10, ['c:300']], ['g50', 'Vétéran', 'Jouer 50 parties', P => P.stats.games >= 50, ['c:1000', 'box']], ['g100', 'Pilier de la Zone', 'Jouer 100 parties', P => P.stats.games >= 100, ['c:2500', 't:pilier']], ['g500', 'Légende vivante', 'Jouer 500 parties', P => P.stats.games >= 500, ['c:10000', 't:legendevivante', 'f:legendary']],
+  ['w1', 'Première victoire', 'Gagner 1 partie', P => P.stats.wins >= 1, ['c:150']], ['w10', 'Gagnant', 'Gagner 10 parties', P => P.stats.wins >= 10, ['c:500']], ['w50', 'Champion', 'Gagner 50 parties', P => P.stats.wins >= 50, ['c:2000', 'box']], ['w100', 'Invaincu', 'Gagner 100 parties', P => P.stats.wins >= 100, ['c:5000', 't:invaincu']],
+  ['s3', 'En série', '3 victoires d’affilée', P => P.stats.best >= 3, ['c:300']], ['s5', 'Inarrêtable', '5 victoires d’affilée', P => P.stats.best >= 5, ['c:800']], ['s10', 'Intouchable', '10 victoires d’affilée', P => P.stats.best >= 10, ['c:3000', 'box', 'box']],
+  ['v10', 'Survivant', 'Survivre à 10 parties', P => P.stats.survived >= 10, ['c:400']], ['v50', 'Increvable', 'Survivre à 50 parties', P => P.stats.survived >= 50, ['c:1500', 'box']],
+  ['c10', 'Chercheur de codes', 'Utiliser 10 codes', P => Object.keys(P.codes).length >= 10, ['c:200']], ['c50', 'Chasseur de codes', 'Utiliser 50 codes', P => Object.keys(P.codes).length >= 50, ['c:600']], ['c100', 'Décodeur', 'Utiliser 100 codes', P => Object.keys(P.codes).length >= 100, ['c:1200', 't:decodeur']], ['c250', 'Cryptographe', 'Utiliser 250 codes', P => Object.keys(P.codes).length >= 250, ['c:3000', 'box']], ['c500', 'Briseur d’énigmes', 'Utiliser 500 codes', P => Object.keys(P.codes).length >= 500, ['c:6000', 'n:glitch']], ['c1000', 'Maître du Signal', 'Utiliser 1 000 codes', P => Object.keys(P.codes).length >= 1000, ['c:15000', 't:maitredusignal', 'f:infinity']],
+  ['l5', 'Niveau 5', 'Atteindre le niveau 5', () => level() >= 5, ['c:200']], ['l10', 'Niveau 10', 'Atteindre le niveau 10', () => level() >= 10, ['c:500']], ['l20', 'Niveau 20', 'Atteindre le niveau 20', () => level() >= 20, ['c:1500']], ['l30', 'Niveau 30', 'Atteindre le niveau 30', () => level() >= 30, ['c:3000', 'box']], ['l50', 'Niveau 50', 'Atteindre le niveau 50', () => level() >= 50, ['c:8000', 'th:universe']],
+  ['h2', 'Propriétaire', 'Construire la cuisine', P => (P.house || 1) >= 2, ['c:200']], ['h4', 'Bel intérieur', 'Construire le salon', P => (P.house || 1) >= 4, ['c:800']], ['h6', 'Châtelain', 'Construire le manoir', P => (P.house || 1) >= 6, ['c:3000', 'box', 'box']],
+  ['p10', 'Pêcheur du dimanche', 'Pêcher 10 poissons', (P, L) => (L.stats.pecher || 0) >= 10, ['c:300']], ['k10', 'Cuistot', 'Cuisiner 10 plats', (P, L) => (L.stats.cuisiner || 0) >= 10, ['c:300']], ['q30', 'Cueilleur', 'Cueillir 30 ingrédients', (P, L) => (L.stats.cueillir || 0) >= 30, ['c:300']],
+  ['e10k', 'Riche', 'Gagner 10 000 pièces au total', P => P.earned >= 10000, ['c:500']], ['e100k', 'Millionnaire de la Zone', 'Gagner 100 000 pièces au total', P => P.earned >= 100000, ['c:5000', 't:millionnaire']],
+  ['lost4', 'Archéologue', 'Trouver 4 codes perdus', P => LOST_CODES.filter(c => P.codes[c]).length >= 4, ['c:1000']], ['lost16', 'Tout est perdu', 'Trouver les 16 codes perdus', P => LOST_CODES.filter(c => P.codes[c]).length >= LOST_CODES.length, ['c:10000', 'box', 'box', 'box']],
+  ['streak7', 'Fidèle', 'Se connecter 7 jours d’affilée', P => (P.login && P.login.best || 0) >= 7, ['c:1000', 't:fidele']], ['streak30', 'Inséparable', 'Se connecter 30 jours d’affilée', P => (P.login && P.login.best || 0) >= 30, ['c:5000', 'f:eternal']],
+];
+Object.assign(TITLES, { pilier: 'Pilier de la Zone', legendevivante: 'Légende vivante', invaincu: 'Invaincu', decodeur: 'Décodeur', maitredusignal: 'Maître du Signal', millionnaire: 'Millionnaire', fidele: 'Fidèle', chanceux: 'Chanceux' });
+META_TABS.splice(1, 0, ['bonus', 'Bonus']);
+const dayKey = (d = new Date()) => d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+function bonusState() { const P_ = pf(); if (!P_.login) P_.login = { day: '', streak: 0, best: 0 }; if (!P_.ach) P_.ach = {}; return P_; }
+function loginCanClaim() { const P_ = bonusState(); return P_.login.day !== dayKey(); }
+function loginClaim() {
+  const P_ = bonusState(); if (!loginCanClaim()) return;
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  P_.login.streak = P_.login.day === dayKey(y) ? P_.login.streak + 1 : 1; P_.login.day = dayKey(); P_.login.best = Math.max(P_.login.best || 0, P_.login.streak);
+  const idx = (P_.login.streak - 1) % 7; const got = LOGIN_REW[idx].map(t => grant(t, true)).filter(Boolean);
+  pfSave(); toast('Jour ' + (idx + 1) + ' : ' + got.join(', ')); if (typeof coinFx === 'function') coinFx(0); metaRender();
+}
+let wheelSpin = null;
+function wheelPick() { const tot = WHEEL.reduce((a, w) => a + w[2], 0); let r = Math.random() * tot; for (let i = 0; i < WHEEL.length; i++) { r -= WHEEL[i][2]; if (r <= 0) return i; } return 0; }
+function wheelGo(paid) {
+  if (wheelSpin) return; const P_ = bonusState();
+  if (paid) { if (P_.coins < WHEEL_PRICE) return toast('Il faut ' + WHEEL_PRICE + ' pièces.', true); P_.coins -= WHEEL_PRICE; P_.spent += WHEEL_PRICE; } else { if (P_.wheel === dayKey()) return; P_.wheel = dayKey(); }
+  pfSave(); const i = wheelPick(); const n = WHEEL.length; const seg = 360 / n;
+  const target = 360 * 6 + (360 - (i * seg + seg / 2)); wheelSpin = { i, deg: target };
+  const w = $('#wheel-disc'); if (w) { w.style.transition = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'none' : 'transform 3.2s cubic-bezier(.15,.85,.2,1)'; w.style.transform = 'rotate(' + target + 'deg)'; }
+  setTimeout(() => { const got = WHEEL[i][1].map(t => grant(t, true)).filter(Boolean); if (i === WHEEL.length - 1) { P_.inv['t:chanceux'] = 1; got.push('[Chanceux]'); } pfSave(); toast('Roue : ' + WHEEL[i][0] + (got.length ? ' — ' + got.join(', ') : '')); wheelSpin = null; metaRender(); }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 200 : 3300);
+}
+function bonusHTML() {
+  const P_ = bonusState(); const L = typeof lifeP === 'function' ? lifeP() : { stats: {} };
+  const st = P_.login; const can = loginCanClaim(); const y = new Date(); y.setDate(y.getDate() - 1);
+  const next = can ? (st.day === dayKey(y) ? st.streak + 1 : 1) : st.streak; const cur = (next - 1) % 7;
+  let h = '<h3>Connexion du jour <small>série : ' + (st.streak || 0) + ' jour' + ((st.streak || 0) > 1 ? 's' : '') + ' · record ' + (st.best || 0) + '</small></h3><div class="cal">';
+  LOGIN_REW.forEach((r, i) => { const done = can ? i < cur : i <= cur; const today = can && i === cur; h += '<div class="cal-d' + (done ? ' done' : '') + (today ? ' today' : '') + '"><span class="eyebrow">Jour ' + (i + 1) + '</span><b>' + e(r.map(rbLabelSafe).join(' + ')) + '</b>' + (done ? '<i>✓</i>' : '') + '</div>'; });
+  h += '</div>' + (can ? '<button class="btn red" data-a="bonus-login">Récupérer le jour ' + (cur + 1) + '</button>' : '<p class="dim">Reviens demain pour le jour ' + ((st.streak % 7) + 1) + '. Si tu rates un jour, la série recommence au jour 1.</p>');
+  const free = P_.wheel !== dayKey(); const n = WHEEL.length;
+  const grad = WHEEL.map((w, i) => w[3] + ' ' + (i * 100 / n) + '% ' + ((i + 1) * 100 / n) + '%').join(', ');
+  h += '<h3>Roue de la fortune</h3><div class="wheel-box"><div class="wheel-wrap"><div class="wheel-ptr" aria-hidden="true"></div><div class="wheel-disc" id="wheel-disc" style="background:conic-gradient(' + grad + ');transform:rotate(' + (wheelSpin ? wheelSpin.deg : 0) + 'deg)">'
+    + WHEEL.map((w, i) => '<span style="transform:rotate(' + (i * 360 / n + 180 / n) + 'deg) translateY(-96px)">' + e(w[0]) + '</span>').join('') + '</div></div>'
+    + '<div class="wheel-side"><p>Un tour gratuit par jour. Les tours suivants coûtent ' + WHEEL_PRICE + ' pièces.</p><p class="dim">Chances : 50 pièces 22 %, 150 pièces 18 %, 200 XP 14 %, 300 pièces 12 %, panier 12 %, coffre 10 %, gains ×2 9 %, jackpot 3 %.</p>'
+    + (free ? '<button class="btn red" data-a="bonus-wheel"' + (wheelSpin ? ' disabled' : '') + '>Tour gratuit</button>' : '<button class="btn ghost" data-a="bonus-wheel2"' + (wheelSpin ? ' disabled' : '') + '>Tourner (◉ ' + WHEEL_PRICE + ')</button>') + '</div></div>';
+  const done = ACH.filter(a => P_.ach[a[0]]).length;
+  h += '<h3>Succès <small>' + done + ' / ' + ACH.length + '</small></h3><div class="ach">';
+  for (const [id, nm, desc, test, rw] of ACH) { const got = P_.ach[id]; let ok = false; try { ok = test(P_, L); } catch {} h += '<div class="ach-i' + (got ? ' got' : ok ? ' ready' : '') + '"><b>' + e(nm) + '</b><small>' + e(desc) + '</small><span class="ach-r">' + e(rw.map(rbLabelSafe).join(' + ')) + '</span>' + (got ? '<span class="tag frost">Réclamé</span>' : ok ? '<button class="btn red small" data-a="bonus-ach" data-id="' + id + '">Réclamer</button>' : '<span class="dim">À débloquer</span>') + '</div>'; }
+  return h + '</div>';
+}
+function rbLabelSafe(t) { try { return rbLabel(t); } catch { return t; } }
+function achClaim(id) { const P_ = bonusState(); const a = ACH.find(x => x[0] === id); if (!a || P_.ach[id]) return; let ok = false; try { ok = a[3](P_, lifeP()); } catch {} if (!ok) return; P_.ach[id] = Date.now(); const got = a[4].map(t => grant(t, true)).filter(Boolean); pfSave(); toast('Succès « ' + a[1] + ' » : ' + got.join(', ')); metaRender(); }
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a^="bonus-"]'); if (!el || el.disabled) return; const a = el.dataset.a;
+  if (a === 'bonus-login') loginClaim();
+  if (a === 'bonus-wheel') wheelGo(false);
+  if (a === 'bonus-wheel2') wheelGo(true);
+  if (a === 'bonus-ach') achClaim(el.dataset.id);
+});
+// petit rappel : un point rouge sur l'onglet Bonus quand quelque chose t'attend
+function bonusPending() { const P_ = bonusState(); if (loginCanClaim() || P_.wheel !== dayKey()) return true; const L = typeof lifeP === 'function' ? lifeP() : { stats: {} }; return ACH.some(a => { if (P_.ach[a[0]]) return false; try { return a[3](P_, L); } catch { return false; } }); }
 
 /* =====================================================================
    CHAT VOCAL (WebRTC, de joueur à joueur ; le serveur ne fait que présenter les joueurs)

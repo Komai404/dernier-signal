@@ -112,6 +112,26 @@ branche une base gratuite **Upstash Redis** (2 minutes) :
 
 Le serveur redémarre et les comptes sont alors stockés pour de bon.
 
+## Compte administrateur
+
+Le compte admin n'existe que si tu le configures sur Render. Son mot de passe n'est jamais écrit dans le code ni dans GitHub.
+
+1. Sur Render, ouvre le service **dernier-signal**, puis **Environment**.
+2. Ajoute la variable `ADMIN_PASSWORD` avec un mot de passe long que toi seul connais.
+3. Facultatif : ajoute `ADMIN_NAME` pour choisir le pseudo de l'admin (par défaut : `admin`).
+4. Enregistre. Render redémarre le site.
+5. Sur le site : **Profil → Se connecter** avec ce pseudo et ce mot de passe. Un onglet **Admin** apparaît.
+
+Ce que permet l'onglet Admin :
+
+- **Codes** : créer, modifier, désactiver ou retirer tes propres codes (nom, message, récompenses à choisir dans une liste, dates de début et de fin, nombre d'utilisations maximum). Tu peux aussi retirer du jeu n'importe lequel des codes existants, ou remplacer ses récompenses. Les joueurs ne peuvent pas voir la liste de tes codes : le navigateur ne reçoit que leur empreinte.
+- **Joueurs** : voir tous les comptes (pièces, XP, parties, codes…), leur envoyer un cadeau, les suspendre, changer leur mot de passe, les supprimer.
+- **Cadeaux** : offrir un cadeau à tous les joueurs, avec une date limite si tu veux.
+- **Site** : annonce en haut de l'écran d'accueil, message d'accueil, pièces et XP multipliées en fin de partie, soldes dans la boutique, événement offert, message de maintenance, cadeau de bienvenue.
+- **Statistiques** : nombre de comptes, de joueurs connectés, de parties.
+
+Sans Upstash, les réglages et les codes admin sont effacés à chaque redémarrage de Render, comme les comptes. Avec Upstash, tout est gardé.
+
 ## Chat vocal
 
 Sur le site (Render ou ton propre serveur), chaque joueur peut parler au micro :
