@@ -5633,6 +5633,97 @@ async function accLogout() {
   toast('Déconnecté. Ta progression reste dans ton compte.'); metaRender(); render();
 }
 
+/* --- encore plus de codes : petites références et événements limités dans le temps --- */
+Object.assign(TITLES, {
+  daron: 'Daron', gardienaltoria: 'Gardien d’Altoria', sus: 'Sus', goat: 'GOAT', npc: 'PNJ', personnageprincipal: 'Personnage principal', sigma: 'Sigma', skillissue: 'Skill issue',
+  over9000: 'Plus de 9000', jenkins: 'Leeroy', pressf: 'Respect', touchgrass: 'Touche de l’herbe', baguette: 'Baguette', boulanger: 'Boulanger', youtubeur: 'Youtubeur', abonne: 'Abonné', streamer: 'Streamer', tryhard: 'Tryhard', neverdies: 'Ne meurt jamais',
+  jedi: 'Jedi', astronome: 'Astronome', patriote: 'Citoyen', fromager: 'Fromager', geek: 'Geek', papa: 'Super papa', maman: 'Super maman', lyceen: 'Bachelier', chocolatier: 'Chocolatier', courtois: 'Courtois', brumeux: 'Dans la brume', chat: 'Ami des chats', pizzaiolo: 'Pizzaiolo', voyageur: 'Voyageur du temps',
+});
+Object.assign(BADGES, {
+  daron: ['☕', '#c9a86a', 'Daron'], altoria: ['♜', '#b28cff', 'Altoria'], sus: ['◖', '#e63a2e', 'Sus'], yt: ['▶', '#ff3d3d', 'Youtube'], manette: ['◰', '#4f9ae8', 'Manette'], baguette: ['⟋', '#d9a45a', 'Baguette'], jedi: ['⚔', '#4fe8ff', 'Jedi'], etoilefilante: ['☄', '#ffd36b', 'Étoile filante'],
+  trefle: ['☘', '#3ad96a', 'Trèfle'], pi: ['π', '#8fb0ff', 'Pi'], terre: ['◍', '#3ad99a', 'Planète'], cocarde: ['◎', '#4f6bff', 'Cocarde'], brume: ['≋', '#9aa3ab', 'Brume'], chat: ['ᓚ', '#ffb84f', 'Chat'], pizza: ['◭', '#ff9b4f', 'Pizza'], troisheures: ['③', '#e63a2e', '3 h du matin'],
+});
+const REF_CODES = {
+  // petites références
+  ALTORIA: ['Un royaume oublié se souvient de toi…', ['t:gardienaltoria', 'b:altoria', 'th:kingdom', 'c:777']],
+  BECOMINGADAD: ['Tu ressens soudain l’envie de régler le thermostat.', ['t:daron', 'b:daron', 'e:hausser', 'c:500']],
+  DADJOKE: ['Tu connais la blague du Mordu ? Il a du mordant.', ['t:daron', 'c:150']],
+  SQUEEZIE: ['Le patron du YouTube français approuve ta partie.', ['t:youtubeur', 'b:yt', 'col:gold', 'c:500']],
+  INOXTAG: ['Tu as gravi l’Everest… du classement.', ['t:tryhard', 'e:victoire', 'c:400']],
+  MICHOU: ['Énergie maximale, vibes maximales.', ['e:danseparty', 'n:rainbow', 'c:300']],
+  AMIXEM: ['Un concept complètement fou débloqué.', ['e:chaos', 'c:300']],
+  GOTAGA: ['GENTLEMATE !', ['t:tryhard', 'b:manette', 'c:400']],
+  JOYCA: ['Tu as testé le jeu le plus dur du monde.', ['e:facepalm', 'c:300']],
+  MCFLY: ['Un concours de bêtises s’annonce.', ['e:rigolo', 'c:250']], CARLITO: ['Et l’autre moitié du duo est là.', ['e:mortderire', 'c:250']], MCFLYETCARLITO: ['Le duo au complet.', ['e:rigolo', 'e:mortderire', 'b:yt', 'c:400']],
+  CYPRIEN: ['Un classique d’internet.', ['e:rire', 'c:300']], NORMAN: ['Il fait des vidéos, et toi tu fais des parties.', ['e:salut', 'c:300']],
+  TIBOINSHAPE: ['Allez, on pousse ! +gains doublés.', ['e:flex', 'dbl:2', 'c:200']], LOCKLEAR: ['Il est temps de faire le pitre.', ['e:tchou', 'c:250']],
+  DOMINGO: ['Un petit live pour la route.', ['t:streamer', 'c:300']], KAMETO: ['La KCorp t’envoie de la force.', ['t:tryhard', 'b:manette', 'c:300']], ZERATOR: ['Tu as gagné ta place au ZEvent… de la meute.', ['t:streamer', 'fx-rain', 'c:400']],
+  LEBOUSEUH: ['Bouh ! Tu as eu peur ?', ['e:ghostmove', 'c:300']], FURIOUSJUMPER: ['Une aventure Minecraft t’attend.', ['e:jump', 'c:300']], SIPHANO: ['Sudoku ou loups-garous, la logique avant tout.', ['t:detective', 'c:300']],
+  LEGRANDJD: ['Le grand JD te salue.', ['e:salutroi', 'c:300']], VALOUZZ: ['Une montée de rang express.', ['xp:300', 'c:200']], MRBEAST: ['Tu viens de gagner… beaucoup de pièces.', ['c:1000', 'fx-rain']],
+  PEWDIEPIE: ['Abonne-toi… à la meute.', ['t:abonne', 'b:yt', 'c:400']], MARKIPLIER: ['Hello everybody, and welcome to Dernier Signal.', ['e:grandsalut', 'c:300']], TECHNOBLADE: ['Il ne meurt jamais.', ['t:neverdies', 'b:couronne', 'c:500']],
+  AMONGUS: ['Quelqu’un est sus…', ['t:sus', 'b:sus', 'e:accuser', 'c:300']], SUS: ['Tu as l’air suspect.', ['t:sus', 'c:100']], IMPOSTOR: ['Il y a un imposteur parmi nous. Ah non, c’est le Mordu.', ['e:accuser', 'c:200']],
+  OVER9000: ['Ton niveau de puissance est… plus de 9000 !', ['t:over9000', 'xp:900', 'c:900']], LEEROYJENKINS: ['LEEROOOOY JENKINS !', ['t:jenkins', 'e:tchou', 'c:300']], PRESSF: ['Respect pour les tombés au combat.', ['t:pressf', 'e:sadboy', 'c:200']],
+  GGEZ: ['Reste humble.', ['e:ggwp', 'c:100']], GOAT: ['Le plus grand de tous les temps.', ['t:goat', 'c:500']], SKILLISSUE: ['C’est un problème de niveau.', ['t:skillissue', 'e:hausser', 'c:150']], TOUCHGRASS: ['Va dehors cinq minutes (ou dans la clairière en 3D).', ['t:touchgrass', 'fur:potfleur', 'c:150']],
+  NPC: ['Bonjour aventurier. Belle journée, n’est-ce pas ?', ['t:npc', 'e:robot', 'c:150']], MAINCHARACTER: ['Tout tourne autour de toi.', ['t:personnageprincipal', 'f:neon', 'c:300']], SIGMA: ['Mode loup solitaire activé.', ['t:sigma', 'e:boss', 'c:300']],
+  RICKROLL: ['Tu viens de te faire avoir.', ['e:danse', 'c:100']], KONAMI: ['↑ ↑ ↓ ↓ ← → ← → B A', ['c:3000', 'xp:300']], UUDDLRLRBA: ['Le vrai code secret.', ['box', 'box', 'c:300']],
+  THECAKEISALIE: ['Le gâteau est un mensonge. Mais voilà quand même un gâteau.', ['fur:gateau', 'c:200']], DOABARRELROLL: ['Tonneau !', ['e:spin', 'fur:tonneau', 'c:200']], HELLOTHERE: ['General Kenobi !', ['t:jedi', 'b:jedi', 'c:300']],
+  NOOB: ['Tout le monde a commencé un jour.', ['c:50', 'xp:50']], BAGUETTE: ['Cocorico.', ['t:baguette', 'b:baguette', 'c:200']], CROISSANT: ['Et pas « chocolatine » pour celui-là.', ['t:boulanger', 'c:200']], CHOCOLATINE: ['Le débat éternel.', ['t:boulanger', 'c:200']], PAINAUCHOCOLAT: ['L’autre camp du débat.', ['t:boulanger', 'c:200']],
+  FROMAGE: ['Un bon camembert pour la route.', ['t:fromager', 'c:200']], OHLALA: ['Oh là là, quelle partie.', ['e:facepalm', 'c:100']], RAGEQUIT: ['Ne casse pas ta manette.', ['e:chaos', 'c:100']], AFK: ['Tu reviens bientôt ?', ['e:sommeil', 'c:100']], LAG: ['Désolé, c’était le wifi.', ['e:glitch', 'c:150']],
+  SPEEDRUN: ['Any%, sans pause.', ['t:coureur', 'c:300']], NOHIT: ['Tu n’as pris aucun coup.', ['xp:200', 'c:200']], FIRSTBLOOD: ['Premier sang.', ['b:skull', 'c:200']], CLUTCH: ['Un retournement de dernière seconde.', ['e:victoire', 'c:250']], TRYHARD: ['On ne lâche rien.', ['t:tryhard', 'c:200']],
+};
+for (const [code, v] of Object.entries(REF_CODES)) if (!CODES[code]) CODES[code] = v;
+/* événements supplémentaires (codes valables seulement pendant leur période) */
+const dowIs = (d, k) => d.getDay() === k; const hr = (d, a, b) => d.getHours() >= a && d.getHours() < b;
+Object.assign(EVENTS, {
+  soldeshiver: { name: 'Soldes d’hiver', when: d => md(d, 1, 8, 31) || md(d, 2, 1, 4), period: 'du 8 janvier au 4 février', rewards: ['cp:30', 'cp:20', 'tax:3', 'c:200'] },
+  pizza: { name: 'Journée de la pizza', when: d => md(d, 2, 9, 9), period: 'le 9 février', rewards: ['b:pizza', 't:pizzaiolo', 'c:300'] },
+  mardigras: { name: 'Mardi gras', when: d => md(d, 2, 10, 18), period: 'du 10 au 18 février', rewards: ['e:dansefolle', 'col:dream', 'c:250'] },
+  bissextile: { name: 'Jour bissextile', when: d => md(d, 2, 29, 29), period: 'le 29 février (tous les 4 ans !)', rewards: ['t:voyageur', 'col:limited', 'c:2900'] },
+  femmes: { name: 'Journée des droits des femmes', when: d => md(d, 3, 8, 8), period: 'le 8 mars', rewards: ['t:maman', 'b:fleur', 'c:300'] },
+  pi: { name: 'Journée de Pi', when: d => md(d, 3, 14, 14), period: 'le 14 mars', rewards: ['b:pi', 'c:314', 'xp:314'] },
+  stpatrick: { name: 'Saint-Patrick', when: d => md(d, 3, 16, 18), period: 'du 16 au 18 mars', rewards: ['b:trefle', 'col:toxic', 'e:danse', 'c:300'] },
+  terre: { name: 'Jour de la Terre', when: d => md(d, 4, 22, 22), period: 'le 22 avril', rewards: ['b:terre', 'fur:cactus', 'fur:potfleur', 'c:200'] },
+  maythe4th: { name: 'May the 4th', when: d => md(d, 5, 4, 4), period: 'le 4 mai', rewards: ['t:jedi', 'b:jedi', 'th:galaxy', 'c:400'] },
+  serviette: { name: 'Jour de la serviette', when: d => md(d, 5, 25, 25), period: 'le 25 mai', rewards: ['c:420', 'xp:42'] },
+  fetemeres: { name: 'Fête des mères', when: d => md(d, 5, 24, 31) || md(d, 6, 1, 1), period: 'du 24 mai au 1er juin', rewards: ['t:maman', 'b:coeur', 'fur:potfleur', 'c:300'] },
+  bac: { name: 'Bac et brevets', when: d => md(d, 6, 10, 30), period: 'du 10 au 30 juin', rewards: ['t:lyceen', 'b:cartable', 'xp:300', 'c:200'] },
+  fetepere: { name: 'Fête des pères', when: d => md(d, 6, 14, 22), period: 'du 14 au 22 juin', rewards: ['t:papa', 'b:daron', 'c:400'] },
+  soldesete: { name: 'Soldes d’été', when: d => md(d, 6, 25, 30) || md(d, 7, 1, 22), period: 'du 25 juin au 22 juillet', rewards: ['cp:30', 'cp:20', 'tax:3', 'c:200'] },
+  bastille: { name: '14 Juillet', when: d => md(d, 7, 14, 14), period: 'le 14 juillet', rewards: ['t:patriote', 'b:cocarde', 'fx-fireworks', 'c:1400'] },
+  emoji: { name: 'Journée des emojis', when: d => md(d, 7, 17, 17), period: 'le 17 juillet', rewards: ['e:rigolo', 'e:heart', 'c:200'] },
+  amitie: { name: 'Journée de l’amitié', when: d => md(d, 7, 30, 30), period: 'le 30 juillet', rewards: ['e:applaudir', 'c:300'] },
+  chats: { name: 'Journée des chats', when: d => md(d, 8, 8, 8), period: 'le 8 août', rewards: ['t:chat', 'b:chat', 'c:300'] },
+  perseides: { name: 'Nuit des étoiles filantes', when: d => md(d, 8, 9, 14), period: 'du 9 au 14 août', rewards: ['t:astronome', 'b:etoilefilante', 'fur:telescope', 'th:celestial', 'c:300'] },
+  canicule: { name: 'Canicule', when: d => md(d, 8, 1, 20), period: 'du 1er au 20 août', rewards: ['col:aqua', 'fur:ventilo', 'c:200'] },
+  gamers: { name: 'Journée du jeu vidéo', when: d => md(d, 8, 29, 29) || md(d, 9, 12, 12), period: 'le 29 août et le 12 septembre', rewards: ['t:geek', 'b:manette', 'fur:arcade', 'c:400'] },
+  programmeurs: { name: 'Jour des programmeurs', when: d => md(d, 9, 12, 13), period: 'les 12 et 13 septembre', rewards: ['th:terminal', 'e:robot', 'c:256'] },
+  loups: { name: 'Semaine des loups', when: d => md(d, 10, 15, 25), period: 'du 15 au 25 octobre', rewards: ['col:wolf', 'e:hurlement', 'b:moon', 'c:400'] },
+  internet: { name: 'Journée d’internet', when: d => md(d, 10, 29, 29), period: 'le 29 octobre', rewards: ['th:cyber', 'n:glitch', 'c:300'] },
+  brume: { name: 'Mois de la brume', when: d => d.getMonth() === 10, period: 'tout le mois de novembre', rewards: ['t:brumeux', 'b:brume', 'th:ghosttown', 'c:250'] },
+  armistice: { name: '11 Novembre', when: d => md(d, 11, 10, 12), period: 'du 10 au 12 novembre', rewards: ['b:cocarde', 'e:silence', 'c:300'] },
+  thanksgiving: { name: 'Thanksgiving', when: d => md(d, 11, 22, 28), period: 'du 22 au 28 novembre', rewards: ['fur:gateau', 'e:applaudis', 'c:300'] },
+  avent: { name: 'Calendrier de l’Avent', when: d => md(d, 12, 1, 24), period: 'du 1er au 24 décembre', rewards: ['box', 'c:240'] },
+  saintnicolas: { name: 'Saint-Nicolas', when: d => md(d, 12, 5, 7), period: 'du 5 au 7 décembre', rewards: ['fur:cadeau', 'h:7', 'c:300'] },
+  reveillon: { name: 'Réveillon de Noël', when: d => md(d, 12, 24, 24), period: 'le 24 décembre', rewards: ['col:christmas', 'fur:gui', 'box', 'c:500'] },
+  troisheures: { name: '3 h du matin', when: d => hr(d, 3, 4), period: 'entre 3 h et 4 h du matin', rewards: ['b:troisheures', 'th:redroom', 'e:mystere', 'c:333'] },
+  pausedej: { name: 'Pause déjeuner', when: d => hr(d, 12, 14), period: 'entre midi et 14 h', rewards: ['fur:tasse', 'c:120'] },
+  gouter: { name: 'L’heure du goûter', when: d => hr(d, 16, 17), period: 'entre 16 h et 17 h', rewards: ['t:chocolatier', 'c:160'] },
+  heuredor: { name: 'Heure dorée', when: d => hr(d, 17, 19) && (d.getMonth() < 3 || d.getMonth() > 8), period: 'entre 17 h et 19 h, d’octobre à mars', rewards: ['th:blackgold', 'c:200'] },
+  lundi: { name: 'Lundi difficile', when: d => dowIs(d, 1), period: 'le lundi', rewards: ['e:facepalm', 'fur:tasse', 'c:110'] },
+  mercredi: { name: 'Mercredi', when: d => dowIs(d, 3), period: 'le mercredi', rewards: ['e:jump', 'c:130'] },
+  vendredisoir: { name: 'Vendredi soir', when: d => dowIs(d, 5) && d.getHours() >= 18, period: 'le vendredi à partir de 18 h', rewards: ['e:partytime', 'dbl:1', 'c:150'] },
+  dimanchesoir: { name: 'Dimanche soir', when: d => dowIs(d, 0) && d.getHours() >= 18, period: 'le dimanche à partir de 18 h', rewards: ['e:sadboy', 'c:150'] },
+  quinze: { name: 'Mi-mois', when: d => d.getDate() === 15, period: 'le 15 de chaque mois', rewards: ['rand', 'c:150'] },
+  pleinelunecode: { name: 'Pleine lune', when: d => { const p = moonPhase(d); return p > 0.45 && p < 0.55; }, period: 'les nuits de pleine lune', rewards: ['e:hurlement', 'b:moon', 'f:moon', 'c:300'] },
+});
+const MORE_EVENT_CODES = {
+  SOLDES: 'soldeshiver', PIZZA: 'pizza', MARDIGRAS: 'mardigras', BISSEXTILE: 'bissextile', JOURNEEDESFEMMES: 'femmes', PIDAY: 'pi', SAINTPATRICK: 'stpatrick', JOURDELATERRE: 'terre', MAYTHE4TH: 'maythe4th', TOWELDAY: 'serviette',
+  FETEDESMERES: 'fetemeres', BAC: 'bac', FETEDESPERES: 'fetepere', SOLDESETE: 'soldesete', QUATORZEJUILLET: 'bastille', EMOJI: 'emoji', AMITIE: 'amitie', CHATS: 'chats', PERSEIDES: 'perseides', CANICULE: 'canicule',
+  GAMERSDAY: 'gamers', DEVDAY: 'programmeurs', SEMAINEDESLOUPS: 'loups', INTERNET: 'internet', BRUME: 'brume', ARMISTICE: 'armistice', THANKSGIVING: 'thanksgiving', AVENT: 'avent', SAINTNICOLAS: 'saintnicolas', REVEILLON: 'reveillon',
+  TROISHEURES: 'troisheures', PAUSEDEJ: 'pausedej', GOUTER: 'gouter', HEUREDOREE: 'heuredor', LUNDI: 'lundi', MERCREDI: 'mercredi', VENDREDISOIR: 'vendredisoir', DIMANCHESOIR: 'dimanchesoir', MIMOIS: 'quinze', LOUPGAROU: 'pleinelunecode',
+};
+for (const [code, ev] of Object.entries(MORE_EVENT_CODES)) if (!CODES[code]) CODES[code] = ['Événement : ' + EVENTS[ev].name, ['event:' + ev]];
+
 /* =====================================================================
    VIE EN 3D : maison qui s'agrandit, lieux à explorer, cueillette, cuisine,
    pêche, bornes d'arcade, défis du jour, sommeil qui raccourcit la nuit
