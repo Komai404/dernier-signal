@@ -172,7 +172,7 @@ const verifierOf = (name, pass) => crypto.pbkdf2Sync(String(pass), 'dernier-sign
 
 /* ---------- réglages du site (modifiables par l'admin) ---------- */
 const CFG_FILE = path.join(DATA_DIR, 'config.json');
-let CFG = { codes: {}, off: {}, banner: null, motd: '', coinMul: 1, xpMul: 1, sale: 0, event: '', maint: '', welcome: [], gifts: [], eco: {}, prices: {}, timers: {}, bots: [], lede: '', weather: '', login: [], houses: [], wheel: {}, lifeCap: 0, log: [], upd: 0 };
+let CFG = { codes: {}, off: {}, banner: null, motd: '', coinMul: 1, xpMul: 1, sale: 0, event: '', maint: '', welcome: [], gifts: [], eco: {}, prices: {}, timers: {}, bots: [], lede: '', weather: '', login: [], houses: [], wheel: {}, lifeCap: 0, log: [], upd: 0, accent: '', countdown: null, poll: null, happy: null, weekend: 1, badwords: [], badnames: [], noRegister: false, no3d: false, noClassic: false, shopClosed: false, noWheel: false, codesOff: false, links: [], news: [], party: false, ticker: '', cotd: '', bannerUntil: 0 };
 const admLog = txt => { CFG.log = [{ t: Date.now(), txt: String(txt).slice(0, 200) }, ...(CFG.log || [])].slice(0, 200); clearTimeout(admLog.t); admLog.t = setTimeout(() => cfgSave().catch(() => {}), 3000); };
 async function cfgLoad() { try { const raw = UP_URL ? await upstash(['GET', 'ds:cfg']) : fs.readFileSync(CFG_FILE, 'utf8'); if (raw) CFG = Object.assign(CFG, JSON.parse(raw)); } catch (e) { if (e.code !== 'ENOENT') console.error('réglages', e.message); } }
 async function cfgSave() { CFG.upd = Date.now(); if (UP_URL) await upstash(['SET', 'ds:cfg', JSON.stringify(CFG)]); else { fs.mkdirSync(DATA_DIR, { recursive: true }); fs.writeFileSync(CFG_FILE, JSON.stringify(CFG)); } }
@@ -184,14 +184,14 @@ const num = (v, a, b, d) => { const x = +v; return Number.isFinite(x) ? Math.max
 const CODE_RX = /^[A-Z0-9]{2,40}$/;
 const codeHash = c => crypto.createHash('sha256').update('ds-code:' + c).digest('hex').slice(0, 24);
 // les codes perso restent secrets : le navigateur ne reçoit que leur empreinte, et demande le contenu au serveur quand on tape le bon code
-const publicCfg = () => ({ eco: CFG.eco, prices: CFG.prices, timers: CFG.timers, bots: CFG.bots, lede: CFG.lede, weather: CFG.weather, login: CFG.login, houses: CFG.houses, wheel: CFG.wheel, lifeCap: CFG.lifeCap, codes: Object.entries(CFG.codes).filter(([, v]) => v.on !== false).map(([c]) => codeHash(c)), off: CFG.off, banner: CFG.banner, motd: CFG.motd, coinMul: CFG.coinMul, xpMul: CFG.xpMul, sale: CFG.sale, event: CFG.event, maint: CFG.maint, welcome: CFG.welcome, gifts: CFG.gifts, upd: CFG.upd });
+const publicCfg = () => ({ eco: CFG.eco, prices: CFG.prices, timers: CFG.timers, bots: CFG.bots, lede: CFG.lede, weather: CFG.weather, login: CFG.login, houses: CFG.houses, wheel: CFG.wheel, lifeCap: CFG.lifeCap, codes: Object.entries(CFG.codes).filter(([, v]) => v.on !== false).map(([c]) => codeHash(c)), off: CFG.off, banner: CFG.banner, motd: CFG.motd, coinMul: CFG.coinMul, xpMul: CFG.xpMul, sale: CFG.sale, event: CFG.event, maint: CFG.maint, welcome: CFG.welcome, gifts: CFG.gifts, upd: CFG.upd, accent: CFG.accent, countdown: CFG.countdown, poll: CFG.poll ? { id: CFG.poll.id, q: CFG.poll.q, opts: CFG.poll.opts, n: CFG.poll.n, on: CFG.poll.on } : null, happy: CFG.happy, weekend: CFG.weekend, badwords: CFG.badwords, no3d: CFG.no3d, noClassic: CFG.noClassic, shopClosed: CFG.shopClosed, noWheel: CFG.noWheel, codesOff: CFG.codesOff, links: CFG.links, news: CFG.news, party: CFG.party, ticker: CFG.ticker, cotd: CFG.cotd, bannerUntil: CFG.bannerUntil, noRegister: CFG.noRegister });
 async function allAccounts(q) {
   let keys = UP_URL ? (await upstash(['KEYS', 'acc:*'])).map(k => k.slice(4)) : Object.keys(accLocal);
   if (q) keys = keys.filter(k => k.includes(accKey(q)));
   keys = keys.sort().slice(0, 300); if (!keys.length) return [];
   const vals = UP_URL ? await upstash(['MGET', ...keys.map(k => 'acc:' + k)]) : keys.map(k => JSON.stringify(accLocal[k]));
   return vals.map((v, i) => { let a; try { a = JSON.parse(v); } catch { return null; } if (!a) return null; const p = a.prof || {}; const st = p.stats || {};
-    return { k: keys[i], name: a.name, coins: p.coins || 0, xp: p.xp || 0, games: st.games || 0, wins: st.wins || 0, codes: Object.keys(p.codes || {}).length, house: p.house || 1, created: a.created || 0, upd: a.upd || 0, banned: !!a.banned, admin: isAdminK(keys[i]), gifts: (a.gifts || []).length }; }).filter(Boolean);
+    return { k: keys[i], name: a.name, coins: p.coins || 0, xp: p.xp || 0, games: st.games || 0, wins: st.wins || 0, codes: Object.keys(p.codes || {}).length, house: p.house || 1, created: a.created || 0, upd: a.upd || 0, banned: !!a.banned, admin: isAdminK(keys[i]), gifts: (a.gifts || []).length, muted: !!a.muted, note: a.note ? 1 : 0, warns: a.warns || 0 }; }).filter(Boolean);
 }
 function cfgApply(v) {
         if ('banner' in v) CFG.banner = v.banner && cleanStr(v.banner.text, 200) ? { text: cleanStr(v.banner.text, 200), color: /^#[0-9a-f]{6}$/i.test(v.banner.color) ? v.banner.color : '#e63a2e', id: Date.now() } : null;
@@ -212,13 +212,40 @@ function cfgApply(v) {
         if ('houses' in v) CFG.houses = Array.isArray(v.houses) ? v.houses.slice(0, 7).map(x => x === '' || x == null ? null : Math.round(num(x, 0, 1e7, 0))) : [];
         if ('wheel' in v && v.wheel && typeof v.wheel === 'object') CFG.wheel = { price: Math.round(num(v.wheel.price, 0, 1e6, 150)), jackpot: Math.round(num(v.wheel.jackpot, 0, 1e7, 3000)) };
         if ('lifeCap' in v) CFG.lifeCap = Math.round(num(v.lifeCap, 0, 1e7, 0));
+        if ('accent' in v) CFG.accent = /^#[0-9a-f]{6}$/i.test(v.accent || '') ? v.accent : '';
+        if ('countdown' in v) CFG.countdown = v.countdown && cleanStr(v.countdown.title, 100) && +v.countdown.at > 0 ? { title: cleanStr(v.countdown.title, 100), at: num(v.countdown.at, 0, 9e15, 0) } : null;
+        if ('happy' in v) CFG.happy = v.happy && +v.happy.mul > 1 ? { from: Math.round(num(v.happy.from, 0, 23, 18)), to: Math.round(num(v.happy.to, 0, 24, 20)), mul: num(v.happy.mul, 1, 10, 2) } : null;
+        if ('weekend' in v) CFG.weekend = num(v.weekend, 1, 10, 1);
+        const words = (x, n) => (Array.isArray(x) ? x : String(x || '').split(/[,\n]/)).map(w => cleanStr(String(w), 30).toLowerCase()).filter(Boolean).slice(0, n);
+        if ('badwords' in v) CFG.badwords = words(v.badwords, 200);
+        if ('badnames' in v) CFG.badnames = words(v.badnames, 200);
+        for (const f of ['noRegister', 'no3d', 'noClassic', 'shopClosed', 'noWheel', 'codesOff', 'party']) if (f in v) CFG[f] = !!v[f];
+        if (CFG.no3d && CFG.noClassic) CFG.noClassic = false;
+        if ('links' in v) CFG.links = Array.isArray(v.links) ? v.links.slice(0, 6).map(x => ({ l: cleanStr(x && x.l, 30), u: cleanStr(x && x.u, 200) })).filter(x => x.l && /^https:\/\/[^\s"'<>]+$/.test(x.u)) : [];
+        if ('news' in v) CFG.news = (Array.isArray(v.news) ? v.news : String(v.news || '').split('\n')).map(x => cleanStr(String(x), 200)).filter(Boolean).slice(0, 30);
+        if ('ticker' in v) CFG.ticker = cleanStr(v.ticker, 300);
+        if ('cotd' in v) CFG.cotd = String(v.cotd || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 40);
+        if ('bannerUntil' in v) CFG.bannerUntil = num(v.bannerUntil, 0, 9e15, 0);
+        if ('poll' in v) { const q = v.poll && cleanStr(v.poll.q, 160); const opts = v.poll && Array.isArray(v.poll.opts) ? v.poll.opts.map(x => cleanStr(String(x), 60)).filter(Boolean).slice(0, 4) : [];
+          if (!q || opts.length < 2) { CFG.poll = null; pollSeen.clear(); } else if (CFG.poll && CFG.poll.q === q && JSON.stringify(CFG.poll.opts) === JSON.stringify(opts)) CFG.poll.on = v.poll.on !== false;
+          else { CFG.poll = { id: crypto.randomBytes(4).toString('hex'), q, opts, n: opts.map(() => 0), on: true }; pollSeen.clear(); } }
+}
+const pollSeen = new Set();
+async function pollVote(req, res) {
+  let b; try { b = await readBody(req); } catch { return json(res, 400, { code: 'invalid_argument' }); }
+  const P = CFG.poll; if (!P || !P.on || b.id !== P.id) return json(res, 410, { code: 'closed', error: 'Ce sondage est terminé.' });
+  const i = Math.round(+b.opt); if (!(i >= 0 && i < P.opts.length)) return json(res, 400, { code: 'invalid_argument' });
+  const who = (typeof b.user === 'string' && b.user ? 'u:' + accKey(b.user) : '') || 'ip:' + (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0];
+  if (pollSeen.has(who)) return json(res, 409, { code: 'already', error: 'Tu as déjà voté.', result: P.n });
+  pollSeen.add(who); P.n[i]++; clearTimeout(pollVote.t); pollVote.t = setTimeout(() => cfgSave().catch(() => {}), 2000);
+  return json(res, 200, { result: P.n });
 }
 async function admin(req, res) {
   let b; try { b = await readBody(req); } catch { return json(res, 400, { code: 'invalid_argument' }); }
   const k = accKey(b.user); if (!isAdminK(k)) return json(res, 403, { code: 'not_admin', error: 'Réservé à l’administrateur.' });
   const me = await accGet(k); if (!me || !okToken(me, b.token)) return json(res, 403, { code: 'bad_token', error: 'Session admin expirée : reconnecte-toi.' });
   const ok = r => json(res, 200, { result: r === undefined ? Object.assign(publicCfg(), { codes: CFG.codes, log: CFG.log }) : r });
-  if (!['cfg', 'players', 'stats', 'player', 'lb', 'games', 'cfgexport'].includes(b.op)) admLog(b.op + (b.code ? ' ' + String(b.code).slice(0, 40) : '') + (b.name ? ' → ' + String(b.name).slice(0, 20) : '') + (b.msg ? ' : ' + String(b.msg).slice(0, 80) : ''));
+  if (!['cfg', 'players', 'stats', 'player', 'lb', 'games', 'cfgexport', 'profget'].includes(b.op)) admLog(b.op + (b.code ? ' ' + String(b.code).slice(0, 40) : '') + (b.name ? ' → ' + String(b.name).slice(0, 20) : '') + (b.msg ? ' : ' + String(b.msg).slice(0, 80) : ''));
   const code = typeof b.code === 'string' ? b.code.toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
   try {
     switch (b.op) {
@@ -250,8 +277,8 @@ async function admin(req, res) {
       case 'lbdel': delete board[b.id]; dirty = true; return ok(null);
       case 'lbreset': board = {}; dirty = true; return ok(null);
       case 'player': { const tk = accKey(b.name); const t = tk && await accGet(tk); if (!t) return json(res, 404, { code: 'unknown_account', error: 'Joueur introuvable.' }); const p = t.prof || {};
-        return ok({ name: t.name, banned: !!t.banned, created: t.created, upd: t.upd, gifts: t.gifts || [], coins: p.coins || 0, xp: p.xp || 0, house: p.house || 1, stats: p.stats || {}, inv: Object.keys(p.inv || {}), codes: Object.keys(p.codes || {}), eq: p.eq || {}, login: p.login || null, ach: Object.keys(p.ach || {}) }); }
-      case 'games': { const out = []; for (const [k2, v] of store) { const sp = k2.split('/'); if (sp.length !== 2 || sp[0] !== 'ds') continue; const d = v.d || {}; out.push({ code: sp[1], phase: d.phase || '?', round: d.round || 0, mode: d.settings && d.settings.mode, map: d.settings && d.settings.map, players: (d.players || []).map(p => ({ name: p.name, bot: !!p.bot, alive: p.alive !== false })), t: v.t }); } return ok(out.sort((a, c) => c.t - a.t).slice(0, 100)); }
+        return ok({ name: t.name, banned: !!t.banned, created: t.created, upd: t.upd, gifts: t.gifts || [], coins: p.coins || 0, xp: p.xp || 0, house: p.house || 1, stats: p.stats || {}, inv: Object.keys(p.inv || {}), codes: Object.keys(p.codes || {}), eq: p.eq || {}, login: p.login || null, ach: Object.keys(p.ach || {}), note: t.note || '', muted: !!t.muted, warns: t.warns || 0 }); }
+      case 'games': { const out = []; for (const [k2, v] of store) { const sp = k2.split('/'); if (sp.length !== 2 || sp[0] !== 'ds') continue; const d = v.d || {}; out.push({ code: sp[1], phase: d.phase || '?', round: d.round || 0, mode: d.settings && d.settings.mode, map: d.settings && d.settings.map, players: (d.players || []).map(p => ({ pid: p.pid, name: p.name, bot: !!p.bot, host: !!p.host, alive: p.alive !== false })), paused: !!d.paused, endsAt: d.endsAt || 0, mj: !!d.mj, t: v.t }); } return ok(out.sort((a, c) => c.t - a.t).slice(0, 100)); }
       case 'gameclose': { const gc = String(b.code || ''); if (!SEG.test(gc)) return json(res, 400, { code: 'invalid_argument' }); for (const c of conns.values()) emit(c, 'admin', { msg: 'Cette partie a été fermée par l’administrateur.', style: 'alerte', code: gc, close: true }); const base = 'ds/' + gc; for (const k2 of [...store.keys()]) if (k2 === base || k2.startsWith(base + '/')) { store.delete(k2); notify(k2); } delete owners[gc]; dirty = true; return ok(null); }
       case 'gamemsg': { const msg = cleanStr(b.msg, 300); if (!msg) return json(res, 400, { code: 'invalid_argument', error: 'Écris un message.' }); for (const c of conns.values()) emit(c, 'admin', { msg, style: 'info', code: String(b.code || '') }); return ok(null); }
       case 'cfgexport': return ok(JSON.parse(JSON.stringify(CFG)));
@@ -261,6 +288,15 @@ async function admin(req, res) {
         if (Array.isArray(v.gifts)) CFG.gifts = v.gifts.slice(0, 40).map(g => ({ id: cleanStr(g.id, 20) || crypto.randomBytes(6).toString('base64url'), msg: cleanStr(g.msg, 200), r: cleanToks(g.r), until: num(g.until, 0, 9e15, 0), at: num(g.at, 0, 9e15, Date.now()) })).filter(g => g.r.length);
         cfgApply(Object.assign({}, v, { banner: v.banner || null })); await cfgSave(); return ok(); }
       case 'logclear': CFG.log = []; await cfgSave(); return ok();
+      case 'gamecmd': { const gc = String(b.code || ''); if (!SEG.test(gc)) return json(res, 400, { code: 'invalid_argument' }); const cmd = b.cmd && typeof b.cmd === 'object' ? { op: cleanStr(b.cmd.op, 20), pid: cleanStr(b.cmd.pid, 40), w: cleanStr(b.cmd.w, 2), txt: cleanStr(b.cmd.txt, 300) } : null; if (!cmd || !cmd.op) return json(res, 400, { code: 'invalid_argument' }); let n = 0; for (const c of conns.values()) { emit(c, 'admin', { code: gc, cmd }); n++; } return ok({ sent: n }); }
+      case 'codedup': { const src = CFG.codes[code]; const to = String(b.to || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (!src || !CODE_RX.test(to)) return json(res, 400, { code: 'invalid_argument', error: 'Nom de code invalide.' }); if (CFG.codes[to]) return json(res, 409, { code: 'exists', error: 'Ce code existe déjà.' }); CFG.codes[to] = Object.assign(JSON.parse(JSON.stringify(src)), { uses: 0, at: Date.now(), batch: undefined }); await cfgSave(); return ok(); }
+      case 'codeext': { const c2 = CFG.codes[code]; if (!c2) return json(res, 404, { code: 'not_found', error: 'Code inconnu.' }); c2.to = Math.max(c2.to || Date.now(), Date.now()) + num(b.days, 1, 365, 7) * 864e5; await cfgSave(); return ok(); }
+      case 'codereset': { const c2 = CFG.codes[code]; if (!c2) return json(res, 404, { code: 'not_found', error: 'Code inconnu.' }); c2.uses = 0; redeemSeen.delete(code); await cfgSave(); return ok(); }
+      case 'offmany': { const list = Array.isArray(b.codes) ? b.codes.filter(c => typeof c === 'string' && CODE_RX.test(c)).slice(0, 3000) : []; for (const c of list) { if (b.off) CFG.off[c] = 1; else delete CFG.off[c]; } await cfgSave(); return ok(); }
+      case 'giftmany': { const r = cleanToks(b.r); const names = Array.isArray(b.names) ? b.names.slice(0, 100) : []; if (!r.length || !names.length) return json(res, 400, { code: 'invalid_argument', error: 'Ajoute des pseudos et au moins une récompense.' }); const done = [], miss = [];
+        for (const nm of names) { const tk = accKey(nm); const t = tk && await accGet(tk); if (!t) { miss.push(String(nm).slice(0, 16)); continue; } t.gifts = [...(t.gifts || []), { id: crypto.randomBytes(6).toString('base64url'), msg: cleanStr(b.msg, 200) || 'Un cadeau de l’administrateur !', r, at: Date.now() }].slice(-30); await accPut(tk, t); done.push(t.name); }
+        return ok({ done, miss }); }
+      case 'pollreset': { if (CFG.poll) { CFG.poll.n = CFG.poll.opts.map(() => 0); pollSeen.clear(); await cfgSave(); } return ok(); }
       case 'stats': { const n = UP_URL ? (await upstash(['KEYS', 'acc:*'])).length : Object.keys(accLocal).length; return ok({ players: n, online: conns.size, games: Object.keys(owners).length, codes: Object.keys(CFG.codes).length, off: Object.keys(CFG.off).length, persistent: !!UP_URL }); }
     }
     // actions sur un joueur
@@ -272,6 +308,15 @@ async function admin(req, res) {
       case 'unban': t.banned = false; await accPut(tk, t); return ok(null);
       case 'resetpass': { const pw = String(b.pass || ''); if (pw.length < 6) return json(res, 400, { code: 'invalid_argument', error: 'Au moins 6 caractères.' }); t.salt = crypto.randomBytes(16).toString('base64'); t.hash = scryptHash(verifierOf(t.name, pw), t.salt); t.tokens = []; await accPut(tk, t); return ok(null); }
       case 'delete': if (UP_URL) await upstash(['DEL', 'acc:' + tk]); else { delete accLocal[tk]; accDirty = true; } return ok(null);
+      case 'kick': t.tokens = []; await accPut(tk, t); return ok(null);
+      case 'mute': t.muted = !!b.v; t.gifts = [...(t.gifts || []), { id: crypto.randomBytes(6).toString('base64url'), kind: 'mute', v: !!b.v, msg: b.v ? 'L’administrateur t’a retiré la parole dans le chat.' : 'Tu peux de nouveau parler dans le chat.', r: [], at: Date.now() }].slice(-30); await accPut(tk, t); return ok(null);
+      case 'note': t.note = cleanStr(b.note, 500); await accPut(tk, t); return ok(null);
+      case 'pmsg': { const msg = cleanStr(b.msg, 300); if (!msg) return json(res, 400, { code: 'invalid_argument', error: 'Écris un message.' }); t.gifts = [...(t.gifts || []), { id: crypto.randomBytes(6).toString('base64url'), kind: b.warn ? 'warn' : 'msg', msg, r: [], at: Date.now() }].slice(-30); if (b.warn) t.warns = (t.warns || 0) + 1; await accPut(tk, t); return ok(null); }
+      case 'giftclear': t.gifts = []; await accPut(tk, t); return ok(null);
+      case 'profget': return ok({ name: t.name, prof: t.prof || null });
+      case 'profset': { const pr = b.prof; if (!pr || typeof pr !== 'object' || JSON.stringify(pr).length > 250000) return json(res, 400, { code: 'invalid_argument', error: 'Profil invalide.' }); t.prof = pr; t.upd = Date.now(); t.gifts = [...(t.gifts || []), { id: crypto.randomBytes(6).toString('base64url'), kind: 'reload', msg: 'Ton profil a été mis à jour par l’administrateur.', r: [], at: Date.now() }].slice(-30); await accPut(tk, t); return ok(null); }
+      case 'rename': { const nn = String(b.to || '').normalize('NFC').trim(); const nk = accKey(nn); if (!NAME_RX.test(nn)) return json(res, 400, { code: 'invalid_argument', error: 'Pseudo invalide (3 à 16 caractères).' }); if (isAdminK(tk) || isAdminK(nk)) return json(res, 400, { code: 'invalid_argument', error: 'Impossible avec le pseudo admin.' }); if (nk !== tk && await accGet(nk)) return json(res, 409, { code: 'name_taken', error: 'Ce pseudo est déjà pris.' });
+        t.name = nn; t.tokens = []; if (t.prof) { t.prof.name = nn; t.prof.acc = nn; } await accPut(nk, t); if (nk !== tk) { if (UP_URL) await upstash(['DEL', 'acc:' + tk]); else { delete accLocal[tk]; accDirty = true; } } return ok(null); }
     }
   } catch (e) { console.error('admin', e.message); return json(res, 503, { code: 'unavailable', error: 'Action impossible pour le moment.' }); }
   return json(res, 400, { code: 'invalid_argument' });
@@ -306,6 +351,8 @@ async function account(req, res) {
       if (!acc.hash || scryptHash(b.verifier, acc.salt) !== acc.hash) { acc.salt = crypto.randomBytes(16).toString('base64'); acc.hash = scryptHash(b.verifier, acc.salt); }
       const token = newToken(acc); await accPut(k, acc); return json(res, 200, { result: { token, name: acc.name, prof: acc.prof || null, upd: acc.upd || 0, admin: true } });
     }
+    if (op === 'register' && CFG.noRegister) return json(res, 403, { code: 'closed', error: 'Les inscriptions sont fermées pour le moment.' });
+    if (op === 'register' && (CFG.badnames || []).some(w => k.includes(w))) return json(res, 400, { code: 'invalid_argument', error: 'Ce pseudo n’est pas autorisé.' });
     if (op === 'register' || op === 'restore') {
       if (tooMany(ip)) return json(res, 429, { code: 'rate_limited', error: 'Trop d’essais, réessaie dans quelques minutes.' });
       if (typeof b.verifier !== 'string' || b.verifier.length < 20) return json(res, 400, { code: 'invalid_argument' });
@@ -323,7 +370,7 @@ async function account(req, res) {
     const acc = await accGet(k); if (!acc) return json(res, 404, { code: 'unknown_account' });
     if (!okToken(acc, b.token)) return json(res, 403, { code: 'bad_token', error: 'Session expirée : reconnecte-toi.' });
     if (acc.banned) return json(res, 403, { code: 'banned', error: 'Ce compte a été suspendu par l’administrateur.' });
-    if (op === 'load') return json(res, 200, { result: { name: acc.name, prof: acc.prof || null, upd: acc.upd || 0, admin: isAdminK(k) } });
+    if (op === 'load') return json(res, 200, { result: { name: acc.name, prof: acc.prof || null, upd: acc.upd || 0, admin: isAdminK(k), muted: !!acc.muted } });
     if (op === 'gifts') { const g = acc.gifts || []; if (g.length) { acc.gifts = []; await accPut(k, acc); } return json(res, 200, { result: g }); }
     if (op === 'save') { if (!okProf(b.prof)) return json(res, 400, { code: 'invalid_argument' }); acc.prof = b.prof; acc.upd = Date.now(); await accPut(k, acc); return json(res, 200, { result: { upd: acc.upd } }); }
     if (op === 'logout') { acc.tokens = (acc.tokens || []).filter(x => x !== hash(b.token)); await accPut(k, acc); return json(res, 200, { result: null }); }
@@ -369,6 +416,7 @@ async function api(req, res, url) {
   if (url.pathname.endsWith('/api/admin') && req.method === 'POST') return admin(req, res);
   if (url.pathname.endsWith('/api/config')) return json(res, 200, { result: publicCfg() });
   if (url.pathname.endsWith('/api/redeem') && req.method === 'POST') return redeemLimited(req, res);
+  if (url.pathname.endsWith('/api/vote') && req.method === 'POST') return pollVote(req, res);
   if (url.pathname.endsWith('/api/op') && req.method === 'POST') {
     const pid = req.headers['x-ds-pid'], token = req.headers['x-ds-token'];
     if (!auth(pid, token)) return json(res, 401, { code: 'not_granted', error: 'Identité inconnue' });

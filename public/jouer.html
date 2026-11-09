@@ -822,6 +822,30 @@ textarea.input { resize: vertical; font-family: inherit; }
 .ach-i .ach-r { font: 600 12px var(--f-mono); color: var(--frost); }
 .ach-i.ready { border-color: var(--signal); }
 .ach-i.got { opacity: .6; }
+
+#dev-hud { position: fixed; left: 8px; bottom: 8px; z-index: 9999; font: 600 11px var(--f-mono); color: #ffd36b; background: rgba(0,0,0,.65); padding: 4px 8px; pointer-events: none; }
+#site-ticker { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; overflow: hidden; white-space: nowrap; background: var(--signal); color: #fff; font: 600 13px var(--f-mono); padding: 5px 0; pointer-events: none; }
+#site-ticker span { display: inline-block; padding-left: 100%; animation: tick 22s linear infinite; }
+@keyframes tick { to { transform: translateX(-100%); } }
+#site-party { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+#site-party i { position: absolute; top: -12px; width: 8px; height: 12px; opacity: .8; animation: confetti linear infinite; }
+@keyframes confetti { to { transform: translateY(110vh) rotate(720deg); } }
+@media (prefers-reduced-motion: reduce) { #site-party, #site-ticker span { animation: none; } #site-party { display: none; } }
+#site-x { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; position: relative; z-index: 1; }
+.site-cotd { font: 600 13px var(--f-mono); color: var(--bone); background: rgba(255,211,107,.08); border: 1px dashed #ffd36b; padding: 6px 10px; cursor: pointer; }
+.site-chip2 { font: 600 12px var(--f-mono); padding: 5px 9px; border: 1px solid var(--line-2); color: #ffd36b; }
+.site-chip2.dim { color: var(--dim); }
+.site-cd { flex-basis: 100%; display: flex; gap: 12px; align-items: baseline; }
+.site-cd b { font: 700 22px var(--f-mono); color: var(--bone); }
+.site-poll { flex-basis: 100%; border: 1px solid var(--line-2); padding: 10px; display: grid; gap: 8px; max-width: 520px; }
+.poll-res { display: grid; gap: 4px; }
+.poll-bar { position: relative; display: flex; justify-content: space-between; padding: 5px 8px; border: 1px solid var(--line); overflow: hidden; }
+.poll-bar span { position: absolute; inset: 0 auto 0 0; background: rgba(139,208,212,.18); }
+.poll-bar.me span { background: rgba(230,58,46,.25); }
+.poll-bar em, .poll-bar small { position: relative; font-style: normal; }
+.site-news { flex-basis: 100%; max-width: 520px; }
+.site-news summary { cursor: pointer; font: 600 12px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.site-news ul { margin: 6px 0 0 18px; }
 </style>
 
 <div class="atmo" aria-hidden="true"></div>
@@ -6143,6 +6167,23 @@ const addEv = (id, ev, code) => { EVENTS[id] = ev; if (!CODES[code]) CODES[code]
   G('MONSTRE', 'Créature', 'Loup-garou|Vampire|Zombie|Momie|Fantome|Spectre|Goule|Liche|Kraken|Hydre|Basilic|Chimere|Minotaure|Cyclope|Harpie|Sirene|Troll|Ogre|Gobelin|Dragon|Wyverne|Manticore|Leviathan|Behemoth|Djinn', ['Leviathan', 'Dragon'], ['Loup-garou', 'Kraken', 'Liche', 'Behemoth'], 18000);
 }
 
+/* --- quelques codes de plus : planètes, notes, saisons, éléments, cartes, et les nouveautés de la mise à jour --- */
+{
+  const TH = ['galaxy', 'aurora', 'celestial', 'eclipse', 'universe', 'darkmatter', 'nightking', 'kingdom', 'dreamland', 'rainbow', 'lunar', 'crimson', 'cyber', 'neon', 'moon'];
+  const CO = COLLECTIONS.map(c => c[0]); const EM = Object.keys(EMOTES);
+  const pI = (arr, i) => arr[((i % arr.length) + arr.length) % arr.length];
+  const R = (tier, i) => tier === 1 ? ['c:' + (150 + (i * 41) % 200), 'xp:' + (40 + (i * 17) % 50)] : tier === 2 ? ['c:' + (350 + (i * 59) % 300), 'e:' + pI(EM, i * 5), 'xp:120'] : ['c:' + (900 + (i * 73) % 600), 'col:' + pI(CO, i * 3), 'th:' + pI(TH, i), 'xp:300', 'box'];
+  const add = (code, desc, tier, i) => { code = code.toUpperCase().normalize('NFD').replace(/[^A-Z0-9]/g, ''); if (code.length >= 2 && !CODES[code]) CODES[code] = [desc, R(tier, i)]; };
+  const G = (prefix, label, list, big, base) => list.split('|').forEach((n, i) => add(prefix + n, label + ' : ' + n + '.', big.includes(n) ? 3 : i % 3 === 0 ? 2 : 1, base + i));
+  G('PLANETE', 'Planète', 'Mercure|Venus|Terre|Mars|Jupiter|Saturne|Uranus|Neptune|Pluton', ['Pluton', 'Saturne'], 19000);
+  G('NOTE', 'Note de musique', 'Do|Re|Mi|Fa|Sol|La|Si', ['Sol'], 19100);
+  G('SAISON', 'Saison', 'Printemps|Ete|Automne|Hiver', ['Hiver'], 19200);
+  G('ELEMENT', 'Élément', 'Feu|Eau|Terre|Air|Ether', ['Ether'], 19300);
+  G('CARTE', 'Carte à jouer', 'As|Roi|Dame|Valet|Joker', ['Joker'], 19400);
+  [['TELECOMMANDE', 'L’admin a une télécommande. Toi, tu as ce code.'], ['HAPPYHOUR', 'C’est l’happy hour quelque part.'], ['SONDAGE', 'Merci d’avoir voté (ou pas).'], ['CODEDUJOUR', 'Le code du jour… d’un autre jour.'], ['MODEFETE', 'Confettis !'], ['SUPERPOUVOIR', 'Un petit super-pouvoir rien que pour toi.'], ['TELEPORTATION', 'Pouf. Tu es ailleurs.'], ['NOCLIP', 'Les murs ne sont qu’une suggestion.'], ['COMPTEAREBOURS', '3… 2… 1…'], ['MESSAGEDEFILANT', 'Ce message défile dans ta tête.']]
+    .forEach(([c, d], i) => add(c, d, i % 3 === 0 ? 3 : 2, 19500 + i));
+}
+
 /* =====================================================================
    VIE EN 3D : maison qui s'agrandit, lieux à explorer, cueillette, cuisine,
    pêche, bornes d'arcade, défis du jour, sommeil qui raccourcit la nuit
@@ -7269,6 +7310,286 @@ document.addEventListener('submit', ev => {
   const f = ev.target; if (!f.dataset || !['devme', 'gmsg'].includes(f.dataset.adm)) return; ev.preventDefault(); ev.stopImmediatePropagation(); if (!devMode()) return;
   if (f.dataset.adm === 'devme') { const P_ = pf(); P_.coins = Math.max(0, +$('#dev-c').value || 0); P_.xp = Math.max(0, +$('#dev-x').value || 0); P_.stats.games = Math.max(0, +$('#dev-g').value || 0); P_.stats.wins = Math.min(P_.stats.games, Math.max(0, +$('#dev-w').value || 0)); const h = +$('#dev-h').value; if (h !== P_.house) { P_.house = h; if (typeof houseRebuild === 'function') houseRebuild(); } pfSave(); toast('Profil mis à jour.'); metaRender(); }
   if (f.dataset.adm === 'gmsg') admReq('gamemsg', { code: f.dataset.c, msg: $('#dev-gm').value }).then(() => { toast('Message envoyé à la partie ' + f.dataset.c + '.'); ADM.gmsg = null; metaRender(); }).catch(err => toast(err.message, true));
+}, true);
+
+/* =====================================================================
+   ADMIN 4 : télécommande des parties, super-pouvoirs, réglages du monde,
+   outils, actions avancées sur les joueurs et les codes
+   ===================================================================== */
+const DEV = { speed: 1, noclip: false, hud: false };
+try { Object.assign(DEV, LS.get('ds_dev', {}) || {}); } catch {}
+const devSave = () => { try { LS.set('ds_dev', { speed: DEV.speed, noclip: DEV.noclip, hud: DEV.hud }); } catch {} };
+const admDl = (name, text, type) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: type || 'text/plain' })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
+const admCopy = txt => { try { navigator.clipboard.writeText(txt); toast('Copié : ' + txt); } catch { toast(txt); } };
+
+/* --- super-pouvoirs en 3D --- */
+const _lifeSpeed4 = lifeSpeed; lifeSpeed = () => _lifeSpeed4() * (devMode() ? DEV.speed || 1 : 1);
+const _g3Collide4 = g3Collide; g3Collide = (x, z) => { if (devMode() && DEV.noclip && G3.world) { const lim = G3.world.L.edge + 6, R = Math.hypot(x, z); return R > lim ? [x * lim / R, z * lim / R] : [x, z]; } return _g3Collide4(x, z); };
+function devTp(where) {
+  if (typeof G3 === 'undefined' || !G3.on || !G3.world) return toast('Téléportation : rejoins d’abord une partie en 3D.', true);
+  if (where === 'home') { const h = lifeMyHome(); if (!h) return toast('Pas de maison trouvée.', true); g3Teleport(h.inside, false); }
+  else if (where === 'centre') g3Teleport([0, 4]);
+  else { const zn = (G3.world.L.zones || []).find(z => z.id === where); if (!zn) return toast('Zone introuvable sur cette carte.', true); const d = Math.hypot(zn.cx, zn.cz) || 1, f = Math.max(0, d - zn.r - 1.5) / d; g3Teleport([zn.cx * f, zn.cz * f]); }
+  toast('Téléporté.');
+}
+// affichage développeur : images par seconde, position, phase
+(function devHud() {
+  let last = performance.now(), frames = 0, fps = 0;
+  const loop = t => { frames++; if (t - last > 500) { fps = Math.round(frames * 1000 / (t - last)); frames = 0; last = t;
+    let el = $('#dev-hud'); const on = DEV.hud && devMode();
+    if (!on) { if (el) el.hidden = true; } else { if (!el) { document.body.insertAdjacentHTML('beforeend', '<div id="dev-hud" aria-hidden="true"></div>'); el = $('#dev-hud'); } el.hidden = false;
+      const m = typeof G3 !== 'undefined' && G3.on && G3.me ? G3.me : null;
+      el.textContent = fps + ' i/s' + (m ? ' · x ' + m.x.toFixed(1) + ' z ' + m.z.toFixed(1) : '') + (G.pub ? ' · ' + G.pub.phase + (G.pub.round ? ' ' + G.pub.round : '') + ' · ' + G.code : '') + (DEV.speed > 1 ? ' · vitesse ×' + DEV.speed : '') + (DEV.noclip ? ' · murs ignorés' : ''); } }
+    requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+})();
+
+/* --- réglages du monde appliqués chez tous les joueurs --- */
+const W4 = { voted: {} }; try { W4.voted = LS.get('ds_poll', {}) || {}; } catch {}
+const happyNow = c => { if (!c.happy) return false; const hr = new Date().getHours(); const { from, to } = c.happy; return from <= to ? hr >= from && hr < to : hr >= from || hr < to; };
+const weekendNow = () => { const d = new Date().getDay(); return d === 0 || d === 6; };
+function siteMulRefresh() {
+  const c = SITE.cfg; if (!c) return;
+  if (c._cm0 == null) c._cm0 = +c.coinMul || 1; if (c._xm0 == null) c._xm0 = +c.xpMul || 1;
+  c.coinMul = Math.round(c._cm0 * (happyNow(c) ? c.happy.mul : 1) * 100) / 100;
+  c.xpMul = Math.round(c._xm0 * (weekendNow() && c.weekend > 1 ? c.weekend : 1) * 100) / 100;
+}
+const badRx = () => { const L = (SITE.cfg && SITE.cfg.badwords) || []; if (!L.length) return null; try { return new RegExp(L.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'gi'); } catch { return null; } };
+const fmtLeft = ms => { if (ms <= 0) return 'maintenant !'; const s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); return (d ? d + ' j ' : '') + String(h).padStart(2, '0') + ' h ' + String(m).padStart(2, '0') + ' min ' + String(s % 60).padStart(2, '0') + ' s'; };
+function worldHTML() {
+  const c = SITE.cfg; if (!c) return ''; const parts = [];
+  if (c.cotd) parts.push('<button class="site-cotd" data-a="w4-cotd" data-c="' + e(c.cotd) + '">Code du jour : <b class="mono">' + e(c.cotd) + '</b></button>');
+  if (happyNow(c)) parts.push('<span class="site-chip2">Happy hour : pièces ×' + c.happy.mul + ' jusqu’à ' + c.happy.to + ' h</span>');
+  else if (c.happy) parts.push('<span class="site-chip2 dim">Happy hour chaque jour de ' + c.happy.from + ' h à ' + c.happy.to + ' h</span>');
+  if (c.weekend > 1 && weekendNow()) parts.push('<span class="site-chip2">Week-end : XP ×' + c.weekend + '</span>');
+  if (c.countdown && c.countdown.at > Date.now() - 864e5) parts.push('<div class="site-cd"><span class="eyebrow">' + e(c.countdown.title) + '</span><b id="site-cd-t">' + fmtLeft(c.countdown.at - Date.now()) + '</b></div>');
+  if (c.poll && c.poll.opts) { const P = c.poll; const mine = W4.voted[P.id]; const tot = P.n.reduce((a, b) => a + b, 0) || 0;
+    parts.push('<div class="site-poll"><b>📊 ' + e(P.q) + '</b>' + (mine != null || !P.on ? '<div class="poll-res">' + P.opts.map((o, i) => { const pc = tot ? Math.round(P.n[i] * 100 / tot) : 0; return '<div class="poll-bar' + (mine === i ? ' me' : '') + '"><span style="width:' + pc + '%"></span><em>' + e(o) + '</em><small>' + pc + ' %</small></div>'; }).join('') + '<small class="dim">' + tot + ' vote' + (tot > 1 ? 's' : '') + (P.on ? '' : ' · sondage terminé') + '</small></div>' : '<div class="row wrap">' + P.opts.map((o, i) => '<button class="btn ghost small" data-a="w4-vote" data-i="' + i + '">' + e(o) + '</button>').join('') + '</div>') + '</div>'); }
+  if ((c.links || []).length) parts.push('<div class="row wrap site-links">' + c.links.map(l => '<a class="btn ghost small" href="' + e(l.u) + '" target="_blank" rel="noopener">' + e(l.l) + '</a>').join('') + '</div>');
+  if ((c.news || []).length) parts.push('<details class="site-news"><summary>Nouveautés <small>' + c.news.length + '</small></summary><ul>' + c.news.map(n => '<li>' + e(n) + '</li>').join('') + '</ul></details>');
+  return parts.join('');
+}
+function worldApply() {
+  const c = SITE.cfg; if (!c) return;
+  const root = document.documentElement.style;
+  if (c.accent) { root.setProperty('--signal', c.accent); root.setProperty('--signal-hi', c.accent); } else { root.removeProperty('--signal'); root.removeProperty('--signal-hi'); }
+  const motd = $('#site-motd'); if (motd) { let x = $('#site-x'); if (!x) { motd.insertAdjacentHTML('afterend', '<div id="site-x"></div>'); x = $('#site-x'); } const h = worldHTML(); if (x.dataset.h !== h) { x.dataset.h = h; setHTML(x, h); } }
+  let tk = $('#site-ticker'); if (c.ticker) { if (!tk) { document.body.insertAdjacentHTML('beforeend', '<div id="site-ticker" aria-label="Annonce défilante"><span></span></div>'); tk = $('#site-ticker'); } if (tk.firstChild.textContent !== c.ticker) tk.firstChild.textContent = c.ticker; tk.hidden = false; } else if (tk) tk.hidden = true;
+  const home = $('#scr-home'); let pf_ = $('#site-party');
+  if (c.party && home) { if (!pf_) { home.insertAdjacentHTML('afterbegin', '<div id="site-party" aria-hidden="true">' + Array.from({ length: 28 }, (_, i) => '<i style="left:' + (i * 37 % 100) + '%;animation-delay:' + (i * 0.37 % 5).toFixed(2) + 's;animation-duration:' + (4 + i % 4) + 's;background:' + ['#e63a2e', '#ffd36b', '#8bd0d4', '#b28cff', '#3ad99a'][i % 5] + '"></i>').join('') + '</div>'); } }
+  else if (pf_) pf_.remove();
+  // annonce programmée : elle disparaît toute seule à la date choisie
+  if (c.bannerUntil && Date.now() > c.bannerUntil && $('#site-banner') && !c.maint) $('#site-banner').hidden = true;
+  // modes de jeu désactivés : l'hôte bascule tout seul sur le mode autorisé
+  if (G.isHost && H.S && H.S.phase === 'lobby') { const m = H.S.settings.mode; const want = c.no3d && m === '3d' ? 'classic' : c.noClassic && m !== '3d' ? '3d' : null; if (want) { H.S.settings.mode = want; if (want === '3d') { H.S.settings.timers.night = Math.max(H.S.settings.timers.night, 120); H.S.settings.timers.day = Math.max(H.S.settings.timers.day, 300); } hostChanged(); toast(want === '3d' ? 'Le mode classique est désactivé par l’administrateur.' : 'Le mode 3D est désactivé par l’administrateur.'); } }
+}
+const _siteApply4 = siteApply; siteApply = function () { siteMulRefresh(); _siteApply4(); worldApply(); };
+setInterval(() => { const c = SITE.cfg; if (!c) return; siteMulRefresh(); const t = $('#site-cd-t'); if (t && c.countdown) t.textContent = fmtLeft(c.countdown.at - Date.now()); if (Date.now() % 30000 < 1000) worldApply(); if (c.bannerUntil && Date.now() > c.bannerUntil && $('#site-banner') && !c.maint) $('#site-banner').hidden = true; }, 1000);
+// mots interdits dans le chat (filtrés par l'hôte de chaque partie)
+const _hostHandle4 = hostHandle; hostHandle = function (pid, m) { if (m && typeof m.txt === 'string' && (m.t === 'chat' || m.t === 'lair')) { const rx = badRx(); if (rx) m = Object.assign({}, m, { txt: m.txt.replace(rx, s => '*'.repeat(s.length)) }); } return _hostHandle4(pid, m); };
+// joueur rendu muet par l'admin
+const _send4 = send; send = async function (msg) { if (msg && (msg.t === 'chat' || msg.t === 'lair') && LS.get('ds_muted', false) && !devMode()) { toast('L’administrateur t’a retiré la parole dans le chat.', true); return; } return _send4(msg); };
+// boutique fermée, roue désactivée, codes fermés, modes désactivés
+window.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a]'); if (!el) return; const c = SITE.cfg || {}; const a = el.dataset.a; if (devMode()) return;
+  const stop = msg => { ev.preventDefault(); ev.stopImmediatePropagation(); toast(msg, true); };
+  if (a === 'buy' && c.shopClosed) return stop('La boutique est fermée pour le moment.');
+  if ((a === 'bonus-wheel' || a === 'bonus-wheel2') && c.noWheel) return stop('La roue est en pause pour le moment.');
+  if (a === 'set-mode' && ((el.dataset.m === '3d' && c.no3d) || (el.dataset.m !== '3d' && c.noClassic))) return stop('Ce mode de jeu est désactivé par l’administrateur.');
+}, true);
+window.addEventListener('submit', ev => { const f = ev.target; if (f.dataset && f.dataset.code != null && SITE.cfg && SITE.cfg.codesOff && !devMode()) { ev.preventDefault(); ev.stopImmediatePropagation(); toast('Les codes sont fermés pour le moment. Reviens plus tard !', true); } }, true);
+const _shopHTML4 = shopHTML; shopHTML = () => (SITE.cfg && SITE.cfg.shopClosed ? '<p class="tip">' + (devMode() ? 'Boutique fermée pour les joueurs (toi, tu peux acheter).' : 'La boutique est fermée pour le moment.') + '</p>' : '') + _shopHTML4();
+const _codesHTML4 = codesHTML; codesHTML = () => (SITE.cfg && SITE.cfg.codesOff ? '<p class="tip">' + (devMode() ? 'Codes fermés pour les joueurs (toi, tu peux en utiliser).' : 'Les codes sont fermés pour le moment.') + '</p>' : '') + _codesHTML4();
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a^="w4-"]'); if (!el) return; const a = el.dataset.a;
+  if (a === 'w4-cotd') { admCopy(el.dataset.c); }
+  if (a === 'w4-vote') { const P = SITE.cfg && SITE.cfg.poll; if (!P) return; const i = +el.dataset.i; const st = typeof accState === 'function' && accState();
+    fetch('api/vote', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: P.id, opt: i, user: st && st.name }) }).then(r => r.json().then(j => [r, j])).then(([r, j]) => {
+      if (j.result) P.n = j.result; W4.voted[P.id] = r.ok ? i : (W4.voted[P.id] != null ? W4.voted[P.id] : -1); LS.set('ds_poll', W4.voted); if (!r.ok) toast(j.error || 'Vote impossible.', true); else toast('Merci pour ton vote !'); worldApply(); }).catch(() => toast('Vote impossible pour le moment.', true)); }
+});
+
+/* --- messages et commandes de l'admin pour ce compte --- */
+siteGifts = async function () {
+  const st = typeof accState === 'function' && accState(); if (!st || !st.token || accMode() !== 'server') return;
+  let g; try { g = await accReq('gifts', { user: st.name, token: st.token }); } catch { return; }
+  for (const x of g || []) {
+    if (x.kind === 'msg') adminPopup({ msg: x.msg, style: 'info' });
+    else if (x.kind === 'warn') adminPopup({ msg: x.msg, style: 'alerte', warn: true });
+    else if (x.kind === 'mute') { LS.set('ds_muted', !!x.v); adminPopup({ msg: x.msg, style: x.v ? 'alerte' : 'info' }); }
+    else if (x.kind === 'reload') { try { const r = await accReq('load', { user: st.name, token: st.token }); if (r && r.prof) accAdopt(r.prof, r.name); toast(x.msg); } catch {} }
+    else siteGive(x.r || [], x.msg);
+  }
+};
+// télécommande : l'hôte de la partie exécute les ordres de l'admin
+function devGameCmd(m) {
+  const c = m.cmd || {};
+  if (c.op === 'kick' && c.pid === G.pid && !G.isHost) { toast('L’administrateur t’a retiré de la partie.', true); try { leaveLocal(); } catch {} return; }
+  if (!G.isHost || !H.S || G.code !== m.code) return;
+  const S = H.S; let ok = false;
+  try {
+    if (['next', 'pause', 'addtime', 'end', 'alive', 'camp'].includes(c.op)) ok = mjOp({ op: c.op, pid: c.pid, w: c.w });
+    else if (c.op === 'kick') { if (S.phase === 'lobby') { hostRemove(c.pid); ok = true; } else if (P(c.pid) && P(c.pid).alive) ok = mjOp({ op: 'alive', pid: c.pid }); (S.kicked = S.kicked || {})[c.pid] = true; }
+    else if (c.op === 'bot') { hostAddBot(); ok = true; }
+    else if (c.op === 'say') { pushChat(S.chat, { sys: true, txt: '📡 Administrateur : ' + c.txt, t: now() }, 100); ok = true; }
+    else if (c.op === 'replay') { hostReplay(); ok = true; }
+    else if (c.op === 'time') { if (S.endsAt) { S.endsAt = now() + 5000; ok = true; } }
+  } catch (err) { console.warn('admin', err); }
+  if (ok) hostChanged(true);
+}
+const POPQ = [];
+const _adminPopup4 = adminPopup; adminPopup = m => { if (m && m.cmd) return devGameCmd(m); const el = $('#adm-pop'); if (el && !el.hidden) { POPQ.push(m); return; } _adminPopup4(m); };
+document.addEventListener('click', ev => { if (ev.target.closest('[data-a="adm-pop-ok"]') && POPQ.length) setTimeout(() => { const m = POPQ.shift(); if (m) adminPopup(m); }, 250); });
+
+/* --- mode stream : cacher l'onglet Admin (Ctrl + Maj + A pour le retrouver) --- */
+const _adminTabSync4 = adminTabSync; adminTabSync = function () { _adminTabSync4(); if (LS.get('ds_admhide', false)) { const i = META_TABS.findIndex(t => t[0] === 'admin'); if (i >= 0) META_TABS.splice(i, 1); } };
+document.addEventListener('keydown', ev => { if (ev.ctrlKey && ev.shiftKey && (ev.key === 'A' || ev.key === 'a') && accState() && accState().admin) { ev.preventDefault(); const v = !LS.get('ds_admhide', false); LS.set('ds_admhide', v); adminTabSync(); if (!v && !META_TABS.some(t => t[0] === 'admin') && isAdmin()) META_TABS.push(['admin', 'Admin']); if (v && G.metaTab === 'admin') G.metaTab = 'profil'; metaRender(); toast(v ? 'Onglet Admin caché (Ctrl + Maj + A pour le retrouver).' : 'Onglet Admin visible.'); } });
+
+/* --- les onglets --- */
+const W4F = [['noRegister', 'Fermer les inscriptions'], ['shopClosed', 'Fermer la boutique'], ['noWheel', 'Mettre la roue en pause'], ['codesOff', 'Fermer les codes'], ['no3d', 'Désactiver le mode 3D'], ['noClassic', 'Désactiver le mode classique'], ['party', 'Mode fête (confettis sur l’accueil)']];
+function admin4HTML() {
+  const T = ADM.tab, C = ADM.cfg; let h = '';
+  const fld = (id, lab, val, attrs) => '<div class="field"><label for="' + id + '">' + lab + '</label><input class="input" id="' + id + '" value="' + e(val == null ? '' : val) + '" ' + (attrs || '') + '></div>';
+  if (T === 'pouvoirs') {
+    h += '<div class="adm-box dev"><b>Super-pouvoirs en 3D</b><p class="dim">Seulement pour toi, dans les parties en 3D.</p>'
+      + '<div class="row wrap"><span class="dim">Vitesse :</span>' + [1, 2, 3, 5].map(x => '<button class="btn ' + (DEV.speed === x ? 'red' : 'ghost') + ' small" data-a="d4-speed" data-v="' + x + '">×' + x + '</button>').join('') + '</div>'
+      + '<div class="row wrap"><button class="btn ' + (DEV.noclip ? 'red' : 'ghost') + ' small" data-a="d4-noclip">Traverser les murs : ' + (DEV.noclip ? 'oui' : 'non') + '</button><button class="btn ' + (DEV.hud ? 'red' : 'ghost') + ' small" data-a="d4-hud">Affichage développeur : ' + (DEV.hud ? 'oui' : 'non') + '</button></div>'
+      + '<div class="row wrap"><span class="dim">Téléportation :</span>' + [['home', 'Ma maison'], ['centre', 'Le centre'], ['etang', 'L’étang'], ['clairiere', 'La clairière'], ['parcours', 'Le parcours'], ['puits', 'Le puits']].map(([k, l]) => '<button class="btn ghost small" data-a="d4-tp" data-v="' + k + '">' + l + '</button>').join('') + '</div></div>';
+    h += '<div class="adm-box"><b>Raccourcis</b><div class="row wrap"><button class="btn ghost small" data-a="d4-ach">Réclamer tous les succès</button><button class="btn ghost small" data-a="d4-fw">Feu d’artifice</button><button class="btn ghost small" data-a="d4-rain">Pluie de pièces</button><button class="btn ghost small" data-a="d4-forget">Oublier mes codes utilisés</button><button class="btn ghost small" data-a="d4-house1">Maison au niveau 1</button><button class="btn ghost small" data-a="d4-house6">Maison au niveau 6</button><button class="btn ghost small" data-a="d4-unmute">Me rendre la parole</button></div></div>';
+    h += '<div class="adm-box"><b>Mode stream</b><p class="dim">Cache l’onglet Admin pour que personne ne le voie à l’écran. Pour le retrouver : <kbd>Ctrl</kbd> + <kbd>Maj</kbd> + <kbd>A</kbd>.</p><button class="btn ghost small" data-a="d4-hide">Cacher l’onglet Admin</button></div>';
+    h += '<div class="adm-box"><b>Sauvegarde de mon profil</b><div class="row wrap"><button class="btn ghost small" data-a="d4-pdl">Télécharger mon profil</button><label class="btn ghost small">Restaurer un fichier<input type="file" id="d4-pup" accept=".json,application/json" hidden></label></div></div>';
+  }
+  if (T === 'outils') {
+    const q = (ADM.insp || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); const d = q && CODES[q];
+    h += '<form class="adm-form" data-adm="d4insp"><b>Inspecteur de code</b><div class="row"><input class="input grow mono" id="d4-insp" placeholder="Tape un code, ex. LOUPCELEBREFENRIR" value="' + e(ADM.insp || '') + '"><button class="btn frost small">Inspecter</button></div>'
+      + (q ? d ? '<div class="adm-item"><div class="grow"><b class="mono">' + e(q) + '</b> <span class="dim">' + e(d[0]) + '</span><div class="adm-sub">' + d[1].map(t => '<span>' + e(rbLabel(t)) + '</span>').join('') + '</div><div class="adm-meta">' + (d[2] === 'lost' ? 'Code perdu · ' : '') + (C.off && C.off[q] ? 'retiré du jeu · ' : '') + (pf().codes[q] ? 'déjà utilisé sur ton compte' : 'pas encore utilisé sur ton compte') + (d[1].find(t => t.startsWith('event:')) ? ' · période : ' + e(EVENTS[d[1].find(t => t.startsWith('event:')).slice(6)].period || '?') : '') + '</div></div><div class="adm-acts"><button type="button" class="btn ghost small" data-a="d4-try" data-c="' + e(q) + '">L’utiliser</button><button type="button" class="btn ghost small" data-a="d4-copyc" data-c="' + e(q) + '">Copier</button></div></div>' : (C.codes && C.codes[q] ? '<p class="tip">C’est un de tes codes perso (onglet Codes).</p>' : '<p class="dim">Ce code n’existe pas.</p>') : '') + '</form>';
+    const pick = ADM.rand || [];
+    h += '<div class="adm-box"><b>Codes au hasard</b><p class="dim">Pour un concours en live : tire des codes parmi les ' + fmtCoins(Object.keys(CODES).length) + ' du jeu.</p><div class="row wrap"><button class="btn ghost small" data-a="d4-rand" data-v="1">1 code</button><button class="btn ghost small" data-a="d4-rand" data-v="5">5 codes</button><button class="btn ghost small" data-a="d4-rand" data-v="rare">1 code rare</button></div>' + (pick.length ? '<div class="rb-chips">' + pick.map(c => '<span class="rb-chip mono" data-a="d4-copyc" data-c="' + e(c) + '" role="button" tabindex="0">' + e(c) + '</span>').join('') + '</div>' : '') + '</div>';
+    h += '<form class="adm-form" data-adm="d4cmd"><b>Ligne de commande</b><p class="dim">Donne-toi des récompenses en les tapant, séparées par des virgules. Exemples : <span class="mono">c:5000, xp:900, th:galaxy, box, house:6, col:loup, fx-fireworks</span></p><div class="row"><input class="input grow mono" id="d4-cmd" placeholder="c:1000, box, box"><button class="btn red small">Exécuter</button></div></form>';
+    h += '<div class="adm-box"><b>Famille de codes du jeu</b><p class="dim">Retire ou remet d’un coup tous les codes qui commencent par un mot (ex. POKE, CONSOLE, SORT).</p><div class="row"><input class="input grow mono" id="d4-pre" placeholder="Préfixe" value="' + e(ADM.pre || '') + '"><button class="btn ghost small" data-a="d4-precount">Compter</button></div>' + (ADM.preList ? '<p>' + ADM.preList.length + ' code(s) trouvé(s).</p><div class="row"><button class="btn red small" data-a="d4-preoff" data-v="1">Tous les retirer</button><button class="btn ghost small" data-a="d4-preoff" data-v="0">Tous les remettre</button></div>' : '') + '</div>';
+  }
+  if (T === 'monde') {
+    const cd = C.countdown || {}, hp = C.happy || {}, P = C.poll;
+    h += '<form class="adm-form" data-adm="d4world"><b>Le monde</b><div class="adm-grid">'
+      + '<div class="field"><label for="w4-acc">Couleur principale du site</label><input class="input" id="w4-acc" type="color" value="' + e(C.accent || '#e63a2e') + '"></div><label class="check"><input type="checkbox" id="w4-accoff"' + (C.accent ? '' : ' checked') + '> Couleur d’origine</label>'
+      + fld('w4-cdt', 'Compte à rebours : titre', cd.title, 'maxlength="100" placeholder="Tournoi de la meute"') + '<div class="field"><label for="w4-cda">Compte à rebours : date</label><input class="input" id="w4-cda" type="datetime-local" value="' + dtIn(cd.at) + '"></div>'
+      + '<div class="field"><label for="w4-hf">Happy hour : de (heure)</label><input class="input" id="w4-hf" type="number" min="0" max="23" value="' + (hp.from != null ? hp.from : '') + '" placeholder="18"></div><div class="field"><label for="w4-ht">à (heure)</label><input class="input" id="w4-ht" type="number" min="0" max="24" value="' + (hp.to != null ? hp.to : '') + '" placeholder="20"></div>'
+      + '<div class="field"><label for="w4-hm">Happy hour : pièces ×</label><select class="input" id="w4-hm">' + [1, 1.5, 2, 3, 5].map(x => '<option value="' + x + '"' + ((hp.mul || 1) === x ? ' selected' : '') + '>' + (x === 1 ? 'désactivée' : '×' + x) + '</option>').join('') + '</select></div>'
+      + '<div class="field"><label for="w4-we">XP le week-end</label><select class="input" id="w4-we">' + [1, 1.5, 2, 3].map(x => '<option value="' + x + '"' + ((C.weekend || 1) === x ? ' selected' : '') + '>' + (x === 1 ? 'normal' : '×' + x) + '</option>').join('') + '</select></div>'
+      + fld('w4-cotd', 'Code du jour mis en avant', C.cotd, 'maxlength="40" placeholder="(vide = aucun)"')
+      + '<div class="field wide"><label for="w4-tk">Message défilant en bas de l’écran</label><input class="input" id="w4-tk" maxlength="300" value="' + e(C.ticker || '') + '"></div>'
+      + '<div class="field"><label for="w4-bu">L’annonce disparaît le (facultatif)</label><input class="input" id="w4-bu" type="datetime-local" value="' + dtIn(C.bannerUntil) + '"></div>'
+      + '<div class="field wide"><label for="w4-bw">Mots interdits dans le chat (séparés par des virgules)</label><input class="input" id="w4-bw" value="' + e((C.badwords || []).join(', ')) + '"></div>'
+      + '<div class="field wide"><label for="w4-bn">Mots interdits dans les pseudos</label><input class="input" id="w4-bn" value="' + e((C.badnames || []).join(', ')) + '"></div>'
+      + '<div class="field wide"><label for="w4-news">Nouveautés affichées sur l’accueil (une par ligne)</label><textarea class="input" id="w4-news" rows="4">' + e((C.news || []).join('\n')) + '</textarea></div>'
+      + '<div class="field wide"><label for="w4-links">Liens sur l’accueil (une ligne par lien : Nom | https://…)</label><textarea class="input" id="w4-links" rows="3" placeholder="Discord | https://discord.gg/…">' + e((C.links || []).map(l => l.l + ' | ' + l.u).join('\n')) + '</textarea></div>'
+      + '</div><div class="adm-grid">' + W4F.map(([k, l]) => '<label class="check"><input type="checkbox" id="w4-' + k + '"' + (C[k] ? ' checked' : '') + '> ' + l + '</label>').join('') + '</div><button class="btn red small">Enregistrer le monde</button></form>';
+    h += '<form class="adm-form" data-adm="d4poll"><b>Sondage pour les joueurs</b>' + (P ? '<div class="poll-res">' + P.opts.map((o, i) => { const tot = P.n.reduce((a, b) => a + b, 0) || 1; return '<div class="poll-bar"><span style="width:' + Math.round(P.n[i] * 100 / tot) + '%"></span><em>' + e(o) + '</em><small>' + P.n[i] + '</small></div>'; }).join('') + '</div><p class="dim">' + (P.on ? 'Sondage ouvert.' : 'Sondage fermé.') + '</p>' : '')
+      + '<div class="adm-grid">' + fld('w4-pq', 'Question', P && P.q, 'maxlength="160" placeholder="Quelle carte pour le tournoi ?"') + [0, 1, 2, 3].map(i => fld('w4-po' + i, 'Choix ' + (i + 1) + (i > 1 ? ' (facultatif)' : ''), P && P.opts[i], 'maxlength="60"')).join('') + '</div>'
+      + '<div class="row wrap"><button class="btn red small">' + (P ? 'Enregistrer' : 'Lancer le sondage') + '</button>' + (P ? '<button type="button" class="btn ghost small" data-a="d4-pollon">' + (P.on ? 'Fermer le sondage' : 'Rouvrir') + '</button><button type="button" class="btn ghost small" data-a="d4-pollreset">Remettre les votes à zéro</button><button type="button" class="btn ghost small" data-a="d4-polldel">Supprimer</button>' : '') + '</div></form>';
+  }
+  if (T === 'parties' && ADM.games && ADM.games.length) {
+    h += '<h3>Télécommande</h3><p class="dim">Les ordres passent par l’hôte de la partie : il doit être connecté.</p>' + ADM.games.map(g => '<div class="adm-box"><div class="row"><b class="mono">' + e(g.code) + '</b><span class="tag">' + e(PH4[g.phase] || g.phase) + (g.round ? ' · manche ' + g.round : '') + (g.paused ? ' · en pause' : '') + '</span><span class="dim">' + g.players.length + ' joueurs</span></div>'
+      + '<div class="row wrap">' + (g.phase === 'lobby' ? '<button class="btn red small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="next">Lancer la partie</button><button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="bot">Ajouter un bot</button>' : g.phase === 'end' ? '<button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="replay">Retour au salon</button>'
+        : '<button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="next">Phase suivante</button><button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="pause">Pause / reprise</button><button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="addtime">+30 s</button><button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="time">Finir le chrono</button><button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="end" data-w="S">Victoire survivants</button><button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="end" data-w="C">Victoire contaminés</button><button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="end" data-w="">Arrêter</button>') + '</div>'
+      + '<form class="row" data-adm="d4say" data-c="' + e(g.code) + '"><input class="input grow" id="d4-say-' + e(g.code) + '" maxlength="300" placeholder="Écrire dans le chat de la partie"><button class="btn ghost small">Écrire</button></form>'
+      + '<div class="adm-list">' + g.players.filter(p => p.pid && !p.host).map(p => '<div class="adm-item"><div class="grow">' + e(p.name) + (p.bot ? ' 🤖' : '') + (p.alive ? '' : ' <span class="tag">éliminé</span>') + '</div><div class="adm-acts">' + (g.phase !== 'lobby' && g.phase !== 'end' ? '<button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="alive" data-p="' + e(p.pid) + '">' + (p.alive ? 'Éliminer' : 'Ressusciter') + '</button><button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="camp" data-p="' + e(p.pid) + '">Changer de camp</button>' : '') + '<button class="btn ghost small" data-a="d4-g" data-c="' + e(g.code) + '" data-op="kick" data-p="' + e(p.pid) + '">Expulser</button></div></div>').join('') + '</div></div>').join('');
+  }
+  if (T === 'joueurs') {
+    if (ADM.players && ADM.players.length) h += '<div class="row wrap adm-row"><label class="dim" for="d4-sort">Trier par</label><select class="input" id="d4-sort" data-a="d4-sort">' + [['name', 'Pseudo'], ['coins', 'Pièces'], ['xp', 'XP'], ['games', 'Parties'], ['wins', 'Victoires'], ['upd', 'Dernière visite'], ['created', 'Inscription']].map(([k, l]) => '<option value="' + k + '"' + ((ADM.psort || 'name') === k ? ' selected' : '') + '>' + l + '</option>').join('') + '</select><button class="btn ghost small" data-a="d4-csv">Exporter en tableau (CSV)</button></div>';
+    if (ADM.fiche) { const F = ADM.fiche;
+      h += '<div class="adm-box fiche"><div class="row wrap"><b>Actions avancées sur ' + e(F.name) + '</b>' + (F.muted ? '<span class="tag">muet</span>' : '') + (F.warns ? '<span class="tag">' + F.warns + ' avertissement(s)</span>' : '') + (F.note ? '<span class="dim">Note : ' + e(F.note) + '</span>' : '') + '</div>'
+        + '<div class="row wrap"><button class="btn ghost small" data-a="d4-p" data-op="kick">Déconnecter partout</button><button class="btn ghost small" data-a="d4-p" data-op="mute" data-v="' + (F.muted ? 0 : 1) + '">' + (F.muted ? 'Rendre la parole' : 'Rendre muet') + '</button><button class="btn ghost small" data-a="d4-p" data-op="giftclear">Annuler ses cadeaux en attente</button><button class="btn ghost small" data-a="d4-p" data-op="profget">Voir son profil complet</button></div>'
+        + '<form class="row" data-adm="d4pmsg"><input class="input grow" id="d4-pm" maxlength="300" placeholder="Message privé (s’affiche à sa prochaine connexion)"><button class="btn ghost small" name="k" value="msg">Message</button><button class="btn red small" name="k" value="warn">Avertissement</button></form>'
+        + '<form class="row" data-adm="d4note"><input class="input grow" id="d4-note" maxlength="500" placeholder="Note privée (visible par toi seul)" value="' + e(F.note || '') + '"><button class="btn ghost small">Enregistrer la note</button></form>'
+        + '<form class="row" data-adm="d4ren"><input class="input grow" id="d4-ren" maxlength="16" placeholder="Nouveau pseudo"><button class="btn ghost small">Renommer le compte</button></form>'
+        + (ADM.profTxt != null ? '<div class="field"><label for="d4-prof">Profil complet (modifiable)</label><textarea class="input mono" id="d4-prof" rows="8">' + e(ADM.profTxt) + '</textarea></div><div class="row"><button class="btn red small" data-a="d4-profset">Écrire ce profil</button><button class="btn ghost small" data-a="d4-profdl">Télécharger</button></div>' : '') + '</div>';
+    }
+    h += '<div class="adm-box"><b>Cadeau à plusieurs joueurs</b><div class="field"><label for="d4-names">Pseudos (séparés par des virgules)</label><input class="input" id="d4-names" placeholder="Nolan, Baptiste, Andrew"></div><div class="field"><label for="d4-gmmsg">Message</label><input class="input" id="d4-gmmsg" maxlength="200" placeholder="Bravo aux gagnants du tournoi !"></div>' + rbHTML('many', 'Cadeau') + '<button class="btn red small" data-a="d4-giftmany">Envoyer</button></div>';
+  }
+  if (T === 'stats' && ADM.players) {
+    const L = ADM.players, day = 864e5, t = Date.now(); const sum = k => L.reduce((a, p) => a + (p[k] || 0), 0); const top = k => L.slice().sort((a, b) => b[k] - a[k])[0];
+    const rich = top('coins'), vet = top('games'), xp = top('xp');
+    h += '<div class="adm-box"><b>Statistiques des comptes</b><div class="adm-sub"><span>Nouveaux aujourd’hui : ' + L.filter(p => t - p.created < day).length + '</span><span>Nouveaux cette semaine : ' + L.filter(p => t - p.created < 7 * day).length + '</span><span>Venus aujourd’hui : ' + L.filter(p => t - p.upd < day).length + '</span><span>Pièces en circulation : ' + fmtCoins(sum('coins')) + '</span><span>Parties jouées (total) : ' + fmtCoins(sum('games')) + '</span><span>Comptes muets : ' + L.filter(p => p.muted).length + '</span><span>Comptes suspendus : ' + L.filter(p => p.banned).length + '</span></div>'
+      + '<div class="adm-meta">Le plus riche : ' + (rich ? e(rich.name) + ' (' + fmtCoins(rich.coins) + ')' : '—') + ' · le plus de parties : ' + (vet ? e(vet.name) + ' (' + vet.games + ')' : '—') + ' · le plus d’XP : ' + (xp ? e(xp.name) + ' (' + fmtCoins(xp.xp) + ')' : '—') + '</div></div>';
+  } else if (T === 'stats') h += '<button class="btn ghost small" data-a="d4-loadp">Charger les statistiques des comptes</button>';
+  if (T === 'journal') h += '<div class="row adm-row"><input class="input grow" id="d4-logq" placeholder="Chercher dans le journal" value="' + e(ADM.logq || '') + '"><button class="btn ghost small" data-a="d4-logf">Filtrer</button><button class="btn ghost small" data-a="d4-logdl">Télécharger le journal</button></div>';
+  return h;
+}
+ADM.rb.many = [];
+const PH4 = { lobby: 'salon', reveal: 'révélation des rôles', poison: 'poison', night: 'nuit', day: 'jour', vote: 'vote', result: 'résultat', end: 'terminée' };
+const _adminHTML4 = adminHTML;
+adminHTML = function () {
+  if (!isAdmin() || !ADM.cfg) return _adminHTML4();
+  const S0 = { log: ADM.cfg.log };
+  if (ADM.tab === 'journal' && ADM.logq) { const q = admNorm(ADM.logq); ADM.cfg.log = (S0.log || []).filter(x => admNorm(x.txt).includes(q)); }
+  if (ADM.players && ADM.psort) { const k = ADM.psort; ADM.players.sort((a, b) => k === 'name' ? String(a.name).localeCompare(b.name) : (b[k] || 0) - (a[k] || 0)); }
+  let h; try { h = _adminHTML4(); } finally { ADM.cfg.log = S0.log; }
+  h = h.replace('<button role="tab" data-a="adm-tab" data-t="codes"', ['pouvoirs', 'Super-pouvoirs', 'monde', 'Monde', 'outils', 'Outils'].reduce((s, x, i, arr) => i % 2 ? s : s + '<button role="tab" data-a="adm-tab" data-t="' + x + '" aria-selected="' + (ADM.tab === x) + '">' + arr[i + 1] + '</button>', '') + '<button role="tab" data-a="adm-tab" data-t="codes"');
+  if (ADM.tab === 'codes') h = h.replace(/(<button class="btn ghost small" data-a="adm-edit" data-c="([A-Z0-9]+)">Modifier<\/button>)/g, (m, b, c) => b + '<button class="btn ghost small" data-a="d4-dup" data-c="' + c + '">Dupliquer</button><button class="btn ghost small" data-a="d4-ext" data-c="' + c + '">+7 jours</button>' + (ADM.cfg.codes[c] && ADM.cfg.codes[c].max ? '<button class="btn ghost small" data-a="d4-creset" data-c="' + c + '">Compteur à zéro</button>' : ''));
+  const extra = admin4HTML(); return extra ? h.replace(/<\/div>$/, extra + '</div>') : h;
+};
+const d4Rare = () => Object.keys(CODES).filter(c => CODES[c][1].includes('fx-rain') || CODES[c][1].filter(t => t === 'box').length >= 2);
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a^="d4-"]'); if (!el || !isAdmin()) return; const a = el.dataset.a; const P_ = pf();
+  if (a === 'd4-speed') { DEV.speed = +el.dataset.v; devSave(); metaRender(); }
+  if (a === 'd4-noclip') { DEV.noclip = !DEV.noclip; devSave(); metaRender(); }
+  if (a === 'd4-hud') { DEV.hud = !DEV.hud; devSave(); metaRender(); }
+  if (a === 'd4-tp') { $('#meta').hidden = true; devTp(el.dataset.v); }
+  if (a === 'd4-ach') { const B = bonusState(); let n = 0; for (const x of ACH) if (!B.ach[x[0]]) { B.ach[x[0]] = Date.now(); x[4].forEach(t => grant(t, true)); n++; } pfSave(); toast(n ? n + ' succès réclamés.' : 'Tous les succès sont déjà à toi.'); metaRender(); }
+  if (a === 'd4-fw') { $('#meta').hidden = true; grant('fx-fireworks', true); }
+  if (a === 'd4-rain') { $('#meta').hidden = true; grant('fx-rain', true); }
+  if (a === 'd4-forget') { const n = Object.keys(P_.codes).length; P_.codes = {}; pfSave(); toast(n + ' codes oubliés : tu peux tous les retester.'); }
+  if (a === 'd4-house1' || a === 'd4-house6') { P_.house = a === 'd4-house1' ? 1 : 6; pfSave(); if (typeof houseRebuild === 'function') houseRebuild(); toast('Maison au niveau ' + P_.house + '.'); metaRender(); }
+  if (a === 'd4-unmute') { LS.set('ds_muted', false); toast('Tu peux parler.'); }
+  if (a === 'd4-hide') { LS.set('ds_admhide', true); adminTabSync(); G.metaTab = 'profil'; metaRender(); toast('Onglet Admin caché. Ctrl + Maj + A pour le retrouver.'); }
+  if (a === 'd4-pdl') admDl('profil-' + (P_.name || 'admin') + '.json', JSON.stringify(P_, null, 1), 'application/json');
+  if (a === 'd4-try') { const r = redeem(el.dataset.c); toast(r.msg, !r.ok); metaRender(); }
+  if (a === 'd4-copyc') admCopy(el.dataset.c);
+  if (a === 'd4-rand') { const all = el.dataset.v === 'rare' ? d4Rare() : Object.keys(CODES).filter(c => c !== 'CKE26' && CODES[c][2] !== 'lost'); const n = el.dataset.v === '5' ? 5 : 1; ADM.rand = []; while (ADM.rand.length < n && all.length) ADM.rand.push(all.splice(Math.floor(Math.random() * all.length), 1)[0]); metaRender(); }
+  if (a === 'd4-precount') { const p = ($('#d4-pre').value || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); ADM.pre = p; ADM.preList = p.length >= 2 ? Object.keys(CODES).filter(c => c.startsWith(p) && c !== 'CKE26') : null; if (!ADM.preList) toast('Au moins 2 lettres.', true); metaRender(); }
+  if (a === 'd4-preoff' && ADM.preList) { const v = el.dataset.v === '1'; admRun('offmany', { codes: ADM.preList, off: v }, ADM.preList.length + ' code(s) ' + (v ? 'retirés' : 'remis') + '.'); }
+  if (a === 'd4-pollon') admRun('cfgset', { cfg: { poll: Object.assign({}, ADM.cfg.poll, { on: !ADM.cfg.poll.on }) } }, 'Sondage mis à jour.');
+  if (a === 'd4-pollreset') admRun('pollreset', {}, 'Votes remis à zéro.');
+  if (a === 'd4-polldel') admRun('cfgset', { cfg: { poll: null } }, 'Sondage supprimé.');
+  if (a === 'd4-g') { const cmd = { op: el.dataset.op, pid: el.dataset.p || '', w: el.dataset.w || '' }; admReq('gamecmd', { code: el.dataset.c, cmd }).then(() => { toast('Ordre envoyé à la partie ' + el.dataset.c + '.'); setTimeout(() => { ADM.games = null; metaRender(); }, 1200); }).catch(err => toast(err.message, true)); }
+  if (a === 'd4-csv') { const cols = ['name', 'coins', 'xp', 'games', 'wins', 'codes', 'house', 'created', 'upd', 'banned', 'muted']; admDl('joueurs.csv', '﻿' + cols.join(';') + '\n' + ADM.players.map(p => cols.map(k => k === 'created' || k === 'upd' ? (p[k] ? new Date(p[k]).toISOString() : '') : String(p[k] == null ? '' : p[k]).replace(/;/g, ',')).join(';')).join('\n'), 'text/csv'); }
+  if (a === 'd4-p' && ADM.fiche) { const nm = ADM.fiche.name, op = el.dataset.op;
+    if (op === 'profget') return admReq('profget', { name: nm }).then(r => { ADM.profTxt = JSON.stringify(r.prof, null, 1); metaRender(); }).catch(err => toast(err.message, true));
+    admRun(op, { name: nm, v: el.dataset.v === '1' }, { kick: nm + ' est déconnecté de tous ses appareils.', mute: el.dataset.v === '1' ? nm + ' ne peut plus écrire dans le chat.' : nm + ' peut de nouveau écrire.', giftclear: 'Cadeaux en attente annulés.' }[op]).then(() => ficheLoad(nm)); }
+  if (a === 'd4-profset' && ADM.fiche) { let v; try { v = JSON.parse($('#d4-prof').value); } catch { return toast('Ce texte n’est pas un profil valide.', true); } const nm = ADM.fiche.name; admRun('profset', { name: nm, prof: v }, 'Profil de ' + nm + ' écrit. Il sera chargé à sa prochaine visite.').then(() => { ADM.profTxt = null; ficheLoad(nm); }); }
+  if (a === 'd4-profdl' && ADM.fiche) admDl('profil-' + ADM.fiche.name + '.json', $('#d4-prof').value, 'application/json');
+  if (a === 'd4-giftmany') { const names = ($('#d4-names').value || '').split(/[,\n;]/).map(x => x.trim()).filter(Boolean); if (!names.length || !ADM.rb.many.length) return toast('Ajoute des pseudos et au moins une récompense.', true); admReq('giftmany', { names, r: ADM.rb.many, msg: $('#d4-gmmsg').value }).then(r => { toast('Envoyé à ' + r.done.length + ' joueur(s)' + (r.miss.length ? ' · introuvable(s) : ' + r.miss.join(', ') : '') + '.', !!r.miss.length); ADM.rb.many = []; metaRender(); }).catch(err => toast(err.message, true)); }
+  if (a === 'd4-loadp') admReq('players', {}).then(r => { ADM.players = r; metaRender(); }).catch(err => toast(err.message, true));
+  if (a === 'd4-logf') { ADM.logq = $('#d4-logq').value; metaRender(); }
+  if (a === 'd4-logdl') admDl('journal-admin.txt', (ADM.cfg.log || []).map(x => new Date(x.t).toLocaleString('fr-FR') + '  ' + x.txt).join('\n'));
+  if (a === 'd4-dup') { const to = prompt('Nom du nouveau code (copie de ' + el.dataset.c + ') :', el.dataset.c + '2'); if (to) admRun('codedup', { code: el.dataset.c, to }, 'Code dupliqué.'); }
+  if (a === 'd4-ext') admRun('codeext', { code: el.dataset.c, days: 7 }, el.dataset.c + ' prolongé de 7 jours.');
+  if (a === 'd4-creset') admRun('codereset', { code: el.dataset.c }, 'Compteur de ' + el.dataset.c + ' remis à zéro.');
+});
+document.addEventListener('change', ev => {
+  const t = ev.target; if (!isAdmin()) return;
+  if (t.id === 'd4-sort') { ADM.psort = t.value; metaRender(); }
+  if (t.id === 'd4-pup' && t.files && t.files[0]) t.files[0].text().then(txt => { const v = JSON.parse(txt); if (!v || typeof v !== 'object' || !v.inv) throw 0; PF = v; pfSave(); applyTheme(); toast('Profil restauré.'); metaRender(); }).catch(() => toast('Ce fichier n’est pas une sauvegarde de profil.', true));
+});
+document.addEventListener('submit', ev => {
+  const f = ev.target; const k = f.dataset && f.dataset.adm; if (!k || !/^d4/.test(k)) return; ev.preventDefault(); ev.stopImmediatePropagation(); if (!isAdmin()) return;
+  if (k === 'd4insp') { ADM.insp = $('#d4-insp').value; metaRender(); }
+  if (k === 'd4cmd') { const toks = ($('#d4-cmd').value || '').split(/[,\s]+/).map(x => x.trim()).filter(Boolean); if (!toks.length) return; const got = []; for (const t of toks) { try { const g = grant(t, true); if (g) got.push(g); } catch {} } pfSave(); applyTheme(); toast(got.length ? 'Reçu : ' + got.join(', ') : 'Rien reçu : vérifie l’orthographe.', !got.length); metaRender(); }
+  if (k === 'd4say') { const inp = f.querySelector('input'); const txt = inp && inp.value.trim(); if (!txt) return; admReq('gamecmd', { code: f.dataset.c, cmd: { op: 'say', txt } }).then(() => { toast('Message écrit dans la partie ' + f.dataset.c + '.'); inp.value = ''; }).catch(err => toast(err.message, true)); }
+  if (k === 'd4pmsg' && ADM.fiche) { const warn = ev.submitter && ev.submitter.value === 'warn'; const msg = $('#d4-pm').value; admRun('pmsg', { name: ADM.fiche.name, msg, warn }, (warn ? 'Avertissement' : 'Message') + ' envoyé à ' + ADM.fiche.name + '.').then(() => ficheLoad(ADM.fiche.name)); }
+  if (k === 'd4note' && ADM.fiche) admRun('note', { name: ADM.fiche.name, note: $('#d4-note').value }, 'Note enregistrée.').then(() => ficheLoad(ADM.fiche.name));
+  if (k === 'd4ren' && ADM.fiche) { const to = $('#d4-ren').value.trim(); const from = ADM.fiche.name; admRun('rename', { name: from, to }, from + ' s’appelle maintenant ' + to + '.').then(r => { if (r !== null) { ADM.fiche = null; ADM.players = null; } metaRender(); }); }
+  if (k === 'd4world') {
+    const links = ($('#w4-links').value || '').split('\n').map(l => l.split('|').map(x => x.trim())).filter(x => x[0] && x[1]).map(([l, u]) => ({ l, u }));
+    const bad = links.find(l => !/^https:\/\//.test(l.u)); if (bad) return toast('Les liens doivent commencer par https:// (' + bad.l + ').', true);
+    const hm = +$('#w4-hm').value; const cfg = { accent: $('#w4-accoff').checked ? '' : $('#w4-acc').value, countdown: $('#w4-cdt').value.trim() && dtOut($('#w4-cda').value) ? { title: $('#w4-cdt').value.trim(), at: dtOut($('#w4-cda').value) } : null,
+      happy: hm > 1 ? { from: +$('#w4-hf').value || 0, to: $('#w4-ht').value === '' ? 24 : +$('#w4-ht').value, mul: hm } : null, weekend: +$('#w4-we').value, cotd: $('#w4-cotd').value, ticker: $('#w4-tk').value, bannerUntil: dtOut($('#w4-bu').value),
+      badwords: $('#w4-bw').value, badnames: $('#w4-bn').value, news: $('#w4-news').value, links };
+    for (const [key] of W4F) cfg[key] = $('#w4-' + key).checked;
+    if (cfg.no3d && cfg.noClassic) return toast('Tu ne peux pas désactiver les deux modes de jeu.', true);
+    admRun('cfgset', { cfg }, 'Le monde est à jour : les joueurs le verront dans les 2 minutes.');
+  }
+  if (k === 'd4poll') { const q = $('#w4-pq').value.trim(); const opts = [0, 1, 2, 3].map(i => $('#w4-po' + i).value.trim()).filter(Boolean); if (!q || opts.length < 2) return toast('Écris une question et au moins 2 choix.', true); admRun('cfgset', { cfg: { poll: { q, opts, on: true } } }, 'Sondage en ligne.'); }
 }, true);
 
 /* =====================================================================
