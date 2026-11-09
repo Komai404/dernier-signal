@@ -153,8 +153,9 @@ Sans Upstash, les réglages et les codes admin sont effacés à chaque redémarr
 Les personnages et les décors de la 3D sont faits avec Blockbench. Les fichiers sont dans `modeles/` :
 
 - `personnage.bbmodel` : le corps des joueurs, en 6 os (jambes, torse, bras, tête) que le jeu anime.
-- `decors.bbmodel` : pins (trois niveaux de détail), chêne, arbre mort, rocher, buisson, fleurs, champignon, souche, tronc couché, caisse, tonneau, lampadaire, banc, lanterne, panneau, voiture.
+- `decors.bbmodel` : pins (trois niveaux de détail), chêne, arbre mort, rocher, buisson, fleurs, champignon, souche, tronc couché, caisse, tonneau, lampadaire, banc, lanterne, panneau, voiture, feu de camp, tombe, bordure de la place, poteau de vote.
 - `maison.bbmodel` : lit, table, chaise, lampe de table, fenêtre à volets, lanterne murale, boîte aux lettres, cheminée, lierre.
+- `skins.bbmodel` : les 15 couvre-chefs, les 7 accessoires et les 7 objets de dos de la boutique (os `tete`, `torse`, `cape`, `aile_g`, `aile_d`).
 
 Pour retoucher un modèle :
 
