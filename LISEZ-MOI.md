@@ -156,6 +156,7 @@ Les personnages et les décors de la 3D sont faits avec Blockbench. Les fichiers
 - `decors.bbmodel` : pins (trois niveaux de détail), chêne, arbre mort, rocher, buisson, fleurs, champignon, souche, tronc couché, caisse, tonneau, lampadaire, banc, lanterne, panneau, voiture, feu de camp, tombe, bordure de la place, poteau de vote.
 - `maison.bbmodel` : lit, table, chaise, lampe de table, fenêtre à volets, lanterne murale, boîte aux lettres, cheminée, lierre.
 - `skins.bbmodel` : les 15 couvre-chefs, les 7 accessoires et les 7 objets de dos de la boutique (os `tete`, `torse`, `cape`, `aile_g`, `aile_d`).
+- `animaux.bbmodel` : lapin, renard, cerf, écureuil, hérisson, canard et chat, chacun découpé en os (pattes, tête, queue…) que le jeu anime selon leur comportement.
 
 Pour retoucher un modèle :
 
